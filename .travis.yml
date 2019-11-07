@@ -1,6 +1,8 @@
 language: generic
+os: linux
+dist: bionic
 
-matrix:
+jobs:
   include:
     - os: linux
       env:
@@ -28,16 +30,15 @@ before_deploy:
 
 deploy:
   provider: releases
-  api_key:
-    secure: auRY9NsH85LoF85jb6SYBS7WUZOkLOk5LZAONhUzUAVQ05lh6+k5x6r0PB5uvklv00C2WrVfy26RS7wlV+Yo/RktZP4AsdvV9I1Tlcw3hzw4cJwQhT83xu5UuGtSFuZQGfrVih5sxj96zZg2aL2R3yyWVzr7BtWNSb3lTto6J/p9xYj43rldriaB/STXRGeRWo+h5Kr9UEZGf6LTydRMuAVPe+J+gsEzEPxfY5kG/Si7k8gifSItcYke64/oER20LfH96uboJsMJG58r7X8ULyM0REKstxMgiPlhs6S6wlRgG0h88/PlNKWfFHG/7mXVw0rhxJkMUsyE3wSTSkTG0Vl/1MJ1A+9j3J9GI6AMvyHiHhQvrHwJ+Vnw4k14+7fYChf6jcYu9mpYDYLYxH31oFbWiUPI79T+l5RX57182OLcaT476i4ragZCr9/wyUEuAA4rDVi8eRO39DRXM6XLjbRPJsoYGqBk5U8KIv+9uMVETqDFcU8CmQDibmwkKUD62tkHan7f4uaB977D5jgPawhPd6sN+6ChgxIKX1HqGpJZ8OhAS1SLzBcV310IF7rsKKfa0RowEajUI9OelHYy11/VIZH8/3HUcZf/5yVu4inOrRcnGvFJhIuGvyTEpvI4wxTxufpWJxNQvt3S2rjXTH422qRqdKpKc+hCxRGmZvA=
-    
+  token:
+    secure: "XNF+7VZVkJ+PkJjR8OZg0VYSLStINThb8nh678/DLBfPH3BKZxFLAcHd+lJcOQPgM3/qLjJWJWliVRXQYBX+xGgV0/A24P0RY5qeJT0350K396WdHmK36zS702fpnD3ict/5BorpRzHpKllbZHsrL8rEKzWsC8FCN7zBS13RvK1j0JRYPHppRRRcfOfO14Kf2aQrq0QvQMbKQZr7FLcnveN2FzWgHtDG9qb24oT9JbSu/PQi5DKT0Z5FUK5bPul+ZiRrytBikGTYTYK4/9QDnjGeNmhZt1xvhUyWli01q93j7p2qMjoBh1cSF7s7r73FkiO29UGJ4xOp+fG2KdTIsJGwEfmKAoYDfslmDN+gjQ1Fq2B8XK+GZSWOU7RppFv4p+6JdEucX80Czlts+kqaQX+TSjjTQ7uFyZU9jYMnVv39yetTvFVRidYRFyD2HVcHmhT0SWj+AWcxyA8rU2dn0qrX8JLFOFS8QnUSprNA2iEwhHqbQa3eAFKikvijJPgaqSrD4JDlszF2F+emp48ggDrSyQH1RFPwhB9CfToj32A8I50P7YiPgf0/BBAq67TtW5phldNhhK/tLEoJ4XdtPGaICK5QnaOL70TCZmfBg7cudMC8WclCPYiuRPmXnxKvBmAVgk0zQGVcUEbt33hUtZda8i9VtjSBqzWXkv8ymtE="    
   file:
     '*.tar.xz'
 
-  skip_cleanup: true
   overwrite: true
   draft: false
   file_glob: true
+  edge: true
 
   on:
     repo: kwrx/aplus-packages
