@@ -1,0 +1,37 @@
+#!/bin/bash
+
+prefix=$1
+
+mkdir -p $prefix
+mkdir -p $prefix/boot
+mkdir -p $prefix/boot/grub
+mkdir -p $prefix/dev
+mkdir -p $prefix/etc
+mkdir -p $prefix/etc/fonts
+mkdir -p $prefix/etc/init.d
+mkdir -p $prefix/home
+mkdir -p $prefix/home/root
+mkdir -p $prefix/home/antonio
+mkdir -p $prefix/mnt
+mkdir -p $prefix/opt
+mkdir -p $prefix/proc
+mkdir -p $prefix/srv
+mkdir -p $prefix/srv/http
+mkdir -p $prefix/sys
+mkdir -p $prefix/tmp
+mkdir -p $prefix/usr
+mkdir -p $prefix/usr/include
+mkdir -p $prefix/usr/sbin
+mkdir -p $prefix/usr/share
+mkdir -p $prefix/usr/lib
+mkdir -p $prefix/usr/lib/modules
+mkdir -p $prefix/usr/bin
+mkdir -p $prefix/var
+mkdir -p $prefix/var/cache
+
+ln -sf usr/sbin $prefix
+ln -sf usr/bin $prefix
+ln -sf usr/lib $prefix
+ln -sf usr/lib $prefix
+ln -sf xsh $prefix/bin/sh
+ln -sf ../usr/share/zoneinfo/UTC $prefix/etc/localtime

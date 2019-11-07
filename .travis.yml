@@ -1,0 +1,44 @@
+language: generic
+
+matrix:
+  include:
+    - os: linux
+      env:
+        - HOST="generic"
+    - os: linux
+      env:
+        - HOST="x86_64"
+    - os: linux
+      env:
+        - HOST="i686"
+
+script:
+  ci/build.sh ${HOST}
+
+install:
+  ci/install.sh
+
+
+
+before_deploy:
+  - git config --local user.name "Antonino Natale"
+  - git config --local user.email "antonio.natale97@hotmail.com"
+  - export TRAVIS_TAG=v0.6.$(date +'%Y%m%d')
+  - git tag $TRAVIS_TAG
+
+deploy:
+  provider: releases
+  api_key:
+    secure: MRWvXKvrCohxxDyuD4l6uwhtVpSvdRaiewlvVniPcGNxk8jcx+AatfJLSbTBnRwhIGaLXhlgYgqtDTT6czgvJCXYt+x5mf3uRukZpb6YmVUi6mS1+v3qOvEBF6r6yIujI/mkMVt+YTY16tt9J+rP9Y3A14ZxvP8ifV5V7LSD74AfOTpR1/BjfQ7JI8mD7D9Fb64NLqbbQwvcsm2M6Ih6Juu2684RIYuDUhYrIiOt4t0OHx9n6n9rW+x7sOqBF8Gx06XGGdiA2N9ENK7upkAGb/P6hFVtABnQC5f4wF4pcyppkAfXfYZXCEHvA5O8v6ZgBSAJKV25gMbjg5gYAAPRLCgvTHtX5MlMwwvtwtyFdTCeUSQjrrqbtQqOfkQnFDT6n77sZRVIZDzFT/6AZktuhsCBrKIaVt/Cyb5uAeINvaImvDkJuxc9Oaiod3Mu+IU91E6ebtuuTsSJ94yr5KhqK5ho6O/uawSdv/Is3PW3Hx3ztqXGZKWufz2I2cyIPKo1xMga9w4/12wbcAH1Jyjm81S8IA1t3Mj/BRDVZjhVhHuqd7reS/tCoaTVmQ5xYuH/z+HxOtefVdGynrt7NYm/8FAhf29rek9HoE9lsSNAIk9jx2jnvB3J7Q/gEm/B69cLTGyZMUI0jfKv57zBtObqIH2Scr6xl64HeX6XmceW4hg=
+    
+  file:
+    '*.tar.xz'
+
+  skip_cleanup: true
+  overwrite: true
+  draft: false
+  file_glob: true
+
+  on:
+    repo: kwrx/aplus-packages
+    tags: false
