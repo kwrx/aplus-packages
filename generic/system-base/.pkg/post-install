@@ -35,3 +35,4 @@ ln -sf usr/lib $prefix
 ln -sf usr/lib $prefix
 ln -sf xsh $prefix/bin/sh
 ln -sf ../usr/share/zoneinfo/UTC $prefix/etc/localtime
+

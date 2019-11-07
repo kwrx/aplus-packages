@@ -1,6 +1,6 @@
 #!/bin/bash
 
-prefix=$prefix
+prefix=$1
 
 
 echo -n "" > $prefix/etc/fonts/fonts.conf
@@ -8,3 +8,5 @@ echo -n "" > $prefix/etc/fonts/fonts.conf
 for line in $(find $prefix/usr/share/fonts/* -type f); do
     echo "${line#$prefix}:$(fc-scan $line | grep "family: " | cut -d '"' -f 2):$(fc-scan $line | grep "style: " | cut -d '"' -f 2)" >> $prefix/etc/fonts/fonts.conf
     echo "Found '$(fc-scan $line | grep "fullname: " | cut -d '"' -f 2)'"
+
+
