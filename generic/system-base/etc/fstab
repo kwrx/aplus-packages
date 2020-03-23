@@ -1,0 +1,9 @@
+# -- /etc/fstab
+# -- aPlus Mount Table
+
+# |   Device   |   Directory   |   Filesystem   |    Flags    |
+
+      none         /proc           proc             nodev,nosuid,rw
+      none         /tmp            tmpfs            nodev,nosuid,rw
+
+ 
