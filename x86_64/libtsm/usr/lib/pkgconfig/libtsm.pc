@@ -1,0 +1,11 @@
+prefix=/opt/src/libtsm-3/_install
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libtsm
+Description: terminal-emulator state machine
+URL: http://dvdhrm.github.io/libtsm
+Version: 3
+Libs: -L${libdir} -ltsm
+Cflags: -I${includedir}
