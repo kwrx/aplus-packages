@@ -1,0 +1,36 @@
+
+package: pixman
+version: 0.40.0
+sources: 
+  - https://www.cairographics.org/releases/pixman-$VERSION.tar.gz
+
+dependencies:
+  - libpng
+
+build:
+
+  patches:
+    - patches/pixman-$VERSION.patch
+
+  env:
+   - DESTDIR: $SYSROOT
+   - CFLAGS: -fPIC -O2 -march=x86-64 -mtune=generic -I$PACKAGE_LIBPNG/__out/usr/include
+   - CPPFLAGS: -fPIC -O2 -march=x86-64 -mtune=generic -I$PACKAGE_LIBPNG/__out/usr/include
+   - LDFLAGS: -L$PACKAGE_LIBPNG/__out/usr/lib
+   - LIBS: -lpng
+
+  configure:
+    - --prefix=/usr
+    - --host=$HOST
+    - --enable-static
+    - --enable-shared=no
+    - --enable-gtk=no
+    - --enable-gnuplot=no
+    - --enable-timers=no
+    - --with-sysroot=$SYSROOT
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)

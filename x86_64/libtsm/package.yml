@@ -18,8 +18,8 @@ build:
     - --prefix=/usr
     - --host=$HOST
     - --enable-static
-    - --disable-shared
-    - --disable-debug
+    - --enable-shared=no
+    - --enable-debug=no
     - --without-xkbcommon
     - --with-sysroot=$SYSROOT
 

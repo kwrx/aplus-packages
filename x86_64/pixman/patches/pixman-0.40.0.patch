@@ -1,0 +1,12 @@
+diff -uraBN pixman-0.40.0/config.sub aplus-pixman-0.40.0/config.sub
+--- pixman-0.40.0/config.sub	2020-04-19 23:53:21.000000000 +0200
++++ aplus-pixman-0.40.0/config.sub	2022-06-09 18:46:54.022439130 +0200
+@@ -1359,7 +1359,7 @@
+ 	# The portable systems comes first.
+ 	# Each alternative MUST end in a * to match a version number.
+ 	# sysv* is not here because it comes later, after sysvr4.
+-	gnu* | bsd* | mach* | minix* | genix* | ultrix* | irix* \
++	gnu* | bsd* | mach* | minix* | genix* | ultrix* | irix* | aplus* \
+ 	     | *vms* | esix* | aix* | cnk* | sunos | sunos[34]*\
+ 	     | hpux* | unos* | osf* | luna* | dgux* | auroraux* | solaris* \
+ 	     | sym* | kopensolaris* | plan9* \

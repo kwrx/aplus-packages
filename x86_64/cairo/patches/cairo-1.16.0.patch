@@ -1,0 +1,33 @@
+diff -uraBN cairo-1.16.0/build/config.sub aplus-cairo-1.16.0/build/config.sub
+--- cairo-1.16.0/build/config.sub	2018-08-17 03:11:52.000000000 +0200
++++ aplus-cairo-1.16.0/build/config.sub	2022-06-09 22:00:57.509695976 +0200
+@@ -1363,7 +1363,7 @@
+ 	# The portable systems comes first.
+ 	# Each alternative MUST end in a * to match a version number.
+ 	# -sysv* is not here because it comes later, after sysvr4.
+-	-gnu* | -bsd* | -mach* | -minix* | -genix* | -ultrix* | -irix* \
++	-gnu* | -bsd* | -mach* | -minix* | -genix* | -ultrix* | -irix* | -aplus* \
+ 	      | -*vms* | -sco* | -esix* | -isc* | -aix* | -cnk* | -sunos | -sunos[34]*\
+ 	      | -hpux* | -unos* | -osf* | -luna* | -dgux* | -auroraux* | -solaris* \
+ 	      | -sym* | -kopensolaris* | -plan9* \
+diff -uraBN cairo-1.16.0/configure aplus-cairo-1.16.0/configure
+--- cairo-1.16.0/configure	2018-10-19 22:20:08.000000000 +0200
++++ aplus-cairo-1.16.0/configure	2022-06-09 22:04:15.545709104 +0200
+@@ -30718,7 +30718,7 @@
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }; then
+-  pkg_cv_FREETYPE_CFLAGS=`$PKG_CONFIG --cflags "freetype2 >= $FREETYPE_MIN_VERSION" 2>/dev/null`
++  pkg_cv_FREETYPE_CFLAGS=""
+ else
+   pkg_failed=yes
+ fi
+@@ -30734,7 +30734,7 @@
+   ac_status=$?
+   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+   test $ac_status = 0; }; then
+-  pkg_cv_FREETYPE_LIBS=`$PKG_CONFIG --libs "freetype2 >= $FREETYPE_MIN_VERSION" 2>/dev/null`
++  pkg_cv_FREETYPE_LIBS=""
+ else
+   pkg_failed=yes
+ fi

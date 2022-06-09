@@ -23,7 +23,7 @@ build:
     - --prefix=/usr
     - --host=$HOST
     - --enable-static
-    - --disable-shared
+    - --enable-shared=no
     - --with-sysroot=$SYSROOT
 
   make:

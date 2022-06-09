@@ -1,0 +1,12 @@
+diff -uraBN freetype-2.12.1/builds/unix/config.sub aplus-freetype-2.12.1/builds/unix/config.sub
+--- freetype-2.12.1/builds/unix/config.sub	2022-05-01 07:25:05.000000000 +0200
++++ aplus-freetype-2.12.1/builds/unix/config.sub	2022-06-09 20:36:16.439350192 +0200
+@@ -1723,7 +1723,7 @@
+ 	# Now accept the basic system types.
+ 	# The portable systems comes first.
+ 	# Each alternative MUST end in a * to match a version number.
+-	gnu* | android* | bsd* | mach* | minix* | genix* | ultrix* | irix* \
++	gnu* | android* | bsd* | mach* | minix* | genix* | ultrix* | irix* | aplus* \
+ 	     | *vms* | esix* | aix* | cnk* | sunos | sunos[34]* \
+ 	     | hpux* | unos* | osf* | luna* | dgux* | auroraux* | solaris* \
+ 	     | sym* |  plan9* | psp* | sim* | xray* | os68k* | v88r* \

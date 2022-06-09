@@ -1,0 +1,79 @@
+
+package: cairo
+version: 1.16.0
+sources: 
+  - https://www.cairographics.org/releases/cairo-$VERSION.tar.xz
+
+dependencies:
+  - freetype
+  - pixman
+  - libpng
+  - zlib
+
+build:
+
+  patches:
+    - patches/cairo-$VERSION.patch
+
+  env:
+    - DESTDIR: $SYSROOT
+    - CFLAGS: -I$PACKAGE_LIBPNG/__out/usr/include -I$PACKAGE_PIXMAN/__out/usr/include -I$PACKAGE_FREETYPE/__out/usr/include/freetype2 -DCAIRO_NO_MUTEX=1
+    - CPPFLAGS: -I$PACKAGE_LIBPNG/__out/usr/include -I$PACKAGE_PIXMAN/__out/usr/include -I$PACKAGE_FREETYPE/__out/usr/include/freetype2 -DCAIRO_NO_MUTEX=1
+
+  configure:
+    - --prefix=/usr
+    - --host=$HOST
+    - --enable-static
+    - --enable-shared=no
+    - --enable-gtk-doc=no
+    - --enable-gtk-doc-html=no
+    - --enable-gtk-doc-pdf=no
+    - --enable-gcov=no
+    - --enable-valgrind=no
+    - --enable-xlib=no
+    - --enable-xlib-xrender=no
+    - --enable-xcb=no
+    - --enable-xlib-xcb=no
+    - --enable-xcb-shm=no
+    - --enable-qt=no
+    - --enable-quartz=no
+    - --enable-quartz-font=no
+    - --enable-quartz-image=no
+    - --enable-win32=no
+    - --enable-win32-font=no
+    - --enable-os2=no
+    - --enable-beos=no
+    - --enable-drm=no
+    - --enable-gallium=no
+    - --enable-gl=no
+    - --enable-glesv2=no
+    - --enable-glesv3=no
+    - --enable-cogl=no
+    - --enable-directfb=no
+    - --enable-vg=no
+    - --enable-egl=no
+    - --enable-glx=no
+    - --enable-wgl=no
+    - --enable-script=no
+    - --enable-fc=no
+    - --enable-ps=no
+    - --enable-pdf=no
+    - --enable-svg=no
+    - --enable-test-surfaces=no
+    - --enable-tee=no
+    - --enable-xml=no
+    - --enable-pthread=no
+    - --enable-gobject=no
+    - --enable-full-testing=no
+    - --enable-trace=no
+    - --enable-interpreter=no
+    - --enable-symbol-lookup=no
+    - --without-x
+    - --without-gallium
+    - --with-sysroot=$SYSROOT
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)

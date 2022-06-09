@@ -16,8 +16,8 @@ build:
     - --prefix=$SYSROOT/usr
     - --host=$HOST
     - --enable-static
-    - --disable-fnmatch
-    - --disable-glob
+    - --enable-fnmatch=no
+    - --enable-glob=no
     - --without-libedit
 
   make:

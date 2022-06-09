@@ -1,0 +1,38 @@
+
+package: freetype
+version: 2.12.1
+sources: 
+  - https://download.savannah.gnu.org/releases/freetype/freetype-$VERSION.tar.xz
+
+dependencies:
+  - libpng
+  - zlib
+
+build:
+
+  patches:
+   - patches/freetype-$VERSION.patch
+
+  env:
+   - DESTDIR: $SYSROOT
+   - CFLAGS: -I$PACKAGE_ZLIB/__out/usr/include
+
+  configure:
+    - --prefix=/usr
+    - --host=$HOST
+    - --enable-static
+    - --disable-shared
+    - --disable-mmap
+    - --disable-freetype-config
+    - --without-pthread
+    - --without-harfbuzz
+    - --without-bzip2
+    - --without-brotli
+    - --without-librsvg
+    - --with-sysroot=$SYSROOT
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)

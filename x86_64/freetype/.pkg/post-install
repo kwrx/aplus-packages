@@ -1,0 +1,7 @@
+#!/bin/bash
+
+prefix=$1
+
+ln -sf dash $prefix/bin/sh
+chmod +x $prefix/bin/sh
+chmod +x $prefix/bin/dash
