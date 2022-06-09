@@ -11,15 +11,17 @@ jobs:
 
     steps:
 
+    - uses: actions/checkout@v2
+
     - name: Prepare environment
       working-directory: ${{github.workspace}}
       shell: bash
-      run: sudo apt update && sudo apt install bison flex build-essential python3 python3-pip && pip install -r ${{github.workspace}}/requirements.txt
+      run: sudo apt update && sudo apt install bison flex build-essential python3 python3-pip
 
-    - name: Build generic packages
+    - name: Prepare build-system
       working-directory: ${{github.workspace}}
       shell: bash
-      run: ci/build.sh
+      run: ci/prepare.sh
 
     - name: Build packages
       working-directory: ${{github.workspace}}
