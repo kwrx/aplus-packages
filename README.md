@@ -1,3 +1,4 @@
+[![deploy](https://github.com/kwrx/aplus-packages/actions/workflows/build-and-deploy.yml/badge.svg)](https://github.com/kwrx/aplus-packages/actions/workflows/build-and-deploy.yml)
 
 # aplus-packages
 Package repository for aplus
