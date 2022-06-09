@@ -1,0 +1,30 @@
+
+package: libtsm
+version: "3"
+sources: 
+  - https://freedesktop.org/software/kmscon/releases/libtsm-$VERSION.tar.xz
+
+build:
+
+  patches:
+    - patches/libtsm-$VERSION.patch
+
+  env:
+   - DESTDIR: $SYSROOT
+   - CFLAGS: -fPIC -O2 -march=x86-64 -mtune=generic
+   - CPPFLAGS: -fPIC -O2 -march=x86-64 -mtune=generic
+
+  configure:
+    - --prefix=/usr
+    - --host=$HOST
+    - --enable-static
+    - --disable-shared
+    - --disable-debug
+    - --without-xkbcommon
+    - --with-sysroot=$SYSROOT
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)

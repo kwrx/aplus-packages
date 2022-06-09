@@ -1,0 +1,22 @@
+
+package: zlib
+version: 1.2.12
+sources: 
+  - https://zlib.net/zlib-$VERSION.tar.gz
+
+build:
+
+  env:
+    - CC: $HOST-gcc
+    - CFLAGS: -fPIC -O2 -march=x86-64 -mtune=generic
+
+  configure:
+    - --prefix=$SYSROOT/usr
+    - --static
+    - --64
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)

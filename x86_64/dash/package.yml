@@ -1,0 +1,27 @@
+
+package: dash
+version: 0.5.11.5
+sources: 
+  - https://ftp.osuosl.org/pub/blfs/conglomeration/dash/dash-$VERSION.tar.gz
+
+build:
+
+  env:
+    - CFLAGS: -fPIC -O2 -march=x86-64 -mtune=generic -s
+
+  patches:
+   - patches/dash-$VERSION.patch
+
+  configure:
+    - --prefix=$SYSROOT/usr
+    - --host=$HOST
+    - --enable-static
+    - --disable-fnmatch
+    - --disable-glob
+    - --without-libedit
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)

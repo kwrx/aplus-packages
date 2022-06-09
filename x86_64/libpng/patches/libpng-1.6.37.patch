@@ -1,0 +1,12 @@
+diff -uraBN libpng-1.6.37/config.sub aplus-libpng-1.6.37/config.sub
+--- libpng-1.6.37/config.sub	2019-04-14 20:10:32.000000000 +0200
++++ aplus-libpng-1.6.37/config.sub	2022-06-08 15:38:34.798776350 +0200
+@@ -1363,7 +1363,7 @@
+ 	# The portable systems comes first.
+ 	# Each alternative MUST end in a * to match a version number.
+ 	# -sysv* is not here because it comes later, after sysvr4.
+-	-gnu* | -bsd* | -mach* | -minix* | -genix* | -ultrix* | -irix* \
++	-gnu* | -bsd* | -mach* | -minix* | -genix* | -ultrix* | -irix* | -aplus* \
+ 	      | -*vms* | -sco* | -esix* | -isc* | -aix* | -cnk* | -sunos | -sunos[34]*\
+ 	      | -hpux* | -unos* | -osf* | -luna* | -dgux* | -auroraux* | -solaris* \
+ 	      | -sym* | -kopensolaris* | -plan9* \

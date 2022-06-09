@@ -1,0 +1,33 @@
+
+package: libpng
+version: 1.6.37
+sources: 
+  - https://download.sourceforge.net/libpng/libpng-$VERSION.tar.xz
+
+dependencies:
+  - zlib
+
+build:
+
+  patches:
+   - patches/libpng-$VERSION.patch
+
+  env:
+   - DESTDIR: $SYSROOT
+   - CFLAGS: -fPIC -O2 -march=x86-64 -mtune=generic -I$PACKAGE_ZLIB/__out/usr/include
+   - CPPFLAGS: -fPIC -O2 -march=x86-64 -mtune=generic -I$PACKAGE_ZLIB/__out/usr/include
+   - LDFLAGS: -L$PACKAGE_ZLIB/__out/usr/lib
+   - LIBS: -lz
+
+  configure:
+    - --prefix=/usr
+    - --host=$HOST
+    - --enable-static
+    - --disable-shared
+    - --with-sysroot=$SYSROOT
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)

@@ -1,0 +1,23 @@
+diff -uraBN libtsm-3/build-aux/config.sub aplus-libtsm-3/build-aux/config.sub
+--- libtsm-3/build-aux/config.sub	2013-06-21 14:53:50.000000000 +0200
++++ aplus-libtsm-3/build-aux/config.sub	2022-06-08 19:52:36.530049206 +0200
+@@ -1349,7 +1349,7 @@
+ 	# The portable systems comes first.
+ 	# Each alternative MUST END IN A *, to match a version number.
+ 	# -sysv* is not here because it comes later, after sysvr4.
+-	-gnu* | -bsd* | -mach* | -minix* | -genix* | -ultrix* | -irix* \
++	-gnu* | -bsd* | -mach* | -minix* | -genix* | -ultrix* | -irix* | -aplus* \
+ 	      | -*vms* | -sco* | -esix* | -isc* | -aix* | -cnk* | -sunos | -sunos[34]*\
+ 	      | -hpux* | -unos* | -osf* | -luna* | -dgux* | -auroraux* | -solaris* \
+ 	      | -sym* | -kopensolaris* | -plan9* \
+diff -uraBN libtsm-3/src/tsm_vte.c aplus-libtsm-3/src/tsm_vte.c
+--- libtsm-3/src/tsm_vte.c	2013-10-23 16:27:43.697000000 +0200
++++ aplus-libtsm-3/src/tsm_vte.c	2022-06-08 19:53:07.397523025 +0200
+@@ -53,6 +53,7 @@
+ #include "libtsm_int.h"
+ #include "shl_llog.h"
+ 
++#undef BUILD_HAVE_XKBCOMMON
+ #ifdef BUILD_HAVE_XKBCOMMON
+ #  include <xkbcommon/xkbcommon-keysyms.h>
+ #else

@@ -1,0 +1,18 @@
+diff -uraBN dash-0.5.11.5/src/shell.h aplus-dash-0.5.11.5/src/shell.h
+--- dash-0.5.11.5/src/shell.h	2014-09-28 10:19:32.000000000 +0200
++++ aplus-dash-0.5.11.5/src/shell.h	2022-06-08 19:33:50.416604907 +0200
+@@ -51,6 +51,14 @@
+ 
+ #include <sys/param.h>
+ 
++#ifndef NAME_MAX
++#define NAME_MAX 255
++#endif
++
++#ifndef PATH_MAX
++#define PATH_MAX 1024
++#endif
++
+ #ifndef JOBS
+ #define JOBS 1
+ #endif

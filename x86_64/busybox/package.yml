@@ -1,0 +1,21 @@
+
+package: busybox
+version: 1.35.0
+sources: 
+  - https://busybox.net/downloads/busybox-$VERSION.tar.bz2
+
+build:
+
+  patches:
+    - patches/busybox-$VERSION.patch
+
+  env:
+   - DESTDIR: $SYSROOT
+
+  make:
+    - -j$(nproc)
+    - CROSS_COMPILE=$HOST-
+
+  install:
+    - -j$(nproc)
+    - CROSS_COMPILE=$HOST-
