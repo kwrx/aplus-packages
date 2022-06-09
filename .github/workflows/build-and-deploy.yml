@@ -2,8 +2,8 @@ name: deploy
 
 on:
   push:
-    branches:
-      - master
+    tags:
+      - 'v*'
 
 jobs:
   build:
@@ -21,12 +21,7 @@ jobs:
     - name: Prepare build-system
       working-directory: ${{github.workspace}}
       shell: bash
-      run: ci/prepare.sh
-
-    - name: Build packages
-      working-directory: ${{github.workspace}}
-      shell: bash
-      run: python3 ci/build.py --clean
+      run: ci/prepare-and-build.sh
       
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:
