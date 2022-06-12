@@ -38,5 +38,5 @@ export PATH=$(pwd)/sdk/bin:$PATH
 
 echo "### Run build-system"
 
-python3 ci/pack.py --clean
+python3 ci/pack.py
 
