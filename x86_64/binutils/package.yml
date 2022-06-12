@@ -1,26 +1,26 @@
 
-package: libtsm
-version: "3"
+package: binutils
+version: "2.38"
 sources: 
-  - https://freedesktop.org/software/kmscon/releases/libtsm-$VERSION.tar.xz
+  - https://ftp.gnu.org/gnu/binutils/binutils-$VERSION.tar.xz
 
 build:
 
   patches:
-    - patches/libtsm-$VERSION.patch
+    - patches/binutils-$VERSION.patch
 
   env:
    - DESTDIR: $SYSROOT
    - CFLAGS: -O2 -march=x86-64 -mtune=generic
-   - CPPFLAGS: -O2 -march=x86-64 -mtune=generic
 
   configure:
     - --prefix=/usr
     - --host=$HOST
     - --enable-static
-    - --enable-shared=no
-    - --enable-debug=no
-    - --without-xkbcommon
+    - --enable-lto
+    - --disable-shared
+    - --disable-host-shared
+    - --disable-werror
     - --with-sysroot=$SYSROOT
 
   make:

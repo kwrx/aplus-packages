@@ -17,8 +17,8 @@ build:
 
   env:
     - DESTDIR: $SYSROOT
-    - CFLAGS: -I$PACKAGE_LIBPNG/__out/usr/include -I$PACKAGE_PIXMAN/__out/usr/include -I$PACKAGE_FREETYPE/__out/usr/include/freetype2 -DCAIRO_NO_MUTEX=1
-    - CPPFLAGS: -I$PACKAGE_LIBPNG/__out/usr/include -I$PACKAGE_PIXMAN/__out/usr/include -I$PACKAGE_FREETYPE/__out/usr/include/freetype2 -DCAIRO_NO_MUTEX=1
+    - CFLAGS: -O2 -march=x86-64 -mtune=generic -I$PACKAGE_LIBPNG/__out/usr/include -I$PACKAGE_PIXMAN/__out/usr/include -I$PACKAGE_FREETYPE/__out/usr/include/freetype2 -DCAIRO_NO_MUTEX=1
+    - CPPFLAGS: -O2 -march=x86-64 -mtune=generic -I$PACKAGE_LIBPNG/__out/usr/include -I$PACKAGE_PIXMAN/__out/usr/include -I$PACKAGE_FREETYPE/__out/usr/include/freetype2 -DCAIRO_NO_MUTEX=1
 
   configure:
     - --prefix=/usr

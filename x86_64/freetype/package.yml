@@ -15,7 +15,7 @@ build:
 
   env:
    - DESTDIR: $SYSROOT
-   - CFLAGS: -I$PACKAGE_ZLIB/__out/usr/include
+   - CFLAGS: -O2 -march=x86-64 -mtune=generic -I$PACKAGE_ZLIB/__out/usr/include
 
   configure:
     - --prefix=/usr

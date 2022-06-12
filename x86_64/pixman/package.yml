@@ -14,8 +14,8 @@ build:
 
   env:
    - DESTDIR: $SYSROOT
-   - CFLAGS: -fPIC -O2 -march=x86-64 -mtune=generic -I$PACKAGE_LIBPNG/__out/usr/include
-   - CPPFLAGS: -fPIC -O2 -march=x86-64 -mtune=generic -I$PACKAGE_LIBPNG/__out/usr/include
+   - CFLAGS: -O2 -march=x86-64 -mtune=generic -I$PACKAGE_LIBPNG/__out/usr/include
+   - CPPFLAGS: -O2 -march=x86-64 -mtune=generic -I$PACKAGE_LIBPNG/__out/usr/include
    - LDFLAGS: -L$PACKAGE_LIBPNG/__out/usr/lib
    - LIBS: -lpng
 

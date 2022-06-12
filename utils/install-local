@@ -1,0 +1,15 @@
+#!/bin/sh
+
+rootdir=$1
+
+if [ -z "$rootdir" ]; then
+    echo "Usage: $0 <rootdir>"
+    exit 1
+fi
+
+for package in $(find . -name "*.tar.xz"); do
+    echo "Installing $package"
+    tar -h -xJf $package -C $rootdir
+done
+
+rm -rf $rootdir/.pkg

@@ -1,3 +1,5 @@
+#!/bin/env python3
+
 import argparse
 import os
 import wget
@@ -8,10 +10,11 @@ environ = os.environ.copy()
 
 
 parser = argparse.ArgumentParser(description='Build the project')
+parser.add_argument('-i', '--install', help='Install the package', default='*', nargs='+')
+parser.add_argument('-c', '--clean', help='Clean all packages')
 parser.add_argument('--tmpdir', default='/tmp/aplus-packages-build', help='Temporary directory')
 parser.add_argument('--host', default='x86_64-aplus', help='Host architecture')
 parser.add_argument('--root', default='.', help='Root directory')
-parser.add_argument('--clean', action='store_true', help='Clean the temporary directory')
 parser.add_argument('--verbose', action='store_true', help='Verbose output')
 args = parser.parse_args()
 
@@ -116,6 +119,13 @@ def build(packages, package):
 
     srcdir = prepare(packages, package)
     curdir = os.curdir
+
+
+    if args.clean:
+        shutil.rmtree(os.path.join(srcdir, '__build'))
+        shutil.rmtree(os.path.join(srcdir, '__out'))
+        os.mkdir(os.path.join(srcdir, '__build'))
+        os.mkdir(os.path.join(srcdir, '__out'))
 
 
     if 'configure' in package['build']:
@@ -298,7 +308,8 @@ def stage_5(packages):
     print('Build packages')
 
     for package in packages:
-        build(packages, package)
+        if args.install == '*' or package['package'] in args.install:
+            build(packages, package)
 
     return packages
 
@@ -327,6 +338,9 @@ def main():
 
     args.root = os.path.abspath(args.root)
 
+    if args.clean:
+        return shutil.rmtree(args.tmpdir)
+
     packages = []
     packages = stage_1(packages)
     packages = stage_2(packages)
@@ -334,9 +348,6 @@ def main():
     packages = stage_4(packages)
     packages = stage_5(packages)
     packages = stage_6(packages)
-
-    if args.clean:
-        shutil.rmtree(args.tmpdir)
 
 
 if __name__ == '__main__':

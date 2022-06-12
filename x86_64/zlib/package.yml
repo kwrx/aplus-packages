@@ -8,7 +8,7 @@ build:
 
   env:
     - CC: $HOST-gcc
-    - CFLAGS: -fPIC -O2 -march=x86-64 -mtune=generic
+    - CFLAGS: -O2 -march=x86-64 -mtune=generic
 
   configure:
     - --prefix=$SYSROOT/usr

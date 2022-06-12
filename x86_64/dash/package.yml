@@ -7,7 +7,7 @@ sources:
 build:
 
   env:
-    - CFLAGS: -fPIC -O2 -march=x86-64 -mtune=generic -s
+    - CFLAGS: -O2 -march=x86-64 -mtune=generic
 
   patches:
    - patches/dash-$VERSION.patch
