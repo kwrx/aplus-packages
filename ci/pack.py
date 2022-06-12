@@ -11,7 +11,7 @@ environ = os.environ.copy()
 
 parser = argparse.ArgumentParser(description='Build the project')
 parser.add_argument('-i', '--install', help='Install the package', default='*', nargs='+')
-parser.add_argument('-c', '--clean', help='Clean all packages')
+parser.add_argument('-c', '--clean', help='Clean all packages', action='store_true')
 parser.add_argument('--tmpdir', default='/tmp/aplus-packages-build', help='Temporary directory')
 parser.add_argument('--host', default='x86_64-aplus', help='Host architecture')
 parser.add_argument('--root', default='.', help='Root directory')
