@@ -1,0 +1,31 @@
+
+package: bash
+version: "5.1"
+sources: 
+  - https://ftp.gnu.org/gnu/bash/bash-$VERSION.tar.gz
+
+build:
+
+  env:
+    - CFLAGS: -O2 -march=x86-64 -mtune=generic
+
+  patches:
+   - patches/bash-$VERSION.patch
+
+  configure:
+    - --prefix=$SYSROOT/usr
+    - --host=$HOST
+    - --enable-static
+    - --enable-minimal-config
+    - --disable-nls
+    - --disable-threads
+    - --disable-rpath
+    - --disable-readline
+    - --disable-select
+
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)

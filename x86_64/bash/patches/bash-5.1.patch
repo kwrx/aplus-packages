@@ -1,0 +1,12 @@
+diff -uraBN bash-5.1/support/config.sub aplus-bash-5.1/support/config.sub
+--- bash-5.1/support/config.sub	2020-11-18 20:40:12.000000000 +0100
++++ aplus-bash-5.1/support/config.sub	2022-06-14 21:09:40.595329304 +0200
+@@ -1690,7 +1690,7 @@
+ 	# Now accept the basic system types.
+ 	# The portable systems comes first.
+ 	# Each alternative MUST end in a * to match a version number.
+-	gnu* | android* | bsd* | mach* | minix* | genix* | ultrix* | irix* \
++	gnu* | android* | bsd* | mach* | minix* | genix* | ultrix* | irix* | aplus* \
+ 	     | *vms* | esix* | aix* | cnk* | sunos | sunos[34]* \
+ 	     | hpux* | unos* | osf* | luna* | dgux* | auroraux* | solaris* \
+ 	     | sym* |  plan9* | psp* | sim* | xray* | os68k* | v88r* \
