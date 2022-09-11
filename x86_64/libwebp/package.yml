@@ -1,0 +1,40 @@
+
+package: libwebp
+version: 1.2.4
+sources: 
+  - https://github.com/webmproject/libwebp/archive/refs/heads/$VERSION.zip
+
+build:
+
+  setup:
+   - $SRCDIR/autogen.sh
+
+  patches:
+   - patches/libwebp-$VERSION.patch
+
+  env:
+   - DESTDIR: $SYSROOT
+   - CFLAGS: -O2 -march=x86-64 -mtune=generic
+
+
+  configure:
+    - --prefix=/usr
+    - --host=$HOST
+    - --enable-static
+    - --with-sysroot=$SYSROOT
+    - --disable-shared
+    - --disable-threading
+    - --disable-gl
+    - --disable-sdl
+    - --disable-png
+    - --disable-jpeg
+    - --disable-wic
+    - --disable-tiff
+    - --disable-gif
+    
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)

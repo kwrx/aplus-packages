@@ -46,9 +46,10 @@ def resolve(packages, package, s):
     s = s.replace('$HOST', args.host)
     s = s.replace('$ROOT', args.root)
     s = s.replace('$TMP',  args.tmpdir)
+    s = s.replace('$SRCDIR', os.path.join(args.tmpdir, package['package'] + '-' + package['version']))
     s = s.replace('$SYSROOT', os.path.join(args.tmpdir, package['package'] + '-' + package['version'], '__out'))
     s = s.replace('$PACKAGE', package['package'])
-    s = s.replace('$VERSION', package['version'])    
+    s = s.replace('$VERSION', package['version'])
 
     return s
 
@@ -126,6 +127,7 @@ def build(packages, package):
         shutil.rmtree(os.path.join(srcdir, '__out'))
         os.mkdir(os.path.join(srcdir, '__build'))
         os.mkdir(os.path.join(srcdir, '__out'))
+
 
 
     if 'configure' in package['build']:
@@ -268,7 +270,11 @@ def stage_3(packages):
             if args.verbose:
                 print(f'   + {archive}')
 
-            os.system(f'tar xf {archive} -C {args.tmpdir}')
+            
+            if archive.endswith('.zip'):
+                os.system(f'unzip -o -q {archive} -d {args.tmpdir}')
+            else:
+                os.system(f'tar xf {archive} -C {args.tmpdir}')
 
     return packages
 
@@ -279,10 +285,29 @@ def stage_4(packages):
 
     for package in packages:
 
-        print(f' - Patching {package["package"]}:{package["version"]}')
-
         srcdir = prepare(packages, package, False)
         curdir = os.curdir
+
+
+        if 'setup' in package['build']:
+
+            print(f' - Setup {package["package"]}:{package["version"]}')
+
+            for cmd in package['build']['setup']:
+
+                cmd = resolve(packages, package, cmd)
+
+                if args.verbose:
+                    print(f'   + {cmd}')
+
+                os.chdir(os.path.join(srcdir))
+                os.system(f'{cmd} 1> __build/setup.log 2> __build/setup.err')
+                os.chdir(curdir)
+
+
+
+
+        print(f' - Patching {package["package"]}:{package["version"]}')
 
         if 'patches' in package['build']:
 
