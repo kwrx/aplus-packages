@@ -6,8 +6,30 @@ prefix=$1
 echo -n "" > $prefix/etc/fonts/fonts.conf
 
 for line in $(find $prefix/usr/share/fonts/* -type f); do
-    echo "${line#$prefix}:$(fc-scan $line | grep "family: " | cut -d '"' -f 2):$(fc-scan $line | grep "style: " | cut -d '"' -f 2)" >> $prefix/etc/fonts/fonts.conf
+
+    family=$(fc-scan $line | grep "family:" | cut -d: -f2 | cut -d\( -f1 | sed 's/\"//g' | sed 's/^ //g')
+    slant=$(fc-scan $line | grep "slant:" | cut -d: -f2 | sed 's/ //g')
+    weight=$(fc-scan $line | grep "weight:" | cut -d: -f2 | sed 's/ //g')
+
+    if [ "$slant" == "100" ]; then
+        slant="Italic"
+    else
+        slant="Regular"
+    fi
+
+    if [ "$weight" == "200" ]; then
+        weight="Bold"
+    elif [ "$weight" == "180" ]; then
+        weight="Medium"
+    elif [ "$weight" == "80" ]; then
+        weight="Regular"
+    else
+        weight="Light"
+    fi
+
+    echo "${line#$prefix}:$family:$slant:$weight" >> $prefix/etc/fonts/fonts.conf
     echo "Found '$(fc-scan $line | grep "fullname: " | cut -d '"' -f 2)'"
+
 done
 
 

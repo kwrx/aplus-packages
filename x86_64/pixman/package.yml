@@ -14,8 +14,8 @@ build:
 
   env:
    - DESTDIR: $SYSROOT
-   - CFLAGS: -O2 -march=x86-64 -mtune=generic -I$PACKAGE_LIBPNG/__out/usr/include
-   - CPPFLAGS: -O2 -march=x86-64 -mtune=generic -I$PACKAGE_LIBPNG/__out/usr/include
+   - CFLAGS: -O1 -march=x86-64 -mtune=generic -I$PACKAGE_LIBPNG/__out/usr/include
+   - CPPFLAGS: -O1 -march=x86-64 -mtune=generic -I$PACKAGE_LIBPNG/__out/usr/include
    - LDFLAGS: -L$PACKAGE_LIBPNG/__out/usr/lib
    - LIBS: -lpng
 
@@ -23,6 +23,9 @@ build:
     - --prefix=/usr
     - --host=$HOST
     - --enable-static
+    - --enable-mmx
+    - --enable-sse2
+    - --enable-ssse3
     - --enable-shared=no
     - --enable-gtk=no
     - --enable-gnuplot=no
