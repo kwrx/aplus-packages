@@ -1,26 +1,22 @@
 
-package: libtsm
-version: "3"
+package: gmp
+version: 6.2.1
 sources: 
-  - https://freedesktop.org/software/kmscon/releases/libtsm-$VERSION.tar.xz
+  - https://gcc.gnu.org/pub/gcc/infrastructure/gmp-$VERSION.tar.bz2
 
 build:
 
   patches:
-    - patches/libtsm-$VERSION.patch
+    - patches/gmp-$VERSION.patch
 
   env:
     - DESTDIR: $SYSROOT
     - CFLAGS: -O2 -march=x86-64 -mtune=generic
-    - CPPFLAGS: -O2 -march=x86-64 -mtune=generic
 
   configure:
     - --prefix=/usr
     - --host=$HOST
     - --enable-static
-    - --enable-shared=no
-    - --enable-debug=no
-    - --without-xkbcommon
     - --with-sysroot=$SYSROOT
 
   make:

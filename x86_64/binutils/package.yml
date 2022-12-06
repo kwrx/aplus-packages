@@ -10,8 +10,8 @@ build:
     - patches/binutils-$VERSION.patch
 
   env:
-   - DESTDIR: $SYSROOT
-   - CFLAGS: -O2 -march=x86-64 -mtune=generic
+    - DESTDIR: $SYSROOT
+    - CFLAGS: -O2 -march=x86-64 -mtune=generic
 
   configure:
     - --prefix=/usr
@@ -21,6 +21,7 @@ build:
     - --disable-shared
     - --disable-host-shared
     - --disable-werror
+    - --disable-nls
     - --with-sysroot=$SYSROOT
 
   make:

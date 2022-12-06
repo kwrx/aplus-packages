@@ -1,0 +1,97 @@
+diff -Naur mesa-22.3.0/src/compiler/glsl/glsl_lexer.ll aplus-mesa-22.3.0/src/compiler/glsl/glsl_lexer.ll
+--- mesa-22.3.0/src/compiler/glsl/glsl_lexer.ll	2022-11-30 22:28:51.000000000 +0100
++++ aplus-mesa-22.3.0/src/compiler/glsl/glsl_lexer.ll	2022-12-04 18:01:15.360672420 +0100
+@@ -21,8 +21,8 @@
+  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+  * DEALINGS IN THE SOFTWARE.
+  */
+-#include <ctype.h>
+-#include <limits.h>
++#include <cctype>
++#include <climits>
+ #include "util/strtod.h"
+ #include "ast.h"
+ #include "glsl_parser_extras.h"
+diff -Naur mesa-22.3.0/src/gallium/targets/osmesa/meson.build aplus-mesa-22.3.0/src/gallium/targets/osmesa/meson.build
+--- mesa-22.3.0/src/gallium/targets/osmesa/meson.build	2022-11-30 22:28:51.000000000 +0100
++++ aplus-mesa-22.3.0/src/gallium/targets/osmesa/meson.build	2022-12-04 18:01:52.509848159 +0100
+@@ -39,7 +39,7 @@
+   command : gen_vs_module_defs_normal_command,
+ )
+ 
+-libosmesa = shared_library(
++libosmesa = library(
+   osmesa_lib_name,
+   'target.c',
+   gnu_symbol_visibility : 'hidden',
+diff -Naur mesa-22.3.0/src/util/detect_os.h aplus-mesa-22.3.0/src/util/detect_os.h
+--- mesa-22.3.0/src/util/detect_os.h	2022-11-30 22:28:51.000000000 +0100
++++ aplus-mesa-22.3.0/src/util/detect_os.h	2022-12-04 17:58:48.557367750 +0100
+@@ -20,6 +20,11 @@
+ #define DETECT_OS_UNIX 1
+ #endif
+ 
++#if defined(__aplus__)
++#define DETECT_OS_APLUS 1
++#define DETECT_OS_UNIX 1
++#endif
++
+ /*
+  * Android defines __linux__, so DETECT_OS_LINUX and DETECT_OS_UNIX will
+  * also be defined.
+@@ -127,5 +132,8 @@
+ #ifndef DETECT_OS_WINDOWS
+ #define DETECT_OS_WINDOWS 0
+ #endif
++#ifndef DETECT_OS_APLUS
++#define DETECT_OS_APLUS 0
++#endif
+ 
+ #endif /* DETECT_OS_H */
+diff -Naur mesa-22.3.0/src/util/os_misc.c aplus-mesa-22.3.0/src/util/os_misc.c
+--- mesa-22.3.0/src/util/os_misc.c	2022-11-30 22:28:51.000000000 +0100
++++ aplus-mesa-22.3.0/src/util/os_misc.c	2022-12-04 19:45:21.432694468 +0100
+@@ -54,7 +54,7 @@
+ #  include <unistd.h>
+ #  include <log/log.h>
+ #  include <cutils/properties.h>
+-#elif DETECT_OS_LINUX || DETECT_OS_CYGWIN || DETECT_OS_SOLARIS || DETECT_OS_HURD
++#elif DETECT_OS_LINUX || DETECT_OS_CYGWIN || DETECT_OS_SOLARIS || DETECT_OS_HURD || DETECT_OS_APLUS
+ #  include <unistd.h>
+ #elif DETECT_OS_OPENBSD || DETECT_OS_FREEBSD
+ #  include <sys/resource.h>
+@@ -224,7 +224,7 @@
+ bool
+ os_get_total_physical_memory(uint64_t *size)
+ {
+-#if DETECT_OS_LINUX || DETECT_OS_CYGWIN || DETECT_OS_SOLARIS || DETECT_OS_HURD
++#if DETECT_OS_LINUX || DETECT_OS_CYGWIN || DETECT_OS_SOLARIS || DETECT_OS_HURD || DETECT_OS_APLUS
+    const long phys_pages = sysconf(_SC_PHYS_PAGES);
+    const long page_size = sysconf(_SC_PAGE_SIZE);
+ 
+diff -Naur mesa-22.3.0/src/util/os_time.c aplus-mesa-22.3.0/src/util/os_time.c
+--- mesa-22.3.0/src/util/os_time.c	2022-11-30 22:28:51.000000000 +0100
++++ aplus-mesa-22.3.0/src/util/os_time.c	2022-12-04 19:49:13.002194715 +0100
+@@ -53,7 +53,7 @@
+ int64_t
+ os_time_get_nano(void)
+ {
+-#if DETECT_OS_LINUX || DETECT_OS_BSD
++#if DETECT_OS_LINUX || DETECT_OS_BSD || DETECT_OS_APLUS
+ 
+    struct timespec tv;
+    clock_gettime(CLOCK_MONOTONIC, &tv);
+diff -Naur mesa-22.3.0/src/util/u_thread.c aplus-mesa-22.3.0/src/util/u_thread.c
+--- mesa-22.3.0/src/util/u_thread.c	2022-11-30 22:28:51.000000000 +0100
++++ aplus-mesa-22.3.0/src/util/u_thread.c	2022-12-04 18:00:05.555582064 +0100
+@@ -20,6 +20,10 @@
+ #include <OS.h>
+ #endif
+ 
++#if DETECT_OS_APLUS
++#include <sched.h>
++#endif
++
+ #if DETECT_OS_LINUX && !defined(ANDROID)
+ #include <sched.h>
+ #elif defined(_WIN32) && !defined(HAVE_PTHREAD)

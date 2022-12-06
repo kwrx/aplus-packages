@@ -10,7 +10,7 @@ build:
     - CFLAGS: -O2 -march=x86-64 -mtune=generic
 
   patches:
-   - patches/dash-$VERSION.patch
+    - patches/dash-$VERSION.patch
 
   configure:
     - --prefix=$SYSROOT/usr

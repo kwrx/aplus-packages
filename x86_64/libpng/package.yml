@@ -10,20 +10,20 @@ dependencies:
 build:
 
   patches:
-   - patches/libpng-$VERSION.patch
+    - patches/libpng-$VERSION.patch
 
   env:
-   - DESTDIR: $SYSROOT
-   - CFLAGS: -O2 -march=x86-64 -mtune=generic -I$PACKAGE_ZLIB/__out/usr/include
-   - CPPFLAGS: -O2 -march=x86-64 -mtune=generic -I$PACKAGE_ZLIB/__out/usr/include
-   - LDFLAGS: -L$PACKAGE_ZLIB/__out/usr/lib
-   - LIBS: -lz
+    - DESTDIR: $SYSROOT
+    - CFLAGS: -O2 -march=x86-64 -mtune=generic
+    - CPPFLAGS: -I$PACKAGE_ZLIB/__out/usr/include
+    - LDFLAGS: -L$PACKAGE_ZLIB/__out/usr/lib
 
   configure:
     - --prefix=/usr
     - --host=$HOST
     - --enable-static
     - --enable-shared=no
+    - --enable-intel-sse
     - --with-sysroot=$SYSROOT
 
   make:

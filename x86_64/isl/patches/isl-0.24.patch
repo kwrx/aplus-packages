@@ -1,0 +1,12 @@
+diff -Naur isl-0.24/config.sub aplus-isl-0.24/config.sub
+--- isl-0.24/config.sub	2020-12-31 15:34:29.000000000 +0100
++++ aplus-isl-0.24/config.sub	2022-12-06 02:28:37.928624126 +0100
+@@ -1363,7 +1363,7 @@
+ 	# The portable systems comes first.
+ 	# Each alternative MUST end in a * to match a version number.
+ 	# -sysv* is not here because it comes later, after sysvr4.
+-	-gnu* | -bsd* | -mach* | -minix* | -genix* | -ultrix* | -irix* \
++	-gnu* | -bsd* | -mach* | -minix* | -genix* | -ultrix* | -irix* | -aplus* \
+ 	      | -*vms* | -sco* | -esix* | -isc* | -aix* | -cnk* | -sunos | -sunos[34]*\
+ 	      | -hpux* | -unos* | -osf* | -luna* | -dgux* | -auroraux* | -solaris* \
+ 	      | -sym* | -kopensolaris* | -plan9* \

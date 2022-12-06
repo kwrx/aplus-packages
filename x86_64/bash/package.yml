@@ -10,7 +10,7 @@ build:
     - CFLAGS: -O2 -march=x86-64 -mtune=generic
 
   patches:
-   - patches/bash-$VERSION.patch
+    - patches/bash-$VERSION.patch
 
   configure:
     - --prefix=$SYSROOT/usr

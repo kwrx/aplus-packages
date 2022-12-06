@@ -1,0 +1,21 @@
+#/bin/sh
+
+packages=$(find . -name ".pkg" -type d | sort | xargs -I {} realpath {}/..)
+
+
+echo "# Packages"
+
+for package in $packages; do
+    echo -n " - \`$(dirname $package | xargs -I {} basename {})\` "
+    echo -n "$(basename $package) : "
+
+    if [ -f $package/.pkg/version ]; then
+        echo -n "*$(cat $package/.pkg/version)*"
+    elif [ -f $package/package.yml ]; then
+        echo -n "*$(grep -E '^version:' $package/package.yml | cut -d: -f2 | xargs)*"
+    else
+        echo -n "*latest*"
+    fi
+
+    echo 
+done

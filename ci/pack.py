@@ -47,9 +47,14 @@ def resolve(packages, package, s):
     s = s.replace('$ROOT', args.root)
     s = s.replace('$TMP',  args.tmpdir)
     s = s.replace('$SRCDIR', os.path.join(args.tmpdir, package['package'] + '-' + package['version']))
+    s = s.replace('$BUILDDIR', os.path.join(args.tmpdir, package['package'] + '-' + package['version'], '__build'))
     s = s.replace('$SYSROOT', os.path.join(args.tmpdir, package['package'] + '-' + package['version'], '__out'))
+    s = s.replace('$PKGDIR', package['root'])
     s = s.replace('$PACKAGE', package['package'])
     s = s.replace('$VERSION', package['version'])
+
+    s = s.replace('\'', '\\\'')
+    s = s.replace('"', '\\"')
 
     return s
 
@@ -140,12 +145,39 @@ def build(packages, package):
         if args.verbose:
             print(f'   + {opts}')
 
-        os.chdir(os.path.join(srcdir, '__build'))
-        os.system(f'{srcdir}/configure {" ".join(opts)} 1> configure.log 2> configure.err')
-        os.chdir(curdir)
+
+        if os.path.exists(f'{srcdir}/configure'):
+
+            os.chdir(os.path.join(srcdir, '__build'))
+            os.system(f'{srcdir}/configure {" ".join(opts)} 1> configure.log 2> configure.err')
+            os.chdir(curdir)
+
+        elif os.path.exists(f'{srcdir}/meson.build'):
+
+            os.chdir(srcdir)
+            os.system(f'meson setup {" ".join(opts)} {srcdir}/__build 1> __build/configure.log 2> __build/configure.err')
+            os.chdir(curdir)
+
+        else:
+
+            raise Exception(f'No configure script found in {srcdir}')
 
 
 
+    if 'premake' in package['build']:
+
+        print(f' - Before build {package["package"]}:{package["version"]}')
+
+        for cmd in package['build']['premake']:
+
+            cmd = resolve(packages, package, cmd)
+
+            if args.verbose:
+                print(f'   + {cmd}')
+
+            os.chdir(os.path.join(srcdir))
+            os.system(f'{cmd} 1> __build/premake.log 2> __build/premake.err')
+            os.chdir(curdir)
 
 
     if 'make' in package['build']:
@@ -158,14 +190,43 @@ def build(packages, package):
         if args.verbose:
             print(f'   + {opts}')
 
-        if 'configure' in package['build']:
-            os.chdir(os.path.join(srcdir, '__build'))
-        else:
-            os.chdir(srcdir)
 
-        os.system(f'make {" ".join(opts)} 1> make.log 2> make.err')
+        os.chdir(srcdir)
+
+
+        if os.path.exists('__build/Makefile'):
+
+            os.system(f'make -C __build {" ".join(opts)} 1> __build/make.log 2> __build/make.err')
+
+        elif os.path.exists('Makefile'):
+
+            os.system(f'make {" ".join(opts)} 1> __build/make.log 2> __build/make.err')
+
+        elif os.path.exists('__build/build.ninja'):
+
+            os.system(f'ninja -C {srcdir}/__build {" ".join(opts)} 1> __build/make.log 2> __build/make.err')
+
+        else:
+
+            raise Exception(f'No makefile found in {srcdir}')
+
         os.chdir(curdir)
 
+
+    if 'postmake' in package['build']:
+
+        print(f' - After build {package["package"]}:{package["version"]}')
+
+        for cmd in package['build']['postmake']:
+
+            cmd = resolve(packages, package, cmd)
+
+            if args.verbose:
+                print(f'   + {cmd}')
+
+            os.chdir(os.path.join(srcdir))
+            os.system(f'{cmd} 1> __build/postmake.log 2> __build/postmake.err')
+            os.chdir(curdir)
 
 
     if 'install' in package['build']:
@@ -178,12 +239,26 @@ def build(packages, package):
         if args.verbose:
             print(f'   + {opts}')
 
-        if 'configure' in package['build']:
-            os.chdir(os.path.join(srcdir, '__build'))
-        else:
-            os.chdir(srcdir)
 
-        os.system(f'make install {" ".join(opts)} 1> install.log 2> install.err')
+        os.chdir(srcdir)
+
+
+        if os.path.exists('__build/Makefile'):
+
+            os.system(f'make -C __build install {" ".join(opts)} 1> __build/make.log 2> __build/make.err')
+       
+        elif os.path.exists('Makefile'):
+
+            os.system(f'make install {" ".join(opts)} 1> __build/make.log 2> __build/make.err')
+
+        elif os.path.exists('__build/build.ninja'):
+
+            os.system(f'ninja -C {srcdir}/__build install {" ".join(opts)} 1> __build/make.log 2> __build/make.err')
+
+        else:
+
+            raise Exception(f'No makefile found in {srcdir}')
+
         os.chdir(curdir)
 
 
@@ -222,6 +297,21 @@ def stage_1(packages):
             yml['status'] = 'init'
 
             packages.append(yml)
+
+
+    if args.install != '*':
+
+        candidates = [i for i in packages if i['package'] in args.install]
+        
+        for candidate in [i for i in candidates if 'dependencies' in i]:
+
+            for dep in candidate['dependencies']:
+
+                if dep not in args.install:
+                    args.install.append(dep)
+
+        packages = [i for i in packages if i['package'] in args.install]
+
 
     return packages
 
@@ -270,7 +360,6 @@ def stage_3(packages):
             if args.verbose:
                 print(f'   + {archive}')
 
-            
             if archive.endswith('.zip'):
                 os.system(f'unzip -o -q {archive} -d {args.tmpdir}')
             else:
@@ -351,7 +440,13 @@ def stage_6(packages):
         curdir = os.curdir
 
         os.chdir(os.path.join(srcdir, '__out'))
-        os.system(f'cp -R {package["root"]}/.pkg .')
+    
+        if os.path.isdir(f'{package["root"]}/.pkg'):
+            os.system(f'cp -R {package["root"]}/.pkg .')
+        else:
+            os.system(f'mkdir -p .pkg')
+
+        os.system(f'echo {package["version"]} > .pkg/version')
         os.system(f'tar cJf {args.root}/{package["package"]}.tar.xz * .pkg')
         os.chdir(curdir)
 
@@ -365,6 +460,7 @@ def main():
 
     if args.clean:
         return shutil.rmtree(args.tmpdir)
+
 
     packages = []
     packages = stage_1(packages)

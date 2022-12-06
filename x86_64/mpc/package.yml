@@ -1,0 +1,38 @@
+
+package: mpc
+version: 1.2.1
+sources: 
+  - https://gcc.gnu.org/pub/gcc/infrastructure/mpc-$VERSION.tar.gz
+
+dependencies:
+  - gmp
+  - mpfr
+
+build:
+
+  setup:
+    - $PKGDIR/scripts/fix-sysroot.sh --init $SYSROOT $PACKAGE_GMP/__out/usr $PACKAGE_MPFR/__out/usr
+
+  patches:
+    - patches/mpc-$VERSION.patch
+
+  env:
+    - DESTDIR: $SYSROOT
+    - CFLAGS: -O2 -march=x86-64 -mtune=generic
+
+  configure:
+    - --prefix=/usr
+    - --host=$HOST
+    - --enable-static
+    - --with-gmp=$PACKAGE_GMP/__out/usr
+    - --with-mpfr=$PACKAGE_MPFR/__out/usr
+    - --with-sysroot=$SYSROOT
+
+  make:
+    - -j$(nproc)
+
+  postmake:
+    - $PKGDIR/scripts/fix-sysroot.sh --clean $SYSROOT $PACKAGE_GMP/__out/usr $PACKAGE_MPFR/__out/usr
+
+  install:
+    - -j$(nproc)

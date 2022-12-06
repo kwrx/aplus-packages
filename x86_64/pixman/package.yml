@@ -13,11 +13,11 @@ build:
     - patches/pixman-$VERSION.patch
 
   env:
-   - DESTDIR: $SYSROOT
-   - CFLAGS: -O1 -march=x86-64 -mtune=generic -I$PACKAGE_LIBPNG/__out/usr/include
-   - CPPFLAGS: -O1 -march=x86-64 -mtune=generic -I$PACKAGE_LIBPNG/__out/usr/include
-   - LDFLAGS: -L$PACKAGE_LIBPNG/__out/usr/lib
-   - LIBS: -lpng
+    - DESTDIR: $SYSROOT
+    - CFLAGS: -O1 -march=x86-64 -mtune=generic -I$PACKAGE_LIBPNG/__out/usr/include
+    - CPPFLAGS: -O1 -march=x86-64 -mtune=generic -I$PACKAGE_LIBPNG/__out/usr/include
+    - LDFLAGS: -L$PACKAGE_LIBPNG/__out/usr/lib
+    - LIBS: -lpng
 
   configure:
     - --prefix=/usr

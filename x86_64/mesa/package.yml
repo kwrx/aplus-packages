@@ -1,0 +1,80 @@
+
+package: mesa
+version: 22.3.0
+sources: 
+  - https://archive.mesa3d.org/mesa-$VERSION.tar.xz
+
+dependencies:
+  - zlib
+
+build:
+
+  setup:
+    - $PKGDIR/scripts/fix-deps.sh
+
+  patches:
+    - patches/mesa-$VERSION.patch
+
+  configure:
+    - -Dprefix=$SYSROOT/usr
+    - -Dbindir=$SYSROOT/usr/bin
+    - -Ddatadir=$SYSROOT/usr/share
+    - -Dincludedir=$SYSROOT/usr/include
+    - -Dinfodir=$SYSROOT/usr/share/info
+    - -Dlibdir=$SYSROOT/usr/lib
+    - -Dlibexecdir=$SYSROOT/usr/libexec
+    - -Dlocaledir=$SYSROOT/usr/share/locale
+    - -Dlocalstatedir=$SYSROOT/var
+    - -Dmandir=$SYSROOT/usr/share/man
+    - -Dsysconfdir=$SYSROOT/etc
+    - -Dbuildtype=release
+    - -Ddefault_library=static
+    - -Dstrip=true
+    - -Dwarning_level=1
+    - -Dwerror=false
+    - -Dc_args=['-march=x86-64','-mtune=generic','-D_GNU_SOURCE','-I$PACKAGE_ZLIB/__out/usr/include']
+    - -Dc_link_args=['-L$PACKAGE_ZLIB/__out/usr/lib']
+    - -Dcpp_args=['-march=x86-64','-mtune=generic','-D_GNU_SOURCE','-I$PACKAGE_ZLIB/__out/usr/include']
+    - -Dcpp_link_args=['-L$PACKAGE_ZLIB/__out/usr/lib']
+    - -Dplatforms=
+    - -Degl-native-platform=surfaceless
+    - -Ddri3=disabled
+    - -Dgallium-drivers=['swrast']
+    - -Dgallium-vdpau=disabled
+    - -Dgallium-omx=disabled
+    - -Dgallium-va=disabled
+    - -Dgallium-xa=disabled
+    - -Dstatic-libclc=[]
+    - -Dvulkan-drivers=[]
+    - -Dshader-cache=disabled
+    - -Dshader-cache-default=false
+    - -Dshared-glapi=disabled
+    - -Dgles1=disabled
+    - -Dgles2=disabled
+    - -Dgbm=disabled
+    - -Dglx=disabled
+    - -Degl=disabled
+    - -Dmicrosoft-clc=disabled
+    - -Dllvm=disabled
+    - -Dshared-llvm=disabled
+    - -Ddraw-use-llvm=false
+    - -Dvalgrind=disabled
+    - -Dlibunwind=disabled
+    - -Dlmsensors=disabled
+    - -Denable-glcpp-tests=false
+    - -Dexecmem=false
+    - -Dosmesa=true
+    - -Dpower8=disabled
+    - -Dxlib-lease=disabled
+    - -Dglx-direct=false
+    - -Dgallium-d3d12-video=disabled
+    - --cross-file=$PKGDIR/meson/meson-cross-$HOST.txt
+
+  premake:
+    - $PKGDIR/scripts/fix-build.sh $BUILDDIR
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)

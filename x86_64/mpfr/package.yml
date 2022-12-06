@@ -1,26 +1,26 @@
 
-package: libtsm
-version: "3"
+package: mpfr
+version: 4.1.0
 sources: 
-  - https://freedesktop.org/software/kmscon/releases/libtsm-$VERSION.tar.xz
+  - https://gcc.gnu.org/pub/gcc/infrastructure/mpfr-$VERSION.tar.bz2
+
+dependencies:
+  - gmp
 
 build:
 
   patches:
-    - patches/libtsm-$VERSION.patch
+    - patches/mpfr-$VERSION.patch
 
   env:
     - DESTDIR: $SYSROOT
     - CFLAGS: -O2 -march=x86-64 -mtune=generic
-    - CPPFLAGS: -O2 -march=x86-64 -mtune=generic
 
   configure:
     - --prefix=/usr
     - --host=$HOST
     - --enable-static
-    - --enable-shared=no
-    - --enable-debug=no
-    - --without-xkbcommon
+    - --with-gmp=$PACKAGE_GMP/__out/usr
     - --with-sysroot=$SYSROOT
 
   make:

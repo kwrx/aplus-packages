@@ -10,7 +10,7 @@ build:
     - patches/busybox-$VERSION.patch
 
   env:
-   - DESTDIR: $SYSROOT
+    - DESTDIR: $SYSROOT
 
   make:
     - -j$(nproc)

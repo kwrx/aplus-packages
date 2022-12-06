@@ -1,0 +1,5 @@
+#!/bin/bash
+
+prefix=$1
+
+ln -sf libOSMesa.a $prefix/lib/libGL.a

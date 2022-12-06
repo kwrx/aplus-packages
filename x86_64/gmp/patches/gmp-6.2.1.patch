@@ -1,0 +1,12 @@
+diff -Naur gmp-6.2.1/configfsf.sub aplus-gmp-6.2.1/configfsf.sub
+--- gmp-6.2.1/configfsf.sub	2020-11-14 19:45:09.000000000 +0100
++++ aplus-gmp-6.2.1/configfsf.sub	2022-12-06 02:27:17.779629380 +0100
+@@ -1690,7 +1690,7 @@
+ 	# Now accept the basic system types.
+ 	# The portable systems comes first.
+ 	# Each alternative MUST end in a * to match a version number.
+-	gnu* | android* | bsd* | mach* | minix* | genix* | ultrix* | irix* \
++	gnu* | android* | bsd* | mach* | minix* | genix* | ultrix* | irix* | aplus* \
+ 	     | *vms* | esix* | aix* | cnk* | sunos | sunos[34]* \
+ 	     | hpux* | unos* | osf* | luna* | dgux* | auroraux* | solaris* \
+ 	     | sym* |  plan9* | psp* | sim* | xray* | os68k* | v88r* \

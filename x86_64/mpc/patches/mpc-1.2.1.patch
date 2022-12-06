@@ -1,0 +1,12 @@
+diff -Naur mpc-1.2.1/build-aux/config.sub aplus-mpc-1.2.1/build-aux/config.sub
+--- mpc-1.2.1/build-aux/config.sub	2020-10-20 18:26:31.000000000 +0200
++++ aplus-mpc-1.2.1/build-aux/config.sub	2022-12-06 02:30:05.054922687 +0100
+@@ -1338,7 +1338,7 @@
+ 	# The portable systems comes first.
+ 	# Each alternative MUST end in a * to match a version number.
+ 	# sysv* is not here because it comes later, after sysvr4.
+-	gnu* | bsd* | mach* | minix* | genix* | ultrix* | irix* \
++	gnu* | bsd* | mach* | minix* | genix* | ultrix* | irix* | aplus* \
+ 	     | *vms* | esix* | aix* | cnk* | sunos | sunos[34]*\
+ 	     | hpux* | unos* | osf* | luna* | dgux* | auroraux* | solaris* \
+ 	     | sym* | kopensolaris* | plan9* \

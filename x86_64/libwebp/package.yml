@@ -7,14 +7,14 @@ sources:
 build:
 
   setup:
-   - $SRCDIR/autogen.sh
+    - $SRCDIR/autogen.sh
 
   patches:
-   - patches/libwebp-$VERSION.patch
+    - patches/libwebp-$VERSION.patch
 
   env:
-   - DESTDIR: $SYSROOT
-   - CFLAGS: -O2 -march=x86-64 -mtune=generic
+    - DESTDIR: $SYSROOT
+    - CFLAGS: -O2 -march=x86-64 -mtune=generic
 
 
   configure:

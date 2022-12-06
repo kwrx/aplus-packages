@@ -1,37 +1,23 @@
-[![deploy](https://github.com/kwrx/aplus-packages/actions/workflows/build-and-deploy.yml/badge.svg)](https://github.com/kwrx/aplus-packages/actions/workflows/build-and-deploy.yml)
-
-# aplus-packages
-Package repository for aplus
-
-# Generic
-- [X] system-base
-- [X] system-cursors
-- [X] system-fonts
-- [X] system-icons
-- [X] system-images
-- [X] system-keymaps
-    - [X] en-US
-    - [X] it-IT
-
-# Libraries
-- [X] Musl
-- [X] LibTSM
-- [X] LibPNG
-- [ ] LibWEBP
-- [ ] Pixman
-- [ ] Cairo
-- [ ] SDL2
-- [ ] SDL2_Image
-- [ ] SDL2_Font
-- [ ] Freetype
-- [ ] MesaGL
-- [X] ZLib
-
-# Utilities
-- [X] Busybox
-- [X] Dash
-- [ ] Bash
-- [ ] Nyancat
-
-# Games
-- [ ] Quake III
+# Packages
+ - `generic` system-base : *0.6*
+ - `generic` system-cursors : *0.6*
+ - `generic` system-fonts : *0.6*
+ - `generic` system-icons : *0.6*
+ - `generic` system-images : *0.6*
+ - `generic` system-keymaps : *0.6*
+ - `x86_64` bash : *5.1*
+ - `x86_64` binutils : *2.38*
+ - `x86_64` busybox : *1.35.0*
+ - `x86_64` cairo : *1.16.0*
+ - `x86_64` dash : *0.5.11.5*
+ - `x86_64` freetype : *2.12.1*
+ - `x86_64` gmp : *6.2.1*
+ - `x86_64` isl : *0.24*
+ - `x86_64` libpng : *1.6.37*
+ - `x86_64` libtsm : *3*
+ - `x86_64` libwebp : *1.2.4*
+ - `x86_64` mesa : *22.3.0*
+ - `x86_64` mpc : *1.2.1*
+ - `x86_64` mpfr : *4.1.0*
+ - `x86_64` pixman : *0.40.0*
+ - `x86_64` zlib : *1.2.13*

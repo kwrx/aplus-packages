@@ -1,26 +1,27 @@
 
-package: libtsm
-version: "3"
+package: isl
+version: "0.24"
 sources: 
-  - https://freedesktop.org/software/kmscon/releases/libtsm-$VERSION.tar.xz
+  - https://gcc.gnu.org/pub/gcc/infrastructure/isl-$VERSION.tar.bz2
+
+dependencies:
+  - gmp
 
 build:
 
   patches:
-    - patches/libtsm-$VERSION.patch
+    - patches/isl-$VERSION.patch
 
   env:
     - DESTDIR: $SYSROOT
     - CFLAGS: -O2 -march=x86-64 -mtune=generic
-    - CPPFLAGS: -O2 -march=x86-64 -mtune=generic
 
   configure:
     - --prefix=/usr
     - --host=$HOST
     - --enable-static
-    - --enable-shared=no
-    - --enable-debug=no
-    - --without-xkbcommon
+    - --with-gmp=system
+    - --with-gmp-prefix=$PACKAGE_GMP/__out/usr
     - --with-sysroot=$SYSROOT
 
   make:
