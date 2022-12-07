@@ -1,0 +1,63 @@
+
+package: gcc
+version: 12.2.0
+sources: 
+  - https://ftp.gnu.org/gnu/gcc/gcc-$VERSION/gcc-$VERSION.tar.xz
+
+dependencies:
+  - gmp
+  - mpfr
+  - mpc
+  - isl
+  - zlib
+
+build:
+
+  patches:
+    - patches/gcc-$VERSION.patch
+
+  env:
+    - DESTDIR: $SYSROOT
+    - CFLAGS: -O2 -march=x86-64 -mtune=generic
+    - CXXFLAGS: -O2 -march=x86-64 -mtune=generic
+    - AUTOCONF_GCC_VERSION: "2.69"
+
+  preconfigure:
+    - $PKGDIR/scripts/configure-stdcxx.sh $SRCDIR $SYSROOT $HOST $AUTOCONF_GCC_VERSION
+
+  configure:
+    - --prefix=/usr
+    - --host=$HOST
+    - --target=$HOST 
+    - --enable-languages=c,c++
+    - --enable-threads=posix
+    - --enable-static
+    - --disable-lto
+    - --disable-multilib
+    - --disable-shared
+    - --disable-host-shared
+    - --disable-werror
+    - --disable-nls
+    - --with-mpc=$PACKAGE_MPC/__out/usr
+    - --with-mpfr=$PACKAGE_MPFR/__out/usr
+    - --with-gmp=$PACKAGE_GMP/__out/usr
+    - --with-isl=$PACKAGE_ISL/__out/usr
+    - --with-zlib=$PACKAGE_ZLIB/__out/usr
+    - --with-build-sysroot=$SYSROOT
+    - --with-sysroot=/
+
+
+  make:
+    - -j$(nproc)
+    - all-gcc
+    - all-target-libgcc
+    - all-target-libstdc++-v3
+
+  install:
+    - -j$(nproc)
+    - install-gcc
+    - install-target-libgcc
+    - install-target-libstdc++-v3
+
+  postinstall:
+    - $PKGDIR/scripts/strip-binaries.sh $SYSROOT/usr $HOST $VERSION

@@ -135,6 +135,23 @@ def build(packages, package):
 
 
 
+    if 'preconfigure' in package['build']:
+
+        print(f' - Before configure {package["package"]}:{package["version"]}')
+
+        for cmd in package['build']['preconfigure']:
+
+            cmd = resolve(packages, package, cmd)
+
+            if args.verbose:
+                print(f'   + {cmd}')
+
+            os.chdir(os.path.join(srcdir))
+            os.system(f'{cmd} 1> __build/preconfigure.log 2> __build/preconfigure.err')
+            os.chdir(curdir)
+
+
+
     if 'configure' in package['build']:
 
         print(f' - Configuring {package["package"]}:{package["version"]}')
@@ -245,21 +262,38 @@ def build(packages, package):
 
         if os.path.exists('__build/Makefile'):
 
-            os.system(f'make -C __build install {" ".join(opts)} 1> __build/make.log 2> __build/make.err')
+            os.system(f'make -C __build install {" ".join(opts)} 1> __build/install.log 2> __build/install.err')
        
         elif os.path.exists('Makefile'):
 
-            os.system(f'make install {" ".join(opts)} 1> __build/make.log 2> __build/make.err')
+            os.system(f'make install {" ".join(opts)} 1> __build/install.log 2> __build/install.err')
 
         elif os.path.exists('__build/build.ninja'):
 
-            os.system(f'ninja -C {srcdir}/__build install {" ".join(opts)} 1> __build/make.log 2> __build/make.err')
+            os.system(f'ninja -C {srcdir}/__build install {" ".join(opts)} 1> __build/install.log 2> __build/install.err')
 
         else:
 
             raise Exception(f'No makefile found in {srcdir}')
 
         os.chdir(curdir)
+
+
+    if 'postinstall' in package['build']:
+
+        print(f' - After install {package["package"]}:{package["version"]}')
+
+        for cmd in package['build']['postinstall']:
+
+            cmd = resolve(packages, package, cmd)
+
+            if args.verbose:
+                print(f'   + {cmd}')
+
+            os.chdir(os.path.join(srcdir))
+            os.system(f'{cmd} 1> __build/postinstall.log 2> __build/postinstall.err')
+            os.chdir(curdir)
+
 
 
     package['status'] = 'done'
