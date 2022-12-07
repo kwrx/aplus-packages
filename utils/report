@@ -2,7 +2,7 @@
 
 packages=$(find . -name ".pkg" -type d | sort | xargs -I {} realpath {}/..)
 
-
+echo "[![deploy](https://github.com/kwrx/aplus-packages/actions/workflows/build-and-deploy.yml/badge.svg)](https://github.com/kwrx/aplus-packages/actions/workflows/build-and-deploy.yml)"
 echo "# Packages"
 
 for package in $packages; do

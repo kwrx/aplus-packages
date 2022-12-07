@@ -1,3 +1,4 @@
+[![deploy](https://github.com/kwrx/aplus-packages/actions/workflows/build-and-deploy.yml/badge.svg)](https://github.com/kwrx/aplus-packages/actions/workflows/build-and-deploy.yml)
 # Packages
  - `generic` system-base : *0.6*
  - `generic` system-cursors : *0.6*
