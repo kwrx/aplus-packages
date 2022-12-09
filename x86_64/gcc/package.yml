@@ -35,7 +35,6 @@ build:
     - --disable-lto
     - --disable-multilib
     - --disable-shared
-    - --disable-host-shared
     - --disable-werror
     - --disable-nls
     - --with-mpc=$PACKAGE_MPC/__out/usr
