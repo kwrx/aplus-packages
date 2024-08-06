@@ -36,7 +36,7 @@ mkdir -p sdk
 
 pushd sdk
     wget https://github.com/kwrx/aplus-toolchain/releases/latest/download/$TARGET-aplus-toolchain-$HOST.tar.xz
-    tar xJf $TARGET-aplus-toolchain.$HOST.tar.xz
+    tar xJf $TARGET-aplus-toolchain-$HOST.tar.xz
 popd
 
 export PATH=$(pwd)/sdk/bin:$PATH
