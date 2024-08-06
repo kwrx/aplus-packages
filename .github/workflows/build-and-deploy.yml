@@ -21,7 +21,7 @@ jobs:
     - name: Prepare build-system
       working-directory: ${{github.workspace}}
       shell: bash
-      run: ci/prepare-and-build.sh
+      run: ci/prepare-and-build.sh x86_64
       
     - uses: "marvinpinto/action-automatic-releases@latest"
       with:

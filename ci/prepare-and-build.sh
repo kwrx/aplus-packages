@@ -2,6 +2,8 @@
 
 echo "### Packing generic packages"
 
+TARGET=${1:-x86_64}
+
 packages="generic"
 
 for p in $packages; do
@@ -16,11 +18,14 @@ done
 
 echo "### Install dependencies"
 
-python3 -m pip install --user --upgrade pip
-python3 -m pip install --user --upgrade setuptools
-python3 -m pip install --user --upgrade wheel
-python3 -m pip install --user --upgrade twine
-python3 -m pip install -r requirements.txt
+python3 -m venv .venv
+source .venv/bin/activate
+
+python -m pip install --upgrade pip
+python -m pip install --upgrade setuptools
+python -m pip install --upgrade wheel
+python -m pip install --upgrade twine
+python -m pip install -r requirements.txt
 
 
 
@@ -29,8 +34,8 @@ echo "### Install toolchain"
 mkdir -p sdk
 
 pushd sdk
-wget https://github.com/kwrx/aplus-toolchain/releases/latest/download/x86_64-aplus-toolchain.tar.xz
-tar xJf x86_64-aplus-toolchain.tar.xz
+    wget https://github.com/kwrx/aplus-toolchain/releases/latest/download/$TARGET-aplus-toolchain.tar.xz
+    tar xJf $TARGET-aplus-toolchain.tar.xz
 popd
 
 export PATH=$(pwd)/sdk/bin:$PATH
@@ -39,4 +44,8 @@ export PATH=$(pwd)/sdk/bin:$PATH
 echo "### Run build-system"
 
 python3 ci/pack.py --verbose
+
+echo "## Clean up"
+deactivate
+rm -rf .venv
 
