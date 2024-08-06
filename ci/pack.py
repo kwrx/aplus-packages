@@ -5,6 +5,8 @@ import os
 import wget
 import yaml
 import shutil
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
 
 environ = os.environ.copy()
 
