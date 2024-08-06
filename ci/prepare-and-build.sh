@@ -3,6 +3,7 @@
 echo "### Packing generic packages"
 
 TARGET=${1:-x86_64}
+HOST=${2:-$(gcc -dumpmachine)}
 
 packages="generic"
 
@@ -34,7 +35,7 @@ echo "### Install toolchain"
 mkdir -p sdk
 
 pushd sdk
-    wget https://github.com/kwrx/aplus-toolchain/releases/latest/download/$TARGET-aplus-toolchain.tar.xz
+    wget https://github.com/kwrx/aplus-toolchain/releases/latest/download/$TARGET-aplus-toolchain-$HOST.tar.xz
     tar xJf $TARGET-aplus-toolchain.tar.xz
 popd
 
