@@ -2,30 +2,29 @@ name: deploy
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v2
 
-    - uses: actions/checkout@v2
+      - name: Prepare environment
+        working-directory: ${{github.workspace}}
+        shell: bash
+        run: sudo apt update && sudo apt install -y wget bison flex build-essential python3 python3-pip ninja-build unzip gtk-doc-tools autoconf libtool
 
-    - name: Prepare environment
-      working-directory: ${{github.workspace}}
-      shell: bash
-      run: sudo apt update && sudo apt install -y wget bison flex build-essential python3 python3-pip ninja-build unzip gtk-doc-tools autoconf libtool
+      - name: Prepare build-system
+        working-directory: ${{github.workspace}}
+        shell: bash
+        run: ci/prepare-and-build.sh x86_64
 
-    - name: Prepare build-system
-      working-directory: ${{github.workspace}}
-      shell: bash
-      run: ci/prepare-and-build.sh x86_64
-      
-    - uses: "marvinpinto/action-automatic-releases@latest"
-      with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        prerelease: false
-        files: |
-          ${{github.workspace}}/*.tar.xz
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          files: |
+            ${{github.workspace}}/*.tar.xz
