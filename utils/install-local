@@ -7,7 +7,7 @@ if [ -z "$rootdir" ]; then
     exit 1
 fi
 
-for package in $(find . -name "*.tar.xz"); do
+for package in $(find . -maxdepth 1 -mindepth 1 -name "*.tar.xz"); do
     echo "Installing $package"
     tar -h -xJf $package -C $rootdir
 done
