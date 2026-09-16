@@ -1,3 +1,9 @@
+## 0.2.0 (2026-09-16)
+
+### Feat
+
+- add commitizen configuration and update deployment trigger to use tags
+
 ## 0.1.0 (2026-09-16)
 
 ### Feat
