@@ -4,6 +4,7 @@ echo "### Packing generic packages"
 
 TARGET=${1:-x86_64}
 HOST=${2:-$(gcc -dumpmachine)}
+TOOLCHAIN_VERSION=${3:-v0.7.1}
 
 packages="generic"
 
@@ -31,12 +32,13 @@ python -m pip install -r requirements.txt
 
 
 echo "### Install toolchain"
-
 mkdir -p sdk
 
 pushd sdk
-    wget https://github.com/kwrx/aplus-toolchain/releases/latest/download/$TARGET-aplus-toolchain-$HOST.tar.xz
-    tar xJf $TARGET-aplus-toolchain-$HOST.tar.xz
+    if [ ! -f $TARGET-aplus-toolchain-$HOST.tar.xz ]; then
+        wget https://github.com/kwrx/aplus-toolchain/releases/download/$TOOLCHAIN_VERSION/$TARGET-aplus-toolchain-$HOST.tar.xz || exit 1
+    fi
+    tar xJf $TARGET-aplus-toolchain-$HOST.tar.xz || exit 1
 popd
 
 export PATH=$(pwd)/sdk/bin:$PATH

@@ -2,7 +2,7 @@
 package: mesa
 version: 22.3.0
 sources: 
-  - https://archive.mesa3d.org/mesa-$VERSION.tar.xz
+  - https://archive.mesa3d.org/older-versions/22.x/mesa-$VERSION.tar.xz
 
 dependencies:
   - zlib

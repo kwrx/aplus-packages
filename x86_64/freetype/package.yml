@@ -2,7 +2,7 @@
 package: freetype
 version: 2.12.1
 sources: 
-  - https://download.savannah.gnu.org/releases/freetype/freetype-$VERSION.tar.xz
+  - https://mirrors.ocf.berkeley.edu/nongnu/freetype/freetype-$VERSION.tar.xz
 
 dependencies:
   - libpng
