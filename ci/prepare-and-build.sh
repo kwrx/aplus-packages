@@ -4,7 +4,7 @@ echo "### Packing generic packages"
 
 TARGET=${1:-x86_64}
 HOST=${2:-$(gcc -dumpmachine)}
-TOOLCHAIN_VERSION=${3:-v0.7.1}
+TOOLCHAIN_VERSION=${3:-0.1.0}
 
 packages="generic"
 
