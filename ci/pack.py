@@ -2,6 +2,7 @@
 
 import argparse
 import os
+import subprocess
 import wget
 import yaml
 import shutil
@@ -21,7 +22,8 @@ parser.add_argument('--verbose', action='store_true', help='Verbose output')
 args = parser.parse_args()
 
 
-
+def run_command(cmd, cwd=None):
+    subprocess.run(cmd, shell=True, check=True, cwd=cwd)
 
 def scan(path):
 
@@ -35,14 +37,17 @@ def scan(path):
             yield root
 
 
+def format_package_env_name(name):
+    return '$PACKAGE_{}'.format(name.upper().replace('-', '_').replace('.', '_').replace('+', '_').replace('@', '_'))
+
 def resolve(packages, package, s):
 
     for p in packages:
 
-        if '$PACKAGE_{}'.format(p['package'].upper()) not in s:
+        if format_package_env_name(p['package']) not in s:
             continue
 
-        s = s.replace('$PACKAGE_{}'.format(p['package'].upper()), os.path.join(args.tmpdir, p['package'] + '-' + p['version']))
+        s = s.replace(format_package_env_name(p['package']), os.path.join(args.tmpdir, p['package'] + '-' + p['version']))
 
 
     s = s.replace('$HOST', args.host)
@@ -99,7 +104,6 @@ def build(packages, package):
     if package['status'] == 'done':
         return
 
-
     if 'dependencies' in package:
 
         for dep in package['dependencies']:
@@ -107,27 +111,35 @@ def build(packages, package):
             if args.verbose:
                 print(f' - Dependency {dep}')
 
+            found = False
             for p in packages:
 
                 if p['package'] != dep:
                     continue
             
                 if p['status'] == 'done':
-                    continue
+                    found = True
+                    break
 
                 if p['status'] == 'building':
                     raise Exception(f'Circular dependency detected: {package} -> {dep}')
 
                 build(packages, p)
+                found = True
                 break
 
+            if not found:
+                raise Exception(f'Dependency {dep} not found for package {package["package"]}')
 
+
+    if not 'build' in package:
+        package['status'] = 'done'
+        return
 
     package['status'] = 'building'
 
     srcdir = prepare(packages, package)
     curdir = os.curdir
-
 
     if args.clean:
         shutil.rmtree(os.path.join(srcdir, '__build'))
@@ -136,6 +148,7 @@ def build(packages, package):
         os.mkdir(os.path.join(srcdir, '__out'))
 
 
+    run_command(f'env > {srcdir}/__build/env.log')
 
     if 'preconfigure' in package['build']:
 
@@ -149,9 +162,8 @@ def build(packages, package):
                 print(f'   + {cmd}')
 
             os.chdir(os.path.join(srcdir))
-            os.system(f'{cmd} 1> __build/preconfigure.log 2> __build/preconfigure.err')
+            run_command(f'{cmd} 1> __build/preconfigure.log 2> __build/preconfigure.err')
             os.chdir(curdir)
-
 
 
     if 'configure' in package['build']:
@@ -168,19 +180,24 @@ def build(packages, package):
         if os.path.exists(f'{srcdir}/configure'):
 
             os.chdir(os.path.join(srcdir, '__build'))
-            os.system(f'{srcdir}/configure {" ".join(opts)} 1> configure.log 2> configure.err')
+            run_command(f'{srcdir}/configure {" ".join(opts)} 1> configure.log 2> configure.err')
             os.chdir(curdir)
 
         elif os.path.exists(f'{srcdir}/meson.build'):
 
             os.chdir(srcdir)
-            os.system(f'meson setup {" ".join(opts)} {srcdir}/__build 1> __build/configure.log 2> __build/configure.err')
+            run_command(f'meson setup {" ".join(opts)} {srcdir}/__build 1> __build/configure.log 2> __build/configure.err')
+            os.chdir(curdir)
+
+        elif os.path.exists(f'{srcdir}/CMakeLists.txt'):
+
+            os.chdir(srcdir)
+            run_command(f'cmake -G "Unix Makefiles" -S {srcdir} -B {srcdir}/__build {" ".join(opts)} 1> __build/configure.log 2> __build/configure.err')
             os.chdir(curdir)
 
         else:
 
             raise Exception(f'No configure script found in {srcdir}')
-
 
 
     if 'premake' in package['build']:
@@ -195,7 +212,7 @@ def build(packages, package):
                 print(f'   + {cmd}')
 
             os.chdir(os.path.join(srcdir))
-            os.system(f'{cmd} 1> __build/premake.log 2> __build/premake.err')
+            run_command(f'{cmd} 1> __build/premake.log 2> __build/premake.err')
             os.chdir(curdir)
 
 
@@ -215,15 +232,15 @@ def build(packages, package):
 
         if os.path.exists('__build/Makefile'):
 
-            os.system(f'make -C __build {" ".join(opts)} 1> __build/make.log 2> __build/make.err')
+            run_command(f'make -C __build {" ".join(opts)} 1> __build/make.log 2> __build/make.err')
 
         elif os.path.exists('Makefile'):
 
-            os.system(f'make {" ".join(opts)} 1> __build/make.log 2> __build/make.err')
+            run_command(f'make {" ".join(opts)} 1> __build/make.log 2> __build/make.err')
 
         elif os.path.exists('__build/build.ninja'):
 
-            os.system(f'ninja -C {srcdir}/__build {" ".join(opts)} 1> __build/make.log 2> __build/make.err')
+            run_command(f'ninja -C {srcdir}/__build {" ".join(opts)} 1> __build/make.log 2> __build/make.err')
 
         else:
 
@@ -244,7 +261,7 @@ def build(packages, package):
                 print(f'   + {cmd}')
 
             os.chdir(os.path.join(srcdir))
-            os.system(f'{cmd} 1> __build/postmake.log 2> __build/postmake.err')
+            run_command(f'{cmd} 1> __build/postmake.log 2> __build/postmake.err')
             os.chdir(curdir)
 
 
@@ -264,15 +281,15 @@ def build(packages, package):
 
         if os.path.exists('__build/Makefile'):
 
-            os.system(f'make -C __build install {" ".join(opts)} 1> __build/install.log 2> __build/install.err')
-       
+            run_command(f'make -C __build install {" ".join(opts)} 1> __build/install.log 2> __build/install.err')
+    
         elif os.path.exists('Makefile'):
 
-            os.system(f'make install {" ".join(opts)} 1> __build/install.log 2> __build/install.err')
+            run_command(f'make install {" ".join(opts)} 1> __build/install.log 2> __build/install.err')
 
         elif os.path.exists('__build/build.ninja'):
 
-            os.system(f'ninja -C {srcdir}/__build install {" ".join(opts)} 1> __build/install.log 2> __build/install.err')
+            run_command(f'ninja -C {srcdir}/__build install {" ".join(opts)} 1> __build/install.log 2> __build/install.err')
 
         else:
 
@@ -293,7 +310,7 @@ def build(packages, package):
                 print(f'   + {cmd}')
 
             os.chdir(os.path.join(srcdir))
-            os.system(f'{cmd} 1> __build/postinstall.log 2> __build/postinstall.err')
+            run_command(f'{cmd} 1> __build/postinstall.log 2> __build/postinstall.err')
             os.chdir(curdir)
 
 
@@ -301,6 +318,32 @@ def build(packages, package):
     package['status'] = 'done'
 
 
+def resolve_package(packages, name):
+
+    for package in packages:
+        if package['package'] == name:
+            return package
+
+    raise Exception(f'Package {name} not found')
+
+
+def resolve_candidates(packages, candidates, resolved=[]):
+    
+    for candidate in candidates:
+
+        if candidate in resolved:
+            continue
+
+        resolved.append(candidate)
+
+        if 'dependencies' in candidate:
+
+            for dep in candidate['dependencies']:
+                candidate = resolve_package(packages, dep)
+                if candidate not in candidates:
+                    candidates = resolve_candidates(packages, candidates + [candidate], resolved)
+
+    return candidates
 
 
 def stage_1(packages):
@@ -322,9 +365,6 @@ def stage_1(packages):
             if 'sources' not in yml:
                 continue
 
-            if 'build' not in yml:
-                continue
-
             if args.verbose:
                 print(f' - Found {yml["package"]}-{yml["version"]}')
 
@@ -338,15 +378,9 @@ def stage_1(packages):
     if args.install != '*':
 
         candidates = [i for i in packages if i['package'] in args.install]
-        
-        for candidate in [i for i in candidates if 'dependencies' in i]:
+        candidates = resolve_candidates(packages, candidates)
 
-            for dep in candidate['dependencies']:
-
-                if dep not in args.install:
-                    args.install.append(dep)
-
-        packages = [i for i in packages if i['package'] in args.install]
+        packages = candidates
 
 
     return packages
@@ -361,24 +395,31 @@ def stage_2(packages):
 
         print(f' - GET {package["package"]}:{package["version"]}')
 
-
         package['archives'] = []
 
         for source in package['sources']:
 
             source = resolve(packages, package, source)
 
-            filename = wget.detect_filename(source)
-            filename = os.path.join(args.tmpdir, filename)
-
             if args.verbose:
                 print(f'   + {source}')
 
-            if not os.path.exists(filename):
-                wget.download(source, filename)
-                print('')
+            if source.startswith('git@'):
+                filename = os.path.join(args.tmpdir, f'{package["package"]}-{package["version"]}')
 
-            package['archives'].append(filename)
+                if not os.path.exists(filename):
+                    run_command(f'git clone {source} {filename}')
+                else:
+                    run_command(f'cd {filename} && git reset --hard && git pull')
+            else:
+                filename = wget.detect_filename(source)
+                filename = os.path.join(args.tmpdir, filename)
+
+                if not os.path.exists(filename):
+                    wget.download(source, filename)
+                    print('')
+
+                package['archives'].append(filename)
 
     return packages
 
@@ -397,9 +438,9 @@ def stage_3(packages):
                 print(f'   + {archive}')
 
             if archive.endswith('.zip'):
-                os.system(f'unzip -o -q {archive} -d {args.tmpdir}')
+                run_command(f'unzip -o -q {archive} -d {args.tmpdir}')
             else:
-                os.system(f'tar xf {archive} -C {args.tmpdir}')
+                run_command(f'tar xf {archive} -C {args.tmpdir}')
 
     return packages
 
@@ -413,6 +454,8 @@ def stage_4(packages):
         srcdir = prepare(packages, package, False)
         curdir = os.curdir
 
+        if not 'build' in package:
+            continue
 
         if 'setup' in package['build']:
 
@@ -426,11 +469,8 @@ def stage_4(packages):
                     print(f'   + {cmd}')
 
                 os.chdir(os.path.join(srcdir))
-                os.system(f'{cmd} 1> __build/setup.log 2> __build/setup.err')
+                run_command(f'{cmd} 1> __build/setup.log 2> __build/setup.err')
                 os.chdir(curdir)
-
-
-
 
         print(f' - Patching {package["package"]}:{package["version"]}')
 
@@ -445,7 +485,7 @@ def stage_4(packages):
                     print(f'   + {patch}')
 
                 os.chdir(os.path.join(srcdir))
-                os.system(f'patch -p1 -t --verbose < {patch} 1> __build/patch.log 2> __build/patch.err')
+                run_command(f'patch -p1 -t --verbose < {patch} 1> __build/patch.log 2> __build/patch.err')
                 os.chdir(curdir)
 
 
@@ -458,8 +498,7 @@ def stage_5(packages):
     print('Build packages')
 
     for package in packages:
-        if args.install == '*' or package['package'] in args.install:
-            build(packages, package)
+        build(packages, package)
 
     return packages
 
@@ -470,6 +509,9 @@ def stage_6(packages):
 
     for package in packages:
 
+        if not 'build' in package:
+            continue
+
         print(f' - Packaging {package["package"]}:{package["version"]}')
 
         srcdir = prepare(packages, package, False)
@@ -478,12 +520,12 @@ def stage_6(packages):
         os.chdir(os.path.join(srcdir, '__out'))
     
         if os.path.isdir(f'{package["root"]}/.pkg'):
-            os.system(f'cp -R {package["root"]}/.pkg .')
+            run_command(f'cp -R {package["root"]}/.pkg .')
         else:
-            os.system(f'mkdir -p .pkg')
+            run_command(f'mkdir -p .pkg')
 
-        os.system(f'echo {package["version"]} > .pkg/version')
-        os.system(f'tar cJf {args.root}/{package["package"]}.tar.xz * .pkg')
+        run_command(f'echo {package["version"]} > .pkg/version')
+        run_command(f'tar cJf {args.root}/{package["package"]}.tar.xz * .pkg')
         os.chdir(curdir)
 
 

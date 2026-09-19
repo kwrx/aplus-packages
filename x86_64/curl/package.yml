@@ -1,0 +1,56 @@
+
+package: curl
+version: 8.22.0
+sources: 
+  - https://curl.se/download/curl-$VERSION.tar.gz
+
+dependencies:
+  - libressl
+  - zlib
+
+build:
+
+  patches:
+    - patches/curl-$VERSION.patch
+
+  env:
+    - DESTDIR: $SYSROOT
+    - CPPFLAGS: -DPATH_MAX=1024 -I$PACKAGE_LIBRESSL/__out/usr/include -I$PACKAGE_ZLIB/__out/usr/include
+    - CFLAGS: -O2 -march=x86-64 -mtune=generic -fno-PIE -static
+    - LDFLAGS: -no-pie -static -L$PACKAGE_LIBRESSL/__out/usr/lib -L$PACKAGE_ZLIB/__out/usr/lib
+    - LIBS: -lssl -lcrypto -lz
+    - PKG_CONFIG_PATH: $PACKAGE_LIBRESSL/__out/usr/lib/pkgconfig:$PACKAGE_ZLIB/__out/usr/lib/pkgconfig
+
+  preconfigure:
+    - $PKGDIR/scripts/fix-sysroot.sh --init $SYSROOT $PACKAGE_LIBRESSL/__out/usr $PACKAGE_ZLIB/__out/usr
+
+  configure:
+    - --prefix=/usr
+    - --host=$HOST
+    - --enable-static
+    - --enable-optimize
+    - --enable-libgcc
+    - --disable-shared
+    - --disable-ares
+    - --disable-rt
+    - --disable-httpsrr
+    - --disable-ech
+    - --disable-ssls-export
+    - --disable-proxy-http3
+    - --disable-threaded-resolver
+    - --without-brotli
+    - --without-zstd
+    - --without-libpsl
+    - --with-openssl
+    - --with-ca-bundle=/etc/ssl/cert.pem
+    - --with-sysroot=$SYSROOT
+    - ac_cv_func_eventfd=no
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)
+
+  postinstall:
+    - $PKGDIR/scripts/fix-sysroot.sh --clean $SYSROOT $PACKAGE_LIBRESSL/__out/usr $PACKAGE_ZLIB/__out/usr

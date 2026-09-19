@@ -16,7 +16,6 @@ build:
     - DESTDIR: $SYSROOT
     - CFLAGS: -O2 -march=x86-64 -mtune=generic
 
-
   configure:
     - --prefix=/usr
     - --host=$HOST
@@ -31,7 +30,6 @@ build:
     - --disable-wic
     - --disable-tiff
     - --disable-gif
-    
 
   make:
     - -j$(nproc)

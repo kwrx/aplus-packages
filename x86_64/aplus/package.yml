@@ -1,0 +1,27 @@
+
+package: aplus
+version: latest
+sources: 
+  - git@github.com:kwrx/aplus.git
+
+dependencies:
+  - cairo
+  - libwebp
+  - freetype
+
+build:
+
+  env:
+    - CFLAGS: -I$PACKAGE_CAIRO/__out/usr/include -I$PACKAGE_WEBP/__out/usr/include -I$PACKAGE_FREETYPE/__out/usr/include/freetype2
+
+  preconfigure:
+    - ./configure --skip-packages --skip-toolchain --kconfig x86_64
+  
+  premake:
+    - ./makew PROJECTS=lib -j$(nproc)
+
+  postmake:
+    - $PKGDIR/scripts/fix-libui.sh $SRCDIR
+
+  postinstall:
+    - $PKGDIR/scripts/fix-sysroot.sh $SRCDIR

@@ -1,0 +1,33 @@
+
+package: libressl
+version: 4.3.2
+sources: 
+  - https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-$VERSION.tar.gz
+
+build:
+
+  patches:
+    - patches/libressl-$VERSION.patch
+
+  env:
+    - DESTDIR: $SYSROOT
+    - CFLAGS: -O2 -march=x86-64 -mtune=generic -DPATH_MAX=1024
+
+  configure:
+    - --prefix=/usr
+    - --host=$HOST
+    - --enable-static
+    - --disable-shared
+    - --disable-tests
+    - --disable-asm
+    - --disable-nc
+    - --with-sysroot=$SYSROOT
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)
+
+  postinstall:
+    - $PKGDIR/scripts/fix-etc.sh $SYSROOT

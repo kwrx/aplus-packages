@@ -1,6 +1,6 @@
 
 package: cairo
-version: 1.16.0
+version: 1.18.4
 sources: 
   - https://www.cairographics.org/releases/cairo-$VERSION.tar.xz
 
@@ -12,65 +12,46 @@ dependencies:
 
 build:
 
-  patches:
-    - patches/cairo-$VERSION.patch
-
   env:
-    - DESTDIR: $SYSROOT
-    - CFLAGS: -O2 -march=x86-64 -mtune=generic -I$PACKAGE_LIBPNG/__out/usr/include -I$PACKAGE_PIXMAN/__out/usr/include -I$PACKAGE_FREETYPE/__out/usr/include/freetype2 -DCAIRO_NO_MUTEX=1
-    - CPPFLAGS: -O2 -march=x86-64 -mtune=generic -I$PACKAGE_LIBPNG/__out/usr/include -I$PACKAGE_PIXMAN/__out/usr/include -I$PACKAGE_FREETYPE/__out/usr/include/freetype2 -DCAIRO_NO_MUTEX=1
+    - CFLAGS: -O2 -march=x86-64 -mtune=generic -fPIE -I$PACKAGE_FREETYPE/__out/usr/include -I$PACKAGE_PIXMAN/__out/usr/include -I$PACKAGE_LIBPNG/__out/usr/include -I$PACKAGE_ZLIB/__out/usr/include
+    - LDFLAGS: -L$PACKAGE_FREETYPE/__out/usr/lib -L$PACKAGE_PIXMAN/__out/usr/lib -L$PACKAGE_LIBPNG/__out/usr/lib -L$PACKAGE_ZLIB/__out/usr/lib
+    - PKG_CONFIG: /usr/bin/pkg-config
+    - PKG_CONFIG_PATH: $PACKAGE_FREETYPE/__out/usr/lib/pkgconfig:$PACKAGE_PIXMAN/__out/usr/lib/pkgconfig:$PACKAGE_LIBPNG/__out/usr/lib/pkgconfig:$PACKAGE_ZLIB/__out/usr/lib/pkgconfig
 
   configure:
-    - --prefix=/usr
-    - --host=$HOST
-    - --enable-static
-    - --enable-shared=no
-    - --enable-gtk-doc=no
-    - --enable-gtk-doc-html=no
-    - --enable-gtk-doc-pdf=no
-    - --enable-gcov=no
-    - --enable-valgrind=no
-    - --enable-xlib=no
-    - --enable-xlib-xrender=no
-    - --enable-xcb=no
-    - --enable-xlib-xcb=no
-    - --enable-xcb-shm=no
-    - --enable-qt=no
-    - --enable-quartz=no
-    - --enable-quartz-font=no
-    - --enable-quartz-image=no
-    - --enable-win32=no
-    - --enable-win32-font=no
-    - --enable-os2=no
-    - --enable-beos=no
-    - --enable-drm=no
-    - --enable-gallium=no
-    - --enable-gl=no
-    - --enable-glesv2=no
-    - --enable-glesv3=no
-    - --enable-cogl=no
-    - --enable-directfb=no
-    - --enable-vg=no
-    - --enable-egl=no
-    - --enable-glx=no
-    - --enable-wgl=no
-    - --enable-script=no
-    - --enable-fc=no
-    - --enable-ps=no
-    - --enable-pdf=no
-    - --enable-svg=no
-    - --enable-test-surfaces=no
-    - --enable-tee=no
-    - --enable-xml=no
-    - --enable-pthread=no
-    - --enable-gobject=no
-    - --enable-full-testing=no
-    - --enable-trace=no
-    - --enable-interpreter=no
-    - --enable-symbol-lookup=no
-    - --without-x
-    - --without-gallium
-    - --with-sysroot=$SYSROOT
+    - -Dprefix=$SYSROOT/usr
+    - -Dbindir=$SYSROOT/usr/bin
+    - -Ddatadir=$SYSROOT/usr/share
+    - -Dincludedir=$SYSROOT/usr/include
+    - -Dinfodir=$SYSROOT/usr/share/info
+    - -Dlibdir=$SYSROOT/usr/lib
+    - -Dlibexecdir=$SYSROOT/usr/libexec
+    - -Dlocaledir=$SYSROOT/usr/share/locale
+    - -Dlocalstatedir=$SYSROOT/var
+    - -Dmandir=$SYSROOT/usr/share/man
+    - -Dsysconfdir=$SYSROOT/etc
+    - -Dbuildtype=release
+    - -Ddefault_library=static
+    - -Dstrip=true
+    - -Dwarning_level=1
+    - -Dwerror=false
+    - -Ddwrite=disabled
+    - -Dfontconfig=disabled
+    - -Dfreetype=enabled
+    - -Dpng=enabled
+    - -Dquartz=disabled
+    - -Dtee=disabled
+    - -Dxcb=disabled
+    - -Dxlib=disabled
+    - -Dxlib-xcb=disabled
+    - -Dzlib=disabled
+    - -Dtests=disabled
+    - -Dlzo=disabled
+    - -Dgtk2-utils=disabled
+    - -Dglib=disabled
+    - -Dspectre=disabled
+    - -Dsymbol-lookup=disabled
+    - --cross-file=$PKGDIR/meson/meson-cross-$HOST.txt
 
   make:
     - -j$(nproc)

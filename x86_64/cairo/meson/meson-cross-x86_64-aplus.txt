@@ -1,0 +1,11 @@
+[binaries]
+c = 'x86_64-aplus-gcc'
+cpp = 'x86_64-aplus-g++'
+ar = 'x86_64-aplus-ar'
+strip = 'x86_64-aplus-strip'
+
+[host_machine]
+system = 'aplus'
+cpu_family = 'x86'
+cpu = 'x86_64'
+endian = 'little'

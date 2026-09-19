@@ -1,0 +1,24 @@
+package: libjpeg-turbo
+version: 3.2.0
+sources: 
+  - https://github.com/libjpeg-turbo/libjpeg-turbo/releases/download/$VERSION/libjpeg-turbo-$VERSION.tar.gz
+
+build:
+
+  env:
+    - SYSROOT: $SYSROOT
+
+  configure:
+    - -DCMAKE_TOOLCHAIN_FILE=$PKGDIR/cmake/x86_64-aplus-toolchain.cmake
+    - -DCMAKE_INSTALL_PREFIX=$SYSROOT/usr
+    - -DCMAKE_BUILD_TYPE=Release
+    - -DENABLE_SHARED=OFF
+    - -DWITH_JPEG8=ON
+    - -DWITH_TOOLS=OFF
+    - -DWITH_TESTS=OFF
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)

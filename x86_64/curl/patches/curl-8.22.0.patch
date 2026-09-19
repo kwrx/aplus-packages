@@ -1,0 +1,12 @@
+diff '--color=auto' -Naur curl-8.22.0/config.sub aplus-curl-8.22.0/config.sub
+--- curl-8.22.0/config.sub	2026-09-02 07:47:45.000000000 +0200
++++ aplus-curl-8.22.0/config.sub	2026-09-19 17:16:05.156111281 +0200
+@@ -1723,7 +1723,7 @@
+ 	# Now accept the basic system types.
+ 	# The portable systems comes first.
+ 	# Each alternative MUST end in a * to match a version number.
+-	gnu* | android* | bsd* | mach* | minix* | genix* | ultrix* | irix* \
++	gnu* | android* | bsd* | mach* | minix* | genix* | ultrix* | irix* | aplus* \
+ 	     | *vms* | esix* | aix* | cnk* | sunos | sunos[34]* \
+ 	     | hpux* | unos* | osf* | luna* | dgux* | auroraux* | solaris* \
+ 	     | sym* |  plan9* | psp* | sim* | xray* | os68k* | v88r* \

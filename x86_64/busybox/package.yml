@@ -11,7 +11,7 @@ build:
 
   env:
     - DESTDIR: $SYSROOT
-    - CFLAGS: -D__linux__
+    - CFLAGS: -D__linux__ -DNAME_MAX=255
 
   make:
     - -j$(nproc)

@@ -1,0 +1,12 @@
+diff -Naur expat-2.8.4/conftools/config.sub aplus-expat-2.8.4/conftools/config.sub
+--- expat-2.8.4/conftools/config.sub	2022-07-27 14:26:54.000000000 +0200
++++ aplus-expat-2.8.4/conftools/config.sub	2026-09-18 00:57:03.034881250 +0200
+@@ -1744,7 +1744,7 @@
+ 	# Now accept the basic system types.
+ 	# The portable systems comes first.
+ 	# Each alternative MUST end in a * to match a version number.
+-	gnu* | android* | bsd* | mach* | minix* | genix* | ultrix* | irix* \
++	gnu* | android* | bsd* | mach* | minix* | genix* | ultrix* | irix* | aplus* \
+ 	     | *vms* | esix* | aix* | cnk* | sunos | sunos[34]* \
+ 	     | hpux* | unos* | osf* | luna* | dgux* | auroraux* | solaris* \
+ 	     | sym* |  plan9* | psp* | sim* | xray* | os68k* | v88r* \

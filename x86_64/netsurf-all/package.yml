@@ -1,0 +1,53 @@
+
+package: netsurf-all
+version: "3.11"
+sources: 
+  - https://download.netsurf-browser.org/netsurf/releases/source-full/netsurf-all-$VERSION.tar.gz
+
+dependencies:
+  - aplus
+  - expat
+  - curl
+  - libressl
+  - libwebp
+  - libpng
+  - libjpeg-turbo
+  - zlib
+
+build:
+
+  env:
+    - DESTDIR: $SYSROOT
+    - CFLAGS: -O2 -march=x86-64 -mtune=generic -fno-PIE -static -DPATH_MAX=1024 -I$PACKAGE_EXPAT/__out/usr/include -I$PACKAGE_CURL/__out/usr/include -I$PACKAGE_APLUS/__out/usr/include -I$PACKAGE_APLUS/include -I$PACKAGE_LIBRESSL/__out/usr/include -I$PACKAGE_LIBWEBP/__out/usr/include -I$PACKAGE_LIBPNG/__out/usr/include -I$PACKAGE_LIBJPEG_TURBO/__out/usr/include -I$PACKAGE_ZLIB/__out/usr/include
+    - LDFLAGS: -no-pie -static -L$PACKAGE_EXPAT/__out/usr/lib -L$PACKAGE_CURL/__out/usr/lib -L$PACKAGE_APLUS/__out/usr/lib -L$PACKAGE_LIBRESSL/__out/usr/lib -L$PACKAGE_LIBWEBP/__out/usr/lib -L$PACKAGE_LIBPNG/__out/usr/lib -L$PACKAGE_LIBJPEG_TURBO/__out/usr/lib -L$PACKAGE_ZLIB/__out/usr/lib 
+    - LIBS: -lexpat -lui -lssl -lcrypto -lwebp -lpng -ljpeg -lz
+    - PKG_CONFIG_PATH: $PACKAGE_EXPAT/__out/usr/lib/pkgconfig:$PACKAGE_CURL/__out/usr/lib/pkgconfig:$PACKAGE_LIBRESSL/__out/usr/lib/pkgconfig:$PACKAGE_LIBWEBP/__out/usr/lib/pkgconfig:$PACKAGE_LIBPNG/__out/usr/lib/pkgconfig:$PACKAGE_LIBJPEG_TURBO/__out/usr/lib/pkgconfig:$PACKAGE_ZLIB/__out/usr/lib/pkgconfig
+
+  patches:
+    - patches/netsurf-all-$VERSION.patch
+
+  make:
+    - -j$(nproc)
+    - TARGET=framebuffer
+    - HOST=$HOST
+    - NETSURF_USE_CURL=YES
+    - NETSURF_USE_OPENSSL=YES
+    - NETSURF_USE_JPEGXL=NO
+    - NETSURF_LOG_LEVEL=INFO
+    - NETSURF_STRIP_BINARY=YES
+    - NSFB_APLUS_AVAILABLE=yes
+
+  install:
+    - -j$(nproc)
+    - TARGET=framebuffer
+    - HOST=$HOST
+    - NETSURF_USE_CURL=YES
+    - NETSURF_USE_OPENSSL=YES
+    - NETSURF_USE_JPEGXL=NO
+    - NETSURF_LOG_LEVEL=INFO
+    - NETSURF_STRIP_BINARY=YES
+    - NSFB_APLUS_AVAILABLE=yes
+
+  postinstall:
+    - mkdir -p $SYSROOT/usr/share/applications
+    - cp $PKGDIR/assets/netsurf-all.desktop $SYSROOT/usr/share/applications/netsurf-all.desktop

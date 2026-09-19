@@ -1,0 +1,12 @@
+diff '--color=auto' -Naur pkgconf-1.1.0/config.sub aplus-pkgconf-1.1.0/config.sub
+--- pkgconf-1.1.0/config.sub	2015-02-15 18:15:37.000000000 +0100
++++ aplus-pkgconf-1.1.0/config.sub	2026-09-19 12:07:02.000480773 +0200
+@@ -1368,7 +1368,7 @@
+ 	# The portable systems comes first.
+ 	# Each alternative MUST END IN A *, to match a version number.
+ 	# -sysv* is not here because it comes later, after sysvr4.
+-	-gnu* | -bsd* | -mach* | -minix* | -genix* | -ultrix* | -irix* \
++	-gnu* | -bsd* | -mach* | -minix* | -genix* | -ultrix* | -irix* | -aplus* \
+ 	      | -*vms* | -sco* | -esix* | -isc* | -aix* | -cnk* | -sunos | -sunos[34]*\
+ 	      | -hpux* | -unos* | -osf* | -luna* | -dgux* | -auroraux* | -solaris* \
+ 	      | -sym* | -kopensolaris* | -plan9* \

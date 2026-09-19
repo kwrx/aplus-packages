@@ -1,0 +1,28 @@
+
+package: expat
+version: 2.8.4
+sources: 
+  - https://github.com/libexpat/libexpat/releases/download/R_2_8_4/expat-$VERSION.tar.xz
+
+build:
+
+  patches:
+    - patches/expat-$VERSION.patch
+
+  env:
+    - DESTDIR: $SYSROOT
+    - CFLAGS: -O2 -march=x86-64 -mtune=generic
+
+  configure:
+    - --prefix=/usr
+    - --host=$HOST
+    - --enable-static
+    - --disable-shared
+    - --disable-getentropy
+    - --with-sysroot=$SYSROOT
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)

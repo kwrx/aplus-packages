@@ -1,0 +1,27 @@
+package: pkgconf
+version: 1.1.0
+sources: 
+  - https://distfiles.dereferenced.org/pkgconf/pkgconf-$VERSION.tar.xz
+
+build:
+
+  patches:
+    - patches/pkgconf-$VERSION.patch
+
+  env:
+    - DESTDIR: $SYSROOT
+
+  configure:
+    - --prefix=/usr
+    - --host=$HOST
+    - --enable-static
+    - --with-sysroot=$SYSROOT
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)
+
+  postinstall:
+    - $PKGDIR/scripts/fix-alternatives.sh $SYSROOT/usr/bin

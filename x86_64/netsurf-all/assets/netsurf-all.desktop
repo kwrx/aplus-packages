@@ -1,0 +1,7 @@
+[Desktop Entry]
+Name=NetSurf
+Comment=Lightweight web browser
+Exec=netsurf-fb
+Terminal=false
+Type=Application
+Categories=Network;WebBrowser;

@@ -1,0 +1,839 @@
+diff '--color=auto' -Naur netsurf-all-3.11/libnsfb/include/libnsfb.h aplus-netsurf-all-3.11/libnsfb/include/libnsfb.h
+--- netsurf-all-3.11/libnsfb/include/libnsfb.h	2023-12-28 01:57:22.000000000 +0100
++++ aplus-netsurf-all-3.11/libnsfb/include/libnsfb.h	2026-09-18 11:03:19.621862893 +0200
+@@ -42,6 +42,7 @@
+     NSFB_SURFACE_LINUX, /**< Linux framebuffer surface */
+     NSFB_SURFACE_ABLE, /**< ABLE framebuffer surface */
+     NSFB_SURFACE_RAM, /**< RAM surface */
++    NSFB_SURFACE_APLUS, /**< aplus display server surface */
+     NSFB_SURFACE_COUNT, /**< The number of surface kinds */
+ };
+ 
+diff '--color=auto' -Naur netsurf-all-3.11/libnsfb/Makefile aplus-netsurf-all-3.11/libnsfb/Makefile
+--- netsurf-all-3.11/libnsfb/Makefile	2023-12-28 01:57:22.000000000 +0100
++++ aplus-netsurf-all-3.11/libnsfb/Makefile	2026-09-18 11:04:16.313658058 +0200
+@@ -43,10 +43,24 @@
+ NSFB_XCB_PKG_NAMES := xcb xcb-icccm xcb-image xcb-keysyms xcb-atom
+ 
+ # determine which surface handlers can be compiled based upon avalable library
+-$(eval $(call pkg_config_package_available,NSFB_VNC_AVAILABLE,libvncserver))
+-$(eval $(call pkg_config_package_available,NSFB_SDL_AVAILABLE,sdl))
+-$(eval $(call pkg_config_package_available,NSFB_XCB_AVAILABLE,$(NSFB_XCB_PKG_NAMES)))
+-$(eval $(call pkg_config_package_available,NSFB_WLD_AVAILABLE,wayland-client))
++# $(eval $(call pkg_config_package_available,NSFB_VNC_AVAILABLE,libvncserver))
++# $(eval $(call pkg_config_package_available,NSFB_SDL_AVAILABLE,sdl))
++# $(eval $(call pkg_config_package_available,NSFB_XCB_AVAILABLE,$(NSFB_XCB_PKG_NAMES)))
++# $(eval $(call pkg_config_package_available,NSFB_WLD_AVAILABLE,wayland-client))
++
++NSFB_VNC_AVAILABLE := no
++NSFB_SDL_AVAILABLE := no
++NSFB_XCB_AVAILABLE := no
++NSFB_WLD_AVAILABLE := no
++
++# the aplus surface talks to the display server through libui, which ships no pkg-config file
++ifeq ($(NSFB_APLUS_AVAILABLE),)
++  ifneq ($(findstring aplus,$(HOST)),)
++    NSFB_APLUS_AVAILABLE := yes
++  else
++    NSFB_APLUS_AVAILABLE := no
++  endif
++endif
+ 
+ # Flags and setup for each support library
+ ifeq ($(NSFB_SDL_AVAILABLE),yes)
+@@ -108,6 +122,12 @@
+   REQUIRED_PKGS := $(REQUIRED_PKGS) wayland-client
+ endif 
+ 
++ifeq ($(NSFB_APLUS_AVAILABLE),yes)
++  TESTLDFLAGS := $(TESTLDFLAGS) -lui
++
++  REQUIRED_LIBS := $(REQUIRED_LIBS) ui
++endif
++
+ TESTLDFLAGS := -lm -Wl,--whole-archive -l$(COMPONENT) -Wl,--no-whole-archive $(TESTLDFLAGS)
+ 
+ include $(NSBUILD)/Makefile.top
+diff '--color=auto' -Naur netsurf-all-3.11/libnsfb/src/surface/aplus.c aplus-netsurf-all-3.11/libnsfb/src/surface/aplus.c
+--- netsurf-all-3.11/libnsfb/src/surface/aplus.c	1970-01-01 01:00:00.000000000 +0100
++++ aplus-netsurf-all-3.11/libnsfb/src/surface/aplus.c	2026-09-18 11:03:19.625196331 +0200
+@@ -0,0 +1,651 @@
++/*
++ * Copyright 2009 Vincent Sanders <vince@simtec.co.uk>
++ *
++ * This file is part of libnsfb, http://www.netsurf-browser.org/
++ * Licenced under the MIT License,
++ *                http://www.opensource.org/licenses/mit-license.php
++ *
++ * Surface handler for the aplus display server, talking to it through libui
++ * rather than through a framebuffer or a portability layer.
++ */
++
++#include <stdbool.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++
++#include <aplus/input.h>
++#include <aplus/ui.h>
++
++#include "libnsfb.h"
++#include "libnsfb_event.h"
++#include "libnsfb_plot.h"
++#include "libnsfb_plot_util.h"
++
++#include "nsfb.h"
++#include "surface.h"
++#include "plot.h"
++#include "cursor.h"
++
++#define UNUSED(x) ((void)(x))
++
++/** how long ::ui_connect keeps retrying, so the browser may start alongside the server */
++#define APLUS_CONNECT_RETRY_MS 5000
++
++/** title the window carries until ::nsfb_set_parameters names another */
++#define APLUS_DEFAULT_TITLE "NetSurf"
++
++/** one server event may become a move, three button transitions and a wheel pair */
++#define APLUS_EVENT_QUEUE 16
++
++/** wheel detents translated per scroll event, the rest being dropped rather than queued */
++#define APLUS_SCROLL_MAX 4
++
++typedef struct aplus_state_s {
++    ui_connection_t *conn; /**< connection to the display server */
++    ui_window_t *win; /**< the window whose surface is plotted into */
++
++    nsfb_plotfn_copy_t *copy; /**< software copy plotter, wrapped to report damage */
++
++    uint8_t buttons; /**< buttons held as of the last pointer event */
++    int ptr_x; /**< pointer position as of the last pointer event */
++    int ptr_y;
++
++    nsfb_event_t queue[APLUS_EVENT_QUEUE];
++    unsigned head;
++    unsigned tail;
++} aplus_state_t;
++
++/** raw key codes as they arrive from the server, against the US layout libnsfb describes */
++static const enum nsfb_key_code_e aplus_nsfb_map[NR_KEYS] = {
++    [KEY_ESC] = NSFB_KEY_ESCAPE,
++    [KEY_1] = NSFB_KEY_1,
++    [KEY_2] = NSFB_KEY_2,
++    [KEY_3] = NSFB_KEY_3,
++    [KEY_4] = NSFB_KEY_4,
++    [KEY_5] = NSFB_KEY_5,
++    [KEY_6] = NSFB_KEY_6,
++    [KEY_7] = NSFB_KEY_7,
++    [KEY_8] = NSFB_KEY_8,
++    [KEY_9] = NSFB_KEY_9,
++    [KEY_0] = NSFB_KEY_0,
++    [KEY_MINUS] = NSFB_KEY_MINUS,
++    [KEY_EQUAL] = NSFB_KEY_EQUALS,
++    [KEY_BACKSPACE] = NSFB_KEY_BACKSPACE,
++    [KEY_TAB] = NSFB_KEY_TAB,
++    [KEY_Q] = NSFB_KEY_q,
++    [KEY_W] = NSFB_KEY_w,
++    [KEY_E] = NSFB_KEY_e,
++    [KEY_R] = NSFB_KEY_r,
++    [KEY_T] = NSFB_KEY_t,
++    [KEY_Y] = NSFB_KEY_y,
++    [KEY_U] = NSFB_KEY_u,
++    [KEY_I] = NSFB_KEY_i,
++    [KEY_O] = NSFB_KEY_o,
++    [KEY_P] = NSFB_KEY_p,
++    [KEY_LEFTBRACE] = NSFB_KEY_LEFTBRACKET,
++    [KEY_RIGHTBRACE] = NSFB_KEY_RIGHTBRACKET,
++    [KEY_ENTER] = NSFB_KEY_RETURN,
++    [KEY_LEFTCTRL] = NSFB_KEY_LCTRL,
++    [KEY_A] = NSFB_KEY_a,
++    [KEY_S] = NSFB_KEY_s,
++    [KEY_D] = NSFB_KEY_d,
++    [KEY_F] = NSFB_KEY_f,
++    [KEY_G] = NSFB_KEY_g,
++    [KEY_H] = NSFB_KEY_h,
++    [KEY_J] = NSFB_KEY_j,
++    [KEY_K] = NSFB_KEY_k,
++    [KEY_L] = NSFB_KEY_l,
++    [KEY_SEMICOLON] = NSFB_KEY_SEMICOLON,
++    [KEY_APOSTROPHE] = NSFB_KEY_QUOTE,
++    [KEY_GRAVE] = NSFB_KEY_BACKQUOTE,
++    [KEY_LEFTSHIFT] = NSFB_KEY_LSHIFT,
++    [KEY_BACKSLASH] = NSFB_KEY_BACKSLASH,
++    [KEY_Z] = NSFB_KEY_z,
++    [KEY_X] = NSFB_KEY_x,
++    [KEY_C] = NSFB_KEY_c,
++    [KEY_V] = NSFB_KEY_v,
++    [KEY_B] = NSFB_KEY_b,
++    [KEY_N] = NSFB_KEY_n,
++    [KEY_M] = NSFB_KEY_m,
++    [KEY_COMMA] = NSFB_KEY_COMMA,
++    [KEY_DOT] = NSFB_KEY_PERIOD,
++    [KEY_SLASH] = NSFB_KEY_SLASH,
++    [KEY_RIGHTSHIFT] = NSFB_KEY_RSHIFT,
++    [KEY_KPASTERISK] = NSFB_KEY_KP_MULTIPLY,
++    [KEY_LEFTALT] = NSFB_KEY_LALT,
++    [KEY_SPACE] = NSFB_KEY_SPACE,
++    [KEY_CAPSLOCK] = NSFB_KEY_CAPSLOCK,
++    [KEY_F1] = NSFB_KEY_F1,
++    [KEY_F2] = NSFB_KEY_F2,
++    [KEY_F3] = NSFB_KEY_F3,
++    [KEY_F4] = NSFB_KEY_F4,
++    [KEY_F5] = NSFB_KEY_F5,
++    [KEY_F6] = NSFB_KEY_F6,
++    [KEY_F7] = NSFB_KEY_F7,
++    [KEY_F8] = NSFB_KEY_F8,
++    [KEY_F9] = NSFB_KEY_F9,
++    [KEY_F10] = NSFB_KEY_F10,
++    [KEY_NUMLOCK] = NSFB_KEY_NUMLOCK,
++    [KEY_SCROLLLOCK] = NSFB_KEY_SCROLLOCK,
++    [KEY_KP7] = NSFB_KEY_KP7,
++    [KEY_KP8] = NSFB_KEY_KP8,
++    [KEY_KP9] = NSFB_KEY_KP9,
++    [KEY_KPMINUS] = NSFB_KEY_KP_MINUS,
++    [KEY_KP4] = NSFB_KEY_KP4,
++    [KEY_KP5] = NSFB_KEY_KP5,
++    [KEY_KP6] = NSFB_KEY_KP6,
++    [KEY_KPPLUS] = NSFB_KEY_KP_PLUS,
++    [KEY_KP1] = NSFB_KEY_KP1,
++    [KEY_KP2] = NSFB_KEY_KP2,
++    [KEY_KP3] = NSFB_KEY_KP3,
++    [KEY_KP0] = NSFB_KEY_KP0,
++    [KEY_KPDOT] = NSFB_KEY_KP_PERIOD,
++    [KEY_102ND] = NSFB_KEY_BACKSLASH,
++    [KEY_F11] = NSFB_KEY_F11,
++    [KEY_F12] = NSFB_KEY_F12,
++    [KEY_KPENTER] = NSFB_KEY_KP_ENTER,
++    [KEY_RIGHTCTRL] = NSFB_KEY_RCTRL,
++    [KEY_KPSLASH] = NSFB_KEY_KP_DIVIDE,
++    [KEY_SYSRQ] = NSFB_KEY_SYSREQ,
++    [KEY_RIGHTALT] = NSFB_KEY_RALT,
++    [KEY_LINEFEED] = NSFB_KEY_LF,
++    [KEY_HOME] = NSFB_KEY_HOME,
++    [KEY_UP] = NSFB_KEY_UP,
++    [KEY_PAGEUP] = NSFB_KEY_PAGEUP,
++    [KEY_LEFT] = NSFB_KEY_LEFT,
++    [KEY_RIGHT] = NSFB_KEY_RIGHT,
++    [KEY_END] = NSFB_KEY_END,
++    [KEY_DOWN] = NSFB_KEY_DOWN,
++    [KEY_PAGEDOWN] = NSFB_KEY_PAGEDOWN,
++    [KEY_INSERT] = NSFB_KEY_INSERT,
++    [KEY_DELETE] = NSFB_KEY_DELETE,
++    [KEY_KPEQUAL] = NSFB_KEY_KP_EQUALS,
++    [KEY_PAUSE] = NSFB_KEY_PAUSE,
++    [KEY_LEFTMETA] = NSFB_KEY_LMETA,
++    [KEY_RIGHTMETA] = NSFB_KEY_RMETA,
++    [KEY_COMPOSE] = NSFB_KEY_COMPOSE,
++    [KEY_UNDO] = NSFB_KEY_UNDO,
++    [KEY_HELP] = NSFB_KEY_HELP,
++    [KEY_MENU] = NSFB_KEY_MENU,
++    [KEY_POWER] = NSFB_KEY_POWER,
++};
++
++/** the buttons the server reports, in the order libnsfb numbers its mouse keys */
++static const struct {
++    uint8_t mask;
++    enum nsfb_key_code_e keycode;
++} aplus_button_map[] = {
++    { UI_BUTTON_LEFT, NSFB_KEY_MOUSE_1 },
++    { UI_BUTTON_MIDDLE, NSFB_KEY_MOUSE_2 },
++    { UI_BUTTON_RIGHT, NSFB_KEY_MOUSE_3 },
++};
++
++/**
++ * @brief Adds an event to the queue, dropping it when there is no room left.
++ *
++ * @param state The surface state holding the queue.
++ * @param event The event to add.
++ */
++static void aplus_queue_push(aplus_state_t *state, const nsfb_event_t *event)
++{
++    unsigned next = (state->tail + 1) % APLUS_EVENT_QUEUE;
++
++    if (next == state->head) {
++        return;
++    }
++
++    state->queue[state->tail] = *event;
++    state->tail = next;
++}
++
++/**
++ * @brief Takes the oldest event off the queue.
++ *
++ * @param state The surface state holding the queue.
++ * @param event Receives the event.
++ * @return true when an event was taken, false when the queue was empty.
++ */
++static bool aplus_queue_pop(aplus_state_t *state, nsfb_event_t *event)
++{
++    if (state->head == state->tail) {
++        return false;
++    }
++
++    *event = state->queue[state->head];
++    state->head = (state->head + 1) % APLUS_EVENT_QUEUE;
++
++    return true;
++}
++
++/**
++ * @brief Queues a resize, replacing one already queued rather than reporting a size twice.
++ *
++ * The server keeps only its newest configure, so an older size queued behind it describes a
++ * surface that will never be adopted.
++ *
++ * @param state The surface state holding the queue.
++ * @param width The width the server configured.
++ * @param height The height the server configured.
++ */
++static void aplus_queue_resize(aplus_state_t *state, int width, int height)
++{
++    nsfb_event_t event;
++    unsigned i;
++
++    event.type = NSFB_EVENT_RESIZE;
++    event.value.resize.w = width;
++    event.value.resize.h = height;
++
++    for (i = state->head; i != state->tail; i = (i + 1) % APLUS_EVENT_QUEUE) {
++        if (state->queue[i].type == NSFB_EVENT_RESIZE) {
++            state->queue[i] = event;
++            return;
++        }
++    }
++
++    aplus_queue_push(state, &event);
++}
++
++/**
++ * @brief Queues a key or mouse button going down or coming up.
++ *
++ * @param state The surface state holding the queue.
++ * @param keycode The key the event is about.
++ * @param down Whether the key went down rather than came up.
++ */
++static void aplus_queue_key(aplus_state_t *state, enum nsfb_key_code_e keycode, bool down)
++{
++    nsfb_event_t event;
++
++    event.type = down ? NSFB_EVENT_KEY_DOWN : NSFB_EVENT_KEY_UP;
++    event.value.keycode = keycode;
++
++    aplus_queue_push(state, &event);
++}
++
++/**
++ * @brief Queues the button transitions between the buttons held before and the ones held now.
++ *
++ * @param state The surface state holding the queue.
++ * @param buttons The buttons the server reports as held.
++ */
++static void aplus_queue_buttons(aplus_state_t *state, uint8_t buttons)
++{
++    size_t i;
++
++    for (i = 0; i < sizeof(aplus_button_map) / sizeof(aplus_button_map[0]); i++) {
++        uint8_t mask = aplus_button_map[i].mask;
++
++        if (((state->buttons ^ buttons) & mask) == 0) {
++            continue;
++        }
++
++        aplus_queue_key(state, aplus_button_map[i].keycode, (buttons & mask) != 0);
++    }
++
++    state->buttons = buttons;
++}
++
++/**
++ * @brief Turns one server event into the libnsfb events it stands for.
++ *
++ * @param state The surface state holding the queue.
++ * @param ev The event the server sent.
++ */
++static void aplus_translate(aplus_state_t *state, const ui_event_t *ev)
++{
++    nsfb_event_t event;
++
++    switch (ev->type) {
++    case UI_EVENT_KEY:
++        if (ev->key.vkey < NR_KEYS && aplus_nsfb_map[ev->key.vkey] != NSFB_KEY_UNKNOWN) {
++            aplus_queue_key(state, aplus_nsfb_map[ev->key.vkey], ev->key.down != 0);
++        }
++        break;
++
++    case UI_EVENT_POINTER:
++        if ((ev->pointer.x != state->ptr_x) || (ev->pointer.y != state->ptr_y)) {
++            state->ptr_x = ev->pointer.x;
++            state->ptr_y = ev->pointer.y;
++
++            event.type = NSFB_EVENT_MOVE_ABSOLUTE;
++            event.value.vector.x = state->ptr_x;
++            event.value.vector.y = state->ptr_y;
++            event.value.vector.z = 0;
++
++            aplus_queue_push(state, &event);
++        }
++
++        aplus_queue_buttons(state, ev->pointer.buttons);
++        break;
++
++    case UI_EVENT_SCROLL: {
++        enum nsfb_key_code_e keycode;
++        int detents = ev->scroll.dy;
++        int i;
++
++        if (detents == 0) {
++            break;
++        }
++
++        keycode = (detents > 0) ? NSFB_KEY_MOUSE_4 : NSFB_KEY_MOUSE_5;
++        detents = (detents > 0) ? detents : -detents;
++
++        if (detents > APLUS_SCROLL_MAX) {
++            detents = APLUS_SCROLL_MAX;
++        }
++
++        for (i = 0; i < detents; i++) {
++            aplus_queue_key(state, keycode, true);
++            aplus_queue_key(state, keycode, false);
++        }
++        break;
++    }
++
++    case UI_EVENT_LEAVE:
++        aplus_queue_buttons(state, 0);
++        break;
++
++    case UI_EVENT_CONFIGURE:
++        aplus_queue_resize(state, ev->configure.width, ev->configure.height);
++        break;
++
++    case UI_EVENT_CLOSE:
++        event.type = NSFB_EVENT_CONTROL;
++        event.value.controlcode = NSFB_CONTROL_QUIT;
++
++        aplus_queue_push(state, &event);
++        break;
++
++    default:
++        break;
++    }
++}
++
++/**
++ * @brief Reports the window's surface as the framebuffer to plot into.
++ *
++ * @param nsfb The framebuffer context.
++ */
++static void aplus_attach(nsfb_t *nsfb)
++{
++    aplus_state_t *state = nsfb->surface_priv;
++
++    nsfb->width = ui_window_width(state->win);
++    nsfb->height = ui_window_height(state->win);
++    nsfb->ptr = (uint8_t *)ui_window_pixels(state->win);
++    nsfb->linelen = (int)ui_window_stride(state->win);
++}
++
++static bool aplus_copy(nsfb_t *nsfb, nsfb_bbox_t *srcbox, nsfb_bbox_t *dstbox);
++
++/**
++ * @brief Picks the software plotters for the format and wraps the copy one so it reports damage.
++ *
++ * @param nsfb The framebuffer context.
++ * @return 0 on success, or -1 when no plotters suit the format.
++ */
++static int aplus_select_plotters(nsfb_t *nsfb)
++{
++    aplus_state_t *state = nsfb->surface_priv;
++
++    if (select_plotters(nsfb) == false) {
++        return -1;
++    }
++
++    if (state != NULL) {
++        state->copy = nsfb->plotter_fns->copy;
++        nsfb->plotter_fns->copy = aplus_copy;
++    }
++
++    return 0;
++}
++
++/**
++ * @brief Moves a region of the surface, marking where it landed as changed.
++ *
++ * The pixels are the server's to read at any time, so a copy nothing else reports would
++ * otherwise reach the screen only when the next plot happened to overlap it.
++ *
++ * @param nsfb The framebuffer context.
++ * @param srcbox The region to copy from.
++ * @param dstbox The region to copy to.
++ * @return true on success.
++ */
++static bool aplus_copy(nsfb_t *nsfb, nsfb_bbox_t *srcbox, nsfb_bbox_t *dstbox)
++{
++    aplus_state_t *state = nsfb->surface_priv;
++
++    if (state->copy(nsfb, srcbox, dstbox) == false) {
++        return false;
++    }
++
++    ui_window_damage(state->win, dstbox->x0, dstbox->y0, dstbox->x1 - dstbox->x0, dstbox->y1 - dstbox->y0);
++
++    return true;
++}
++
++/**
++ * @brief Takes up the size the server last configured, the window's surface not being ours to size.
++ *
++ * @param nsfb The framebuffer context.
++ * @param width The width asked for, which only decides how large a window is created.
++ * @param height The height asked for.
++ * @param format The format asked for, which the server only ever answers with XRGB8888.
++ * @return 0 on success, or -1 on error.
++ */
++static int aplus_set_geometry(nsfb_t *nsfb, int width, int height, enum nsfb_format_e format)
++{
++    aplus_state_t *state = nsfb->surface_priv;
++
++    UNUSED(format);
++
++    nsfb->format = NSFB_FMT_XRGB8888;
++
++    if (state == NULL) {
++        nsfb->width = width;
++        nsfb->height = height;
++
++        return aplus_select_plotters(nsfb);
++    }
++
++    if (ui_window_apply_configure(state->win) < 0) {
++        return -1;
++    }
++
++    aplus_attach(nsfb);
++
++    return aplus_select_plotters(nsfb);
++}
++
++/**
++ * @brief Names the window, which the server draws in the decoration.
++ *
++ * @param nsfb The framebuffer context.
++ * @param parameters The title to give the window.
++ * @return 0 on success, or -1 on error.
++ */
++static int aplus_set_parameters(nsfb_t *nsfb, const char *parameters)
++{
++    aplus_state_t *state = nsfb->surface_priv;
++
++    if (state == NULL) {
++        return 0;
++    }
++
++    return ui_window_set_title(state->win, parameters) < 0 ? -1 : 0;
++}
++
++/**
++ * @brief Opens a window on the display server and plots into the surface it hands back.
++ *
++ * @param nsfb The framebuffer context.
++ * @return 0 on success, or -1 on error.
++ */
++static int aplus_initialise(nsfb_t *nsfb)
++{
++    aplus_state_t *state;
++    const char *title = nsfb->parameters;
++
++    if (nsfb->surface_priv != NULL) {
++        return -1;
++    }
++
++    state = calloc(1, sizeof(aplus_state_t));
++
++    if (state == NULL) {
++        return -1;
++    }
++
++    state->ptr_x = -1;
++    state->ptr_y = -1;
++
++    state->conn = ui_connect(NULL, APLUS_CONNECT_RETRY_MS);
++
++    if (state->conn == NULL) {
++        fprintf(stderr, "libnsfb: unable to reach the display server\n");
++        free(state);
++        return -1;
++    }
++
++    if ((title == NULL) || (*title == 0)) {
++        title = APLUS_DEFAULT_TITLE;
++    }
++
++    state->win = ui_window_create(state->conn, nsfb->width, nsfb->height, title);
++
++    if (state->win == NULL) {
++        fprintf(stderr, "libnsfb: unable to create a window\n");
++        ui_disconnect(state->conn);
++        free(state);
++        return -1;
++    }
++
++    nsfb->surface_priv = state;
++    nsfb->format = NSFB_FMT_XRGB8888;
++
++    aplus_attach(nsfb);
++
++    return aplus_select_plotters(nsfb);
++}
++
++/**
++ * @brief Closes the window and drops the connection.
++ *
++ * @param nsfb The framebuffer context.
++ * @return 0 on success.
++ */
++static int aplus_finalise(nsfb_t *nsfb)
++{
++    aplus_state_t *state = nsfb->surface_priv;
++
++    if (state == NULL) {
++        return 0;
++    }
++
++    ui_window_destroy(state->win);
++    ui_disconnect(state->conn);
++
++    free(state);
++
++    nsfb->surface_priv = NULL;
++    nsfb->ptr = NULL;
++
++    return 0;
++}
++
++/**
++ * @brief Waits for the next event, translating what the server sends into libnsfb events.
++ *
++ * @param nsfb The framebuffer context.
++ * @param event Receives the event.
++ * @param timeout How long to wait in milliseconds, polling at 0 and waiting indefinitely below it.
++ * @return true when an event was stored, false when a poll found nothing.
++ */
++static bool aplus_input(nsfb_t *nsfb, nsfb_event_t *event, int timeout)
++{
++    aplus_state_t *state = nsfb->surface_priv;
++
++    if (aplus_queue_pop(state, event) == true) {
++        return true;
++    }
++
++    for (;;) {
++        ui_event_t ev;
++
++        int got = ui_next_event(state->conn, &ev, timeout);
++
++        if (got < 0) {
++            event->type = NSFB_EVENT_CONTROL;
++            event->value.controlcode = NSFB_CONTROL_QUIT;
++            return true;
++        }
++
++        if (got == 0) {
++            if (timeout == 0) {
++                return false;
++            }
++
++            event->type = NSFB_EVENT_CONTROL;
++            event->value.controlcode = NSFB_CONTROL_TIMEOUT;
++            return true;
++        }
++
++        aplus_translate(state, &ev);
++
++        if (aplus_queue_pop(state, event) == true) {
++            return true;
++        }
++    }
++}
++
++/**
++ * @brief Tells the server which part of the surface changed and asks for it to be shown.
++ *
++ * @param nsfb The framebuffer context.
++ * @param box The region that was redrawn.
++ * @return 0 on success, or -1 on error.
++ */
++static int aplus_update(nsfb_t *nsfb, nsfb_bbox_t *box)
++{
++    aplus_state_t *state = nsfb->surface_priv;
++
++    ui_window_damage(state->win, box->x0, box->y0, box->x1 - box->x0, box->y1 - box->y0);
++
++    return ui_window_commit(state->win) < 0 ? -1 : 0;
++}
++
++/**
++ * @brief Accepts a cursor move without plotting anything, the server drawing the pointer itself.
++ *
++ * @param nsfb The framebuffer context.
++ * @param cursor The cursor libnsfb tracks.
++ * @return true.
++ */
++static int aplus_cursor(nsfb_t *nsfb, struct nsfb_cursor_s *cursor)
++{
++    UNUSED(nsfb);
++    UNUSED(cursor);
++
++    return true;
++}
++
++const nsfb_surface_rtns_t aplus_rtns = {
++    .initialise = aplus_initialise,
++    .finalise = aplus_finalise,
++    .input = aplus_input,
++    .update = aplus_update,
++    .cursor = aplus_cursor,
++    .geometry = aplus_set_geometry,
++    .parameters = aplus_set_parameters,
++};
++
++NSFB_SURFACE_DEF(aplus, NSFB_SURFACE_APLUS, &aplus_rtns)
++
++/*
++ * Local variables:
++ *  c-basic-offset: 4
++ *  tab-width: 8
++ * End:
++ */
+diff '--color=auto' -Naur netsurf-all-3.11/libnsfb/src/surface/Makefile aplus-netsurf-all-3.11/libnsfb/src/surface/Makefile
+--- netsurf-all-3.11/libnsfb/src/surface/Makefile	2023-12-28 01:57:22.000000000 +0100
++++ aplus-netsurf-all-3.11/libnsfb/src/surface/Makefile	2026-09-18 11:03:19.625196331 +0200
+@@ -8,6 +8,7 @@
+ SURFACE_HANDLER_$(NSFB_XCB_AVAILABLE) += x.c
+ SURFACE_HANDLER_$(NSFB_VNC_AVAILABLE) += vnc.c
+ SURFACE_HANDLER_$(NSFB_WLD_AVAILABLE) += wld.c
++SURFACE_HANDLER_$(NSFB_APLUS_AVAILABLE) += aplus.c
+ 
+ DIR_SOURCES := $(SURFACE_HANDLER_yes)
+ 
+diff '--color=auto' -Naur netsurf-all-3.11/netsurf/content/fetch.c aplus-netsurf-all-3.11/netsurf/content/fetch.c
+--- netsurf-all-3.11/netsurf/content/fetch.c	2023-12-28 01:57:22.000000000 +0100
++++ aplus-netsurf-all-3.11/netsurf/content/fetch.c	2026-09-19 15:45:22.000000000 +0200
+@@ -54,7 +54,9 @@
+ #include "content/fetchers.h"
+ #include "content/fetchers/resource.h"
+ #include "content/fetchers/about/about.h"
++#ifdef WITH_CURL
+ #include "content/fetchers/curl.h"
++#endif
+ #include "content/fetchers/data.h"
+ #include "content/fetchers/file/file.h"
+ #include "javascript/fetcher.h"
+diff '--color=auto' -Naur netsurf-all-3.11/netsurf/frontends/framebuffer/Makefile aplus-netsurf-all-3.11/netsurf/frontends/framebuffer/Makefile
+--- netsurf-all-3.11/netsurf/frontends/framebuffer/Makefile	2023-12-28 01:57:22.000000000 +0100
++++ aplus-netsurf-all-3.11/netsurf/frontends/framebuffer/Makefile	2026-09-19 15:04:34.000000000 +0200
+@@ -55,6 +55,13 @@
+ $(eval $(call pkg_config_find_and_add,libnsfb,libnsfb))
+ LDFLAGS += -Wl,--no-whole-archive
+ 
++# the aplus surface of libnsfb talks to the display server through libui,
++# which ships no pkg-config file. Keep it out of the whole-archive block so
++# only the window/event objects get pulled in.
++ifneq ($(findstring aplus,$(HOST)),)
++  LDFLAGS += -lui
++endif
++
+ # ---------------------------------------------------------------------------
+ # Target setup
+ # ---------------------------------------------------------------------------
+diff '--color=auto' -Naur netsurf-all-3.11/netsurf/frontends/framebuffer/Makefile.tools aplus-netsurf-all-3.11/netsurf/frontends/framebuffer/Makefile.tools
+--- netsurf-all-3.11/netsurf/frontends/framebuffer/Makefile.tools	2023-12-28 01:57:22.000000000 +0100
++++ aplus-netsurf-all-3.11/netsurf/frontends/framebuffer/Makefile.tools	2026-09-19 15:45:22.000000000 +0200
+@@ -12,4 +12,14 @@
+ ifneq ($(origin GCCSDK_INSTALL_CROSSBIN),undefined)
+   CC := $(wildcard $(GCCSDK_INSTALL_CROSSBIN)/*gcc)
+   CXX := $(wildcard $(GCCSDK_INSTALL_CROSSBIN)/*g++)
++else
++  # Cross-compiling for aplus: name the toolchain after HOST, the way the
++  # shared buildsystem already does for the support libraries. Restrict
++  # pkg-config to PKG_CONFIG_PATH so host .pc files are not picked up.
++  ifneq ($(findstring aplus,$(HOST)),)
++    CC := $(HOST)-gcc
++    CXX := $(HOST)-g++
++    STRIP := $(HOST)-strip
++    PKG_CONFIG := PKG_CONFIG_LIBDIR="$(PKG_CONFIG_PATH)" pkg-config
++  endif
+ endif
+diff '--color=auto' -Naur netsurf-all-3.11/netsurf/Makefile aplus-netsurf-all-3.11/netsurf/Makefile
+--- netsurf-all-3.11/netsurf/Makefile	2023-12-28 01:57:22.000000000 +0100
++++ aplus-netsurf-all-3.11/netsurf/Makefile	2026-09-19 15:51:09.000000000 +0200
+@@ -136,7 +136,13 @@
+ -include Makefile.config
+ 
+ # libraries enabled by feature switch without pkgconfig file 
++# libjpeg-turbo ships a pkg-config file; use it when cross-compiling for aplus
++# so the cross headers are found instead of the host ones.
++ifneq ($(findstring aplus,$(HOST)),)
++$(eval $(call pkg_config_find_and_add_enabled,JPEG,libjpeg,JPEG))
++else
+ $(eval $(call feature_switch,JPEG,JPEG (libjpeg),-DWITH_JPEG,-ljpeg,-UWITH_JPEG,))
++endif
+ $(eval $(call feature_switch,HARU_PDF,PDF export (haru),-DWITH_PDF_EXPORT,-lhpdf -lpng,-UWITH_PDF_EXPORT,))
+ $(eval $(call feature_switch,LIBICONV_PLUG,glibc internal iconv,-DLIBICONV_PLUG,,-ULIBICONV_PLUG,-liconv))
+ $(eval $(call feature_switch,DUKTAPE,Javascript (Duktape),,,,,))
+@@ -147,7 +153,13 @@
+ $(eval $(call pkg_config_find_and_add,libnsutils,nsutils))
+ 
+ # Common libraries without pkg-config support
++# zlib ships a pkg-config file; use it when cross-compiling for aplus so the
++# cross headers are found instead of the host ones.
++ifneq ($(findstring aplus,$(HOST)),)
++$(eval $(call pkg_config_find_and_add,zlib,zlib))
++else
+ LDFLAGS += -lz
++endif
+ 
+ # Optional libraries with pkgconfig
+ 
+diff '--color=auto' -Naur netsurf-all-3.11/netsurf/utils/config.h aplus-netsurf-all-3.11/netsurf/utils/config.h
+--- netsurf-all-3.11/netsurf/utils/config.h	2023-12-28 01:57:22.000000000 +0100
++++ aplus-netsurf-all-3.11/netsurf/utils/config.h	2026-09-19 17:12:44.000000000 +0200
+@@ -136,7 +136,7 @@
+ #endif
+ 
+ #define HAVE_MMAP
+-#if (defined(_WIN32) || defined(__riscos__) || defined(__HAIKU__) || defined(__BEOS__) || defined(__amigaos4__) || defined(__AMIGA__) || defined(__MINT__))
++#if (defined(_WIN32) || defined(__riscos__) || defined(__HAIKU__) || defined(__BEOS__) || defined(__amigaos4__) || defined(__AMIGA__) || defined(__MINT__) || defined(__aplus__))
+ #undef HAVE_MMAP
+ #endif
+ 
+diff '--color=auto' -Naur netsurf-all-3.11/netsurf/content/fetchers/about/certificate.c aplus-netsurf-all-3.11/netsurf/content/fetchers/about/certificate.c
+--- netsurf-all-3.11/netsurf/content/fetchers/about/certificate.c	2023-12-28 01:57:22.000000000 +0100
++++ aplus-netsurf-all-3.11/netsurf/content/fetchers/about/certificate.c	2026-09-19 18:30:00.000000000 +0200
+@@ -137,7 +137,8 @@
+ /* OpenSSL 1.0.x, 1.0.2, 1.1.0 and 1.1.1 API all changed
+  * LibreSSL declares its OpenSSL version as 2.1 but only supports 1.0.x API
+  */
+-#if (defined(LIBRESSL_VERSION_NUMBER) || (OPENSSL_VERSION_NUMBER < 0x1010000fL))
++#if ((defined(LIBRESSL_VERSION_NUMBER) && (LIBRESSL_VERSION_NUMBER < 0x3050000fL)) || \
++     (!defined(LIBRESSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER < 0x1010000fL)))
+ /* 1.0.x */
+ 
+ #if (defined(LIBRESSL_VERSION_NUMBER) || (OPENSSL_VERSION_NUMBER < 0x1000200fL))
+diff '--color=auto' -Naur netsurf-all-3.11/netsurf/content/fetchers/curl.c aplus-netsurf-all-3.11/netsurf/content/fetchers/curl.c
+--- netsurf-all-3.11/netsurf/content/fetchers/curl.c	2023-12-28 01:57:22.000000000 +0100
++++ aplus-netsurf-all-3.11/netsurf/content/fetchers/curl.c	2026-09-19 18:30:00.000000000 +0200
+@@ -98,7 +98,8 @@
+ /* OpenSSL 1.0.x to 1.1.0 certificate reference counting changed
+  * LibreSSL declares its OpenSSL version as 2.1 but only supports the old way
+  */
+-#if (defined(LIBRESSL_VERSION_NUMBER) || (OPENSSL_VERSION_NUMBER < 0x1010000fL))
++#if ((defined(LIBRESSL_VERSION_NUMBER) && (LIBRESSL_VERSION_NUMBER < 0x3050000fL)) || \
++     (!defined(LIBRESSL_VERSION_NUMBER) && (OPENSSL_VERSION_NUMBER < 0x1010000fL)))
+ static int ns_X509_up_ref(X509 *cert)
+ {
+ 	cert->references++;

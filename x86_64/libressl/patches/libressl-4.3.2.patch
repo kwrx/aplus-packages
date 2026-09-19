@@ -1,0 +1,24 @@
+diff '--color=auto' -Naur libressl-4.3.2/config.sub aplus-libressl-4.3.2/config.sub
+--- libressl-4.3.2/config.sub	2026-05-24 12:26:41.000000000 +0200
++++ aplus-libressl-4.3.2/config.sub	2026-09-19 16:55:29.855446338 +0200
+@@ -1727,7 +1727,7 @@
+ 	# Now accept the basic system types.
+ 	# The portable systems comes first.
+ 	# Each alternative MUST end in a * to match a version number.
+-	gnu* | android* | bsd* | mach* | minix* | genix* | ultrix* | irix* \
++	gnu* | android* | bsd* | mach* | minix* | genix* | ultrix* | irix* | aplus* \
+ 	     | *vms* | esix* | aix* | cnk* | sunos | sunos[34]* \
+ 	     | hpux* | unos* | osf* | luna* | dgux* | auroraux* | solaris* \
+ 	     | sym* |  plan9* | psp* | sim* | xray* | os68k* | v88r* \
+diff '--color=auto' -Naur libressl-4.3.2/crypto/compat/arc4random.h aplus-libressl-4.3.2/crypto/compat/arc4random.h
+--- libressl-4.3.2/crypto/compat/arc4random.h	2025-10-06 04:38:08.000000000 +0200
++++ aplus-libressl-4.3.2/crypto/compat/arc4random.h	2026-09-19 17:09:09.728527633 +0200
+@@ -12,7 +12,7 @@
+ #elif defined(__hpux)
+ #include "arc4random_hpux.h"
+ 
+-#elif defined(__linux__)
++#elif defined(__linux__) || defined(__aplus__)
+ #include "arc4random_linux.h"
+ 
+ #elif defined(__midipix__)
