@@ -1,6 +1,6 @@
 #/bin/sh
 
-packages=$(find . -name ".pkg" -type d | sort | xargs -I {} realpath {}/..)
+packages=$(find . \( -name "package.yml" -o -type d -name ".pkg" \) | xargs -I {} dirname {} | sort | uniq | xargs -I {} realpath {})
 
 echo "[![deploy](https://github.com/kwrx/aplus-packages/actions/workflows/build-and-deploy.yml/badge.svg)](https://github.com/kwrx/aplus-packages/actions/workflows/build-and-deploy.yml)"
 echo "# Packages"
