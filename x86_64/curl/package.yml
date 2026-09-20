@@ -15,7 +15,7 @@ build:
 
   env:
     - DESTDIR: $SYSROOT
-    - CPPFLAGS: -DPATH_MAX=1024 -I$PACKAGE_LIBRESSL/__out/usr/include -I$PACKAGE_ZLIB/__out/usr/include
+    - CPPFLAGS: -DPATH_MAX=4096 -I$PACKAGE_LIBRESSL/__out/usr/include -I$PACKAGE_ZLIB/__out/usr/include
     - CFLAGS: -O2 -march=x86-64 -mtune=generic -fno-PIE -static
     - LDFLAGS: -no-pie -static -L$PACKAGE_LIBRESSL/__out/usr/lib -L$PACKAGE_ZLIB/__out/usr/lib
     - LIBS: -lssl -lcrypto -lz

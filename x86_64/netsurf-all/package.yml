@@ -18,7 +18,7 @@ build:
 
   env:
     - DESTDIR: $SYSROOT
-    - CFLAGS: -O2 -march=x86-64 -mtune=generic -fno-PIE -static -DPATH_MAX=1024 -I$PACKAGE_EXPAT/__out/usr/include -I$PACKAGE_CURL/__out/usr/include -I$PACKAGE_APLUS/__out/usr/include -I$PACKAGE_APLUS/include -I$PACKAGE_LIBRESSL/__out/usr/include -I$PACKAGE_LIBWEBP/__out/usr/include -I$PACKAGE_LIBPNG/__out/usr/include -I$PACKAGE_LIBJPEG_TURBO/__out/usr/include -I$PACKAGE_ZLIB/__out/usr/include
+    - CFLAGS: -O2 -march=x86-64 -mtune=generic -fno-PIE -static -DPATH_MAX=4096 -I$PACKAGE_EXPAT/__out/usr/include -I$PACKAGE_CURL/__out/usr/include -I$PACKAGE_APLUS/__out/usr/include -I$PACKAGE_APLUS/include -I$PACKAGE_LIBRESSL/__out/usr/include -I$PACKAGE_LIBWEBP/__out/usr/include -I$PACKAGE_LIBPNG/__out/usr/include -I$PACKAGE_LIBJPEG_TURBO/__out/usr/include -I$PACKAGE_ZLIB/__out/usr/include
     - LDFLAGS: -no-pie -static -L$PACKAGE_EXPAT/__out/usr/lib -L$PACKAGE_CURL/__out/usr/lib -L$PACKAGE_APLUS/__out/usr/lib -L$PACKAGE_LIBRESSL/__out/usr/lib -L$PACKAGE_LIBWEBP/__out/usr/lib -L$PACKAGE_LIBPNG/__out/usr/lib -L$PACKAGE_LIBJPEG_TURBO/__out/usr/lib -L$PACKAGE_ZLIB/__out/usr/lib 
     - LIBS: -lexpat -lui -lssl -lcrypto -lwebp -lpng -ljpeg -lz
     - PKG_CONFIG_PATH: $PACKAGE_EXPAT/__out/usr/lib/pkgconfig:$PACKAGE_CURL/__out/usr/lib/pkgconfig:$PACKAGE_LIBRESSL/__out/usr/lib/pkgconfig:$PACKAGE_LIBWEBP/__out/usr/lib/pkgconfig:$PACKAGE_LIBPNG/__out/usr/lib/pkgconfig:$PACKAGE_LIBJPEG_TURBO/__out/usr/lib/pkgconfig:$PACKAGE_ZLIB/__out/usr/lib/pkgconfig

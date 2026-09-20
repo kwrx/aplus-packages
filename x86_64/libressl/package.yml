@@ -11,7 +11,7 @@ build:
 
   env:
     - DESTDIR: $SYSROOT
-    - CFLAGS: -O2 -march=x86-64 -mtune=generic -DPATH_MAX=1024
+    - CFLAGS: -O2 -march=x86-64 -mtune=generic -DPATH_MAX=4096
 
   configure:
     - --prefix=/usr
