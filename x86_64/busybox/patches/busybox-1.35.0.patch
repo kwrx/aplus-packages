@@ -867,7 +867,7 @@ diff -uraBN busybox-1.35.0/.config aplus-busybox-1.35.0/.config
 +# CONFIG_FEATURE_FTPGETPUT_LONG_OPTIONS is not set
 +# CONFIG_HOSTNAME is not set
 +# CONFIG_DNSDOMAINNAME is not set
-+CONFIG_HTTPD=y
++# CONFIG_HTTPD is not set
 +# CONFIG_FEATURE_HTTPD_PORT_DEFAULT is not set
 +# CONFIG_FEATURE_HTTPD_RANGES is not set
 +# CONFIG_FEATURE_HTTPD_SETUID is not set
