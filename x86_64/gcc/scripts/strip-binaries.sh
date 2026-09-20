@@ -9,9 +9,13 @@ pushd $PREFIX/bin
 popd
 
 pushd $PREFIX/libexec/gcc/$HOST/$VERSION
-    $HOST-strip cc1 cc1plus collect2 lto1 lto-wrapper                 || exit 1
+    for i in cc1 cc1plus collect2 lto1 lto-wrapper; do
+        if [ -f $i ]; then
+            $HOST-strip $i                                            || exit 1
+        fi
+    done
 popd
 
 pushd $PREFIX/include
-    rm -rf *
+    find . -maxdepth 1 -mindepth 1 ! -name c++ -exec rm -rf {} +      || exit 1
 popd

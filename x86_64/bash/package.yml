@@ -8,6 +8,7 @@ build:
 
   env:
     - CFLAGS: -O2 -march=x86-64 -mtune=generic
+    - CFLAGS_FOR_BUILD: -g -std=gnu17
 
   patches:
     - patches/bash-$VERSION.patch

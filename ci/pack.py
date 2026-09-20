@@ -278,18 +278,22 @@ def build(packages, package):
 
         os.chdir(srcdir)
 
+        if any(not i.startswith('-') and '=' not in i for i in opts):
+            default_target = ''
+        else:
+            default_target = 'install'
 
         if os.path.exists('__build/Makefile'):
 
-            run_command(f'make -C __build install {" ".join(opts)} 1> __build/install.log 2> __build/install.err')
+            run_command(f'make -C __build {default_target} {" ".join(opts)} 1> __build/install.log 2> __build/install.err')
     
         elif os.path.exists('Makefile'):
 
-            run_command(f'make install {" ".join(opts)} 1> __build/install.log 2> __build/install.err')
+            run_command(f'make {default_target} {" ".join(opts)} 1> __build/install.log 2> __build/install.err')
 
         elif os.path.exists('__build/build.ninja'):
 
-            run_command(f'ninja -C {srcdir}/__build install {" ".join(opts)} 1> __build/install.log 2> __build/install.err')
+            run_command(f'ninja -C {srcdir}/__build {default_target} {" ".join(opts)} 1> __build/install.log 2> __build/install.err')
 
         else:
 

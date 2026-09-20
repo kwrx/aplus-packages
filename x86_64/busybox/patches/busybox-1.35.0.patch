@@ -420,7 +420,7 @@ diff -uraBN busybox-1.35.0/.config aplus-busybox-1.35.0/.config
 +# CONFIG_ED is not set
 +# CONFIG_PATCH is not set
 +# CONFIG_SED is not set
-+CONFIG_VI=y
++# CONFIG_VI is not set
 +CONFIG_FEATURE_VI_MAX_LEN=0
 +CONFIG_FEATURE_VI_8BIT=y
 +CONFIG_FEATURE_VI_COLON=y

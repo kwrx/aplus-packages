@@ -25,6 +25,7 @@ mkdir -p $prefix/usr/sbin
 mkdir -p $prefix/usr/share
 mkdir -p $prefix/usr/lib
 mkdir -p $prefix/usr/lib/modules
+mkdir -p $prefix/usr/share/applications
 mkdir -p $prefix/usr/bin
 mkdir -p $prefix/var
 mkdir -p $prefix/var/cache
