@@ -7,12 +7,13 @@ sources:
 dependencies:
   - cairo
   - libwebp
+  - libjpeg-turbo
   - freetype
 
 build:
 
   env:
-    - CFLAGS: -I$PACKAGE_CAIRO/__out/usr/include -I$PACKAGE_WEBP/__out/usr/include -I$PACKAGE_FREETYPE/__out/usr/include/freetype2 -DPATH_MAX=4096
+    - CFLAGS: -I$PACKAGE_CAIRO/__out/usr/include -I$PACKAGE_LIBWEBP/__out/usr/include -I$PACKAGE_FREETYPE/__out/usr/include/freetype2 -I$PACKAGE_LIBJPEG_TURBO/__out/usr/include -DPATH_MAX=4096
 
   preconfigure:
     - ./configure --skip-packages --skip-toolchain --kconfig x86_64
