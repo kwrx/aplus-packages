@@ -46,7 +46,7 @@ export PATH=$(pwd)/sdk/bin:$PATH
 
 echo "### Run build-system"
 
-python3 ci/pack.py -i netsurf-all --verbose
+python3 ci/pack.py --verbose
 
 echo "## Clean up"
 deactivate
