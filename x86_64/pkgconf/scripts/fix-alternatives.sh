@@ -1,3 +1,3 @@
 #!/bin/sh
 
-ln -sf $1/pkgconf $1/pkg-config
+ln -sf pkgconf $1/pkg-config
