@@ -1,3 +1,12 @@
+## 0.3.1 (2026-10-17)
+
+### Fix
+
+- add zlib dependency and update CFLAGS in package.yml
+- update toolchain version to 0.2.0 in prepare-and-build.sh
+- correct symbolic link command in fix-alternatives.sh
+- update build commands to use dynamic default target; create applications directory in pre-install script; enhance strip-binaries script for safer execution
+
 ## 0.3.0 (2026-09-20)
 
 ### Feat
