@@ -1,3 +1,9 @@
+## 0.6.0 (2026-10-18)
+
+### Feat
+
+- add user.make and package.yml for MuPDF configuration and build setup
+
 ## 0.5.0 (2026-10-18)
 
 ### Feat
