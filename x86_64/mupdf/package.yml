@@ -1,0 +1,34 @@
+
+package: mupdf
+version: 1.28.5-source
+sources:
+  - https://casper.mupdf.com/downloads/archive/mupdf-$VERSION.tar.gz
+
+dependencies:
+  - freetype
+  - libjpeg-turbo
+  - libpng
+  - zlib
+
+build:
+
+  env:
+    - DESTDIR: $SYSROOT
+    - CROSS_COMPILE: $HOST-
+    - SYS_FREETYPE_CFLAGS: -I$PACKAGE_FREETYPE/__out/usr/include/freetype2
+    - SYS_FREETYPE_LIBS: -L$PACKAGE_FREETYPE/__out/usr/lib -L$PACKAGE_LIBPNG/__out/usr/lib -L$PACKAGE_ZLIB/__out/usr/lib -lfreetype -lpng -lz
+    - SYS_LIBJPEG_CFLAGS: -I$PACKAGE_LIBJPEG_TURBO/__out/usr/include
+    - SYS_LIBJPEG_LIBS: -L$PACKAGE_LIBJPEG_TURBO/__out/usr/lib -ljpeg
+    - SYS_ZLIB_CFLAGS: -I$PACKAGE_ZLIB/__out/usr/include
+    - SYS_ZLIB_LIBS: -L$PACKAGE_ZLIB/__out/usr/lib -lz
+
+  setup:
+    - cp -f $PKGDIR/config/user.make $SRCDIR/user.make
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - install-libs
+    - install-tools
+    - -j$(nproc)
