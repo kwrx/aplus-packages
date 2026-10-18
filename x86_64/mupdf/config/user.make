@@ -1,4 +1,4 @@
-# MuPDF for aplus: PDF only, static, cross-built with the aplus toolchain.
+# MuPDF for aplus: PDF and images, static, cross-built with the aplus toolchain.
 
 CROSS_COMPILE ?= x86_64-aplus-
 
@@ -11,7 +11,7 @@ AR := $(CROSS_COMPILE)ar
 LD := $(CROSS_COMPILE)ld
 RANLIB := $(CROSS_COMPILE)ranlib
 
-# Every format and optional library except PDF.
+# Every format and optional library except PDF and images.
 mujs := no
 brotli := no
 html := no
@@ -42,6 +42,6 @@ override SYS_LIBJPEG_LIBS := $(SYS_LIBJPEG_LIBS)
 override SYS_ZLIB_CFLAGS := $(SYS_ZLIB_CFLAGS)
 override SYS_ZLIB_LIBS := $(SYS_ZLIB_LIBS)
 
-CFLAGS += -DFZ_ENABLE_CBZ=0 -DFZ_ENABLE_IMG=0
+CFLAGS += -DFZ_ENABLE_CBZ=0
 CFLAGS += -DFZ_ENABLE_ODT_OUTPUT=0 -DFZ_ENABLE_OCR_OUTPUT=0
 CFLAGS += -DFZ_ENABLE_HYPHEN=0
