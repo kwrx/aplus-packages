@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Doom
+Comment=Open source first person shooter game
+Exec=doom -iwad /usr/share/doom/doom1.wad
+Icon=doom
+Terminal=false
+Type=Application
+Categories=Utility;Game;
