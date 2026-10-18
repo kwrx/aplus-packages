@@ -1,3 +1,9 @@
+## 0.4.1 (2026-10-18)
+
+### Fix
+
+- update git source URLs to use HTTPS instead of SSH
+
 ## 0.4.0 (2026-10-18)
 
 ### Feat
