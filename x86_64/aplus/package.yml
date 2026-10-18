@@ -2,7 +2,7 @@
 package: aplus
 version: latest
 sources: 
-  - git@github.com:kwrx/aplus.git
+  - https://github.com/kwrx/aplus.git
 
 dependencies:
   - cairo

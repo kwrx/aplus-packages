@@ -2,7 +2,7 @@
 package: doom
 version: "1.0.0"
 sources: 
-  - git@github.com:kwrx/aplus-doom.git
+  - https://github.com/kwrx/aplus-doom.git
 
 dependencies:
   - aplus

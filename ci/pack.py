@@ -408,7 +408,7 @@ def stage_2(packages):
             if args.verbose:
                 print(f'   + {source}')
 
-            if source.startswith('git@'):
+            if source.endswith('.git'):
                 filename = os.path.join(args.tmpdir, f'{package["package"]}-{package["version"]}')
 
                 if not os.path.exists(filename):
