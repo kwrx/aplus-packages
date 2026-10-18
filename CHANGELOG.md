@@ -1,3 +1,13 @@
+## 0.5.0 (2026-10-18)
+
+### Feat
+
+- add nesemu package with build configuration and dependencies
+
+### Fix
+
+- update CFLAGS to include SRCDIR for nesemu package build
+
 ## 0.4.1 (2026-10-18)
 
 ### Fix
