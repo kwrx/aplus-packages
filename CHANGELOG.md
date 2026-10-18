@@ -1,3 +1,9 @@
+## 0.4.0 (2026-10-18)
+
+### Feat
+
+- add doom package with desktop entry and build configuration
+
 ## 0.3.1 (2026-10-17)
 
 ### Fix
