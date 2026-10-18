@@ -10,20 +10,17 @@ VERSION=$4
 # C Library
 #
 
-mkdir -p $SRCDIR/musl
+rm -rf $SRCDIR/musl                                                                                     || exit 1
+git clone --depth 1 https://github.com/kwrx/aplus-musl $SRCDIR/musl                                     || exit 1
 
-pushd $SRCDIR/musl                                                                                      || exit 1
+mkdir -p $SRCDIR/musl/build
 
-    wget https://github.com/kwrx/aplus-musl/releases/latest/download/$HOST-musl.tar.xz                  || exit 1
-    tar -xf $HOST-musl.tar.xz                                                                           || exit 1
+pushd $SRCDIR/musl/build                                                                                || exit 1
 
-    mkdir -p $SYSROOT/usr
-    mkdir -p $SYSROOT/usr/lib
-    mkdir -p $SYSROOT/usr/include
+    ../configure --prefix=/usr --host=$HOST --disable-shared --enable-static                            || exit 1
 
-    pushd $HOST                                                                                         || exit 1
-        cp -rf . $SYSROOT/usr                                                                           || exit 1
-    popd
+    make -j$(nproc)                                                                                     || exit 1
+    make -j$(nproc) DESTDIR=$SYSROOT install                                                            || exit 1
 
 popd
 
