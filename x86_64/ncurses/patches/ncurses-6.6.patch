@@ -1,0 +1,11 @@
+diff -Naur ncurses-6.6/config.sub aplus-ncurses-6.6/config.sub
+--- ncurses-6.6/config.sub	2025-07-10 04:29:18.000000000 +0200
++++ aplus-ncurses-6.6/config.sub	2026-10-18 23:49:52.439174505 +0200
+@@ -1970,6 +1970,7 @@
+ 	# Now accept the basic system types.
+ 	# Each alternative MUST end in a * to match a version number.
+ 	  abug \
++	| aplus* \
+ 	| aix* \
+ 	| amdhsa* \
+ 	| amigados* \

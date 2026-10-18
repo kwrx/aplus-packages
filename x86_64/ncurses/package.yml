@@ -1,0 +1,24 @@
+
+package: ncurses
+version: "6.6"
+sources: 
+  - https://gnu.mirror.constant.com/ncurses/ncurses-$VERSION.tar.gz
+
+build:
+
+  patches:
+    - patches/ncurses-$VERSION.patch
+
+  configure:
+    - --prefix=$SYSROOT/usr
+    - --host=$HOST
+    - --without-ada
+    - --without-tests
+    - --without-shared
+    - --without-debug
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)
