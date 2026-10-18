@@ -1,0 +1,27 @@
+
+package: nesemu
+version: "1.0.0"
+sources: 
+  - https://github.com/kwrx/aplus-nesemu.git
+
+dependencies:
+  - aplus
+  - cairo
+  - pixman
+  - freetype
+  - libpng
+  - zlib
+
+build:
+
+  env:
+    - DESTDIR: $SYSROOT
+    - CFLAGS: -O2 -fno-PIE -static -march=x86-64 -mtune=generic -I$PACKAGE_CAIRO/__out/usr/include -I$PACKAGE_PIXMAN/__out/usr/include -I$PACKAGE_FREETYPE/__out/usr/include -I$PACKAGE_LIBPNG/__out/usr/include -I$PACKAGE_ZLIB/__out/usr/include -I$PACKAGE_APLUS/include -I$PACKAGE_APLUS/__out/usr/include
+    - LDFLAGS: -L$PACKAGE_CAIRO/__out/usr/lib -L$PACKAGE_PIXMAN/__out/usr/lib -L$PACKAGE_FREETYPE/__out/usr/lib -L$PACKAGE_LIBPNG/__out/usr/lib -L$PACKAGE_ZLIB/__out/usr/lib -L$PACKAGE_APLUS/__out/usr/lib
+    - LIBS: -lui -lcairo -lpixman-1 -lfreetype -lpng -lz -lm
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)
