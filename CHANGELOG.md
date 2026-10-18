@@ -1,3 +1,10 @@
+## 0.6.1 (2026-10-18)
+
+### Fix
+
+- streamline musl library setup in configure-stdcxx.sh
+- add CC variable to build environment in package.yml for doom and nesemu
+
 ## 0.6.0 (2026-10-18)
 
 ### Feat
