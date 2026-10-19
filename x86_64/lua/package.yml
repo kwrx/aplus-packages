@@ -1,0 +1,23 @@
+
+package: lua
+version: 5.5.1
+sources: 
+  - https://www.lua.org/ftp/lua-$VERSION.tar.gz
+
+build:
+
+  make:
+    - -j$(nproc)
+    - CC="$HOST-gcc -std=gnu99"
+    - AR="$HOST-ar rcu"
+    - RANLIB=$HOST-ranlib
+    - PLAT=posix
+    - INSTALL_TOP=$SYSROOT/usr
+
+  install:
+    - -j$(nproc)
+    - CC="$HOST-gcc -std=gnu99"
+    - AR="$HOST-ar rcu"
+    - RANLIB=$HOST-ranlib
+    - PLAT=posix
+    - INSTALL_TOP=$SYSROOT/usr
