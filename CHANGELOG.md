@@ -1,3 +1,10 @@
+## 0.7.1 (2026-10-19)
+
+### Fix
+
+- remove redundant cleanup of sdk and temporary build directory
+- escape characters in build configuration for mesa package
+
 ## 0.7.0 (2026-10-19)
 
 ### Feat
