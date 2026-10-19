@@ -4,11 +4,17 @@ version: "5.1"
 sources: 
   - https://ftp.gnu.org/gnu/bash/bash-$VERSION.tar.gz
 
+dependencies:
+  - ncurses
+  - readline
+
 build:
 
   env:
     - CFLAGS: -O2 -march=x86-64 -mtune=generic
     - CFLAGS_FOR_BUILD: -g -std=gnu17
+    - CPPFLAGS: -I$PACKAGE_NCURSES/__out/usr/include -I$PACKAGE_NCURSES/__out/usr/include/ncursesw -I$PACKAGE_READLINE/__out/usr/include
+    - LDFLAGS: -L$PACKAGE_NCURSES/__out/usr/lib -L$PACKAGE_READLINE/__out/usr/lib
 
   patches:
     - patches/bash-$VERSION.patch
@@ -17,16 +23,34 @@ build:
     - --prefix=$SYSROOT/usr
     - --host=$HOST
     - --enable-static
-    - --enable-minimal-config
+    - --enable-static-link
+    - --enable-alias
+    - --enable-arith-for-command
+    - --enable-bang-history
+    - --enable-brace-expansion
+    - --enable-casemod-attributes
+    - --enable-casemod-expansions
+    - --enable-command-timing
+    - --enable-cond-command
+    - --enable-cond-regexp
+    - --enable-directory-stack
+    - --enable-dparen-arithmetic
+    - --enable-extended-glob
+    - --enable-help-builtin
+    - --enable-history
+    - --enable-job-control
+    - --enable-readline
+    - --enable-select
+    - --enable-threads=posix
     - --disable-nls
-    - --disable-threads
     - --disable-rpath
-    - --disable-readline
-    - --disable-select
-
+    - --with-installed-readline
+    - --with-curses
 
   make:
     - -j$(nproc)
+    - TERMCAP_LIB=-lncursesw
 
   install:
     - -j$(nproc)
+    - TERMCAP_LIB=-lncursesw
