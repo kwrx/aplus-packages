@@ -1,0 +1,11 @@
+diff -Naur readline-8.3/support/config.sub aplus-readline-8.3/support/config.sub
+--- readline-8.3/support/config.sub	2024-12-13 15:06:05.000000000 +0100
++++ aplus-readline-8.3/support/config.sub	2026-10-19 00:10:05.304681782 +0200
+@@ -1965,6 +1965,7 @@
+ 	# Now accept the basic system types.
+ 	# Each alternative MUST end in a * to match a version number.
+ 	  abug \
++	| aplus* \
+ 	| aix* \
+ 	| amdhsa* \
+ 	| amigados* \

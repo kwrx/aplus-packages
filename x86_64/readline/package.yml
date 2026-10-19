@@ -1,0 +1,32 @@
+
+package: readline
+version: "8.3"
+sources: 
+  - https://gnu.mirror.constant.com/readline/readline-$VERSION.tar.gz
+
+dependencies:
+  - ncurses
+
+build:
+
+  env:
+    - CC: $HOST-gcc
+    - CPPFLAGS: -I$PACKAGE_NCURSES/__out/usr/include -I$PACKAGE_NCURSES/__out/usr/include/ncursesw
+    - LDFLAGS: -L$PACKAGE_NCURSES/__out/usr/lib
+
+  patches:
+    - patches/readline-$VERSION.patch
+
+  configure:
+    - --prefix=$SYSROOT/usr
+    - --host=$HOST
+    - --disable-shared
+    - --disable-install-examples
+    - --disable-bracketed-paste-default
+    - --with-curses
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)
