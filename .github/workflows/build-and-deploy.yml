@@ -28,3 +28,4 @@ jobs:
           prerelease: false
           files: |
             ${{github.workspace}}/*.tar.xz
+            ${{github.workspace}}/index
