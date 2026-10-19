@@ -1,3 +1,26 @@
+## 0.7.0 (2026-10-19)
+
+### Feat
+
+- add package configuration and patch for xz 5.8.4
+- add package configuration and patch for SQLite autoconf 3540100
+- add package configuration and patch for nano 9.2
+- add package configuration and patch for GNU Make 4.4
+- add Lua package configuration file
+- add metadata generation and indexing for packages
+- add readline package and patch for aplus compatibility
+- add ncurses package and patch for aplus compatibility
+
+### Fix
+
+- correct order of arguments in tar command for packaging
+- update .gitignore to include /index and ensure /sdk/ is ignored
+- include index file in deployment artifacts
+- update bash package configuration for improved compatibility and features
+- update CONFIG_CLEAR setting in busybox configuration
+- update environment variables and user configurations
+- update MuPDF configuration to support images in user.make
+
 ## 0.6.1 (2026-10-18)
 
 ### Fix
