@@ -1,0 +1,36 @@
+
+package: nano
+version: "9.2"
+sources: 
+  - https://www.nano-editor.org/dist/v9/nano-$VERSION.tar.xz
+
+dependencies:
+  - ncurses
+
+build:
+
+  env:
+    - DESTDIR: $SYSROOT
+    - NCURSES_CFLAGS: -I$PACKAGE_NCURSES/__out/usr/include -I$PACKAGE_NCURSES/__out/usr/include/ncursesw
+    - NCURSES_LIBS: -L$PACKAGE_NCURSES/__out/usr/lib -lncurses
+    - NCURSESW_CFLAGS: -I$PACKAGE_NCURSES/__out/usr/include -I$PACKAGE_NCURSES/__out/usr/include/ncursesw
+    - NCURSESW_LIBS: -L$PACKAGE_NCURSES/__out/usr/lib -lncursesw
+
+  patches:
+    - patches/nano-$VERSION.patch
+
+  configure:
+    - --prefix=/usr
+    - --host=$HOST
+    - --disable-maintainer-mode
+    - --disable-mouse
+    - --disable-nls
+    - --disable-rpath
+    - --disable-libmagic
+    - --enable-utf8
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)

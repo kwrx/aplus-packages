@@ -1,0 +1,12 @@
+diff -Naur nano-9.2/config.sub aplus-nano-9.2/config.sub
+--- nano-9.2/config.sub	2022-01-31 15:43:17.000000000 +0100
++++ aplus-nano-9.2/config.sub	2026-10-19 12:05:10.372604089 +0200
+@@ -1723,7 +1723,7 @@
+ 	# Now accept the basic system types.
+ 	# The portable systems comes first.
+ 	# Each alternative MUST end in a * to match a version number.
+-	gnu* | android* | bsd* | mach* | minix* | genix* | ultrix* | irix* \
++	gnu* | android* | bsd* | mach* | minix* | genix* | ultrix* | irix* | aplus* \
+ 	     | *vms* | esix* | aix* | cnk* | sunos | sunos[34]* \
+ 	     | hpux* | unos* | osf* | luna* | dgux* | auroraux* | solaris* \
+ 	     | sym* |  plan9* | psp* | sim* | xray* | os68k* | v88r* \
