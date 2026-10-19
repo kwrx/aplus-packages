@@ -1,0 +1,11 @@
+diff -Naur sqlite-autoconf-3540100/autosetup/autosetup-config.sub aplus-sqlite-autoconf-3540100/autosetup/autosetup-config.sub
+--- sqlite-autoconf-3540100/autosetup/autosetup-config.sub	2026-10-16 17:19:43.000000000 +0200
++++ aplus-sqlite-autoconf-3540100/autosetup/autosetup-config.sub	2026-10-19 16:57:56.555758540 +0200
+@@ -1965,6 +1965,7 @@
+ 	# Now accept the basic system types.
+ 	# Each alternative MUST end in a * to match a version number.
+ 	  abug \
++    | aplus* \
+ 	| aix* \
+ 	| amdhsa* \
+ 	| amigados* \

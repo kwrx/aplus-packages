@@ -1,0 +1,32 @@
+package: sqlite
+version: "autoconf-3540100"
+sources: 
+  - https://www.sqlite.org/2026/sqlite-$VERSION.tar.gz
+
+dependencies:
+  - ncurses
+  - readline
+
+build:
+
+  env:
+    - DESTDIR: $SYSROOT
+
+  patches:
+    - patches/sqlite-$VERSION.patch
+
+  configure:
+    - --prefix=/usr
+    - --host=$HOST
+    - --disable-shared
+    - --disable-load-extension
+    - --disable-rpath
+    - --static-cli-shell
+    - --with-readline-ldflags="-L$PACKAGE_READLINE/__out/usr/lib -L$PACKAGE_NCURSES/__out/usr/lib -lreadline -lncursesw"
+    - --with-readline-cflags="-I$PACKAGE_READLINE/__out/usr/include"
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)
