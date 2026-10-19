@@ -60,9 +60,6 @@ def resolve(packages, package, s):
     s = s.replace('$PACKAGE', package['package'])
     s = s.replace('$VERSION', package['version'])
 
-    s = s.replace('\'', '\\\'')
-    s = s.replace('"', '\\"')
-
     return s
 
 
@@ -317,8 +314,6 @@ def build(packages, package):
             run_command(f'{cmd} 1> __build/postinstall.log 2> __build/postinstall.err')
             os.chdir(curdir)
 
-
-
     package['status'] = 'done'
 
 
@@ -509,6 +504,52 @@ def stage_5(packages):
 
 def stage_6(packages):
 
+    print('Generating metadata')
+
+    for package in packages:
+
+        if not 'build' in package:
+            continue
+
+        print(f' - Indexing {package["package"]}:{package["version"]}')
+
+        srcdir = prepare(packages, package, False)
+        curdir = os.curdir
+
+        os.chdir(os.path.join(srcdir, '__out'))
+
+        if not os.path.isdir('.pkg'):
+            os.mkdir('.pkg')
+
+        index = []
+        for root, _, files in os.walk('.'):
+            for file in files:
+                sha256 = subprocess.run(f'sha256sum {os.path.join(root, file)}', shell=True, check=True, capture_output=True, text=True).stdout.split()[0]
+                index.append((os.path.join(root, file), sha256))
+
+        with open('.pkg/index', 'w') as f:
+            for file, sha256 in index:
+                match file:
+                    case '.pkg/index':
+                        continue
+                    case '.pkg/version':
+                        continue
+                    case '.pkg/pre-install':
+                        continue
+                    case '.pkg/post-install':
+                        continue
+                    case _:
+                        f.write(f'{file}:{sha256}\n')
+
+        with open('.pkg/version', 'w') as f:
+            f.write(f'{package["version"]}\n')
+
+        os.chdir(curdir)
+
+    return packages
+
+def stage_7(packages):
+
     print('Packaging packages')
 
     for package in packages:
@@ -529,8 +570,29 @@ def stage_6(packages):
             run_command(f'mkdir -p .pkg')
 
         run_command(f'echo {package["version"]} > .pkg/version')
-        run_command(f'tar cJf {args.root}/{package["package"]}.tar.xz * .pkg')
+        run_command(f'tar cJf {args.root}/{package["package"]}.tar.xz .pkg *')
         os.chdir(curdir)
+
+    return packages
+
+def stage_8(packages):
+
+    print('Generating index')
+
+    index = []
+    for package in packages:
+        if not 'build' in package:
+            continue
+
+        sha256 = subprocess.run(f'sha256sum {args.root}/{package["package"]}.tar.xz', shell=True, check=True, capture_output=True, text=True).stdout.split()[0]
+        dependencies = ','.join(package.get('dependencies', []))
+        index.append(f'{package["package"]}:{package["version"]}:{sha256}:{dependencies}')
+
+    with open(f'{args.root}/index', 'w') as f:
+        for item in index:
+            f.write(f'{item}\n')
+
+    return packages
 
 
 def main():
@@ -543,7 +605,6 @@ def main():
     if args.clean:
         return shutil.rmtree(args.tmpdir)
 
-
     packages = []
     packages = stage_1(packages)
     packages = stage_2(packages)
@@ -551,6 +612,8 @@ def main():
     packages = stage_4(packages)
     packages = stage_5(packages)
     packages = stage_6(packages)
+    packages = stage_7(packages)
+    packages = stage_8(packages)
 
 
 if __name__ == '__main__':
