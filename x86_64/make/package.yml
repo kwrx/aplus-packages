@@ -1,0 +1,24 @@
+
+package: make
+version: "4.4"
+sources: 
+  - https://ftp.gnu.org/gnu/make/make-$VERSION.tar.gz
+
+build:
+
+  env:
+    - DESTDIR: $SYSROOT
+
+  patches:
+    - patches/make-$VERSION.patch
+
+  configure:
+    - --prefix=/usr
+    - --host=$HOST
+    - --disable-posix-spawn
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)

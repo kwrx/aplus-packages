@@ -1,0 +1,12 @@
+diff -Naur make-4.4/build-aux/config.sub aplus-make-4.4/build-aux/config.sub
+--- make-4.4/build-aux/config.sub	2022-09-20 09:28:58.000000000 +0200
++++ aplus-make-4.4/build-aux/config.sub	2026-10-19 11:42:57.135618825 +0200
+@@ -1723,7 +1723,7 @@
+ 	# Now accept the basic system types.
+ 	# The portable systems comes first.
+ 	# Each alternative MUST end in a * to match a version number.
+-	gnu* | android* | bsd* | mach* | minix* | genix* | ultrix* | irix* \
++	gnu* | android* | bsd* | mach* | minix* | genix* | ultrix* | irix* | aplus* \
+ 	     | *vms* | esix* | aix* | cnk* | sunos | sunos[34]* \
+ 	     | hpux* | unos* | osf* | luna* | dgux* | auroraux* | solaris* \
+ 	     | sym* |  plan9* | psp* | sim* | xray* | os68k* | v88r* \
