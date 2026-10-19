@@ -1,0 +1,28 @@
+package: xz
+version: 5.8.4
+sources: 
+  - https://github.com/tukaani-project/xz/releases/download/v$VERSION/xz-$VERSION.tar.gz
+
+build:
+
+  env:
+    - DESTDIR: $SYSROOT
+
+  patches:
+    - patches/xz-$VERSION.patch
+
+  configure:
+    - --prefix=/usr
+    - --host=$HOST
+    - --disable-shared
+    - --enable-static
+    - --disable-nls
+    - --disable-rpath
+    - --disable-doc
+    - --disable-sandbox
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)

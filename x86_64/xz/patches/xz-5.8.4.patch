@@ -1,0 +1,11 @@
+diff -Naur xz-5.8.4/build-aux/config.sub aplus-xz-5.8.4/build-aux/config.sub
+--- xz-5.8.4/build-aux/config.sub	2026-09-09 16:34:12.000000000 +0200
++++ aplus-xz-5.8.4/build-aux/config.sub	2026-10-19 17:42:32.639666053 +0200
+@@ -1971,6 +1971,7 @@
+ 	# Now accept the basic system types.
+ 	# Each alternative MUST end in a * to match a version number.
+ 	  abug \
++    | aplus* \
+ 	| aix* \
+ 	| amdhsa* \
+ 	| amigados* \
