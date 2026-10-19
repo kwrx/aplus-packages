@@ -3,7 +3,6 @@
  - `generic` system-base : *0.6*
  - `generic` system-cursors : *0.6*
  - `generic` system-fonts : *0.6*
- - `generic` system-icons : *0.6*
  - `generic` system-images : *0.6*
  - `generic` system-keymaps : *0.6*
  - `x86_64` aplus : *latest*
@@ -13,6 +12,7 @@
  - `x86_64` cairo : *1.18.4*
  - `x86_64` curl : *8.22.0*
  - `x86_64` dash : *0.5.11.5*
+ - `x86_64` doom : *1.0.0*
  - `x86_64` expat : *2.8.4*
  - `x86_64` freetype : *2.12.1*
  - `x86_64` gcc : *12.2.0*
@@ -26,7 +26,11 @@
  - `x86_64` mesa : *22.3.0*
  - `x86_64` mpc : *1.2.1*
  - `x86_64` mpfr : *4.1.0*
+ - `x86_64` mupdf : *1.28.5-source*
+ - `x86_64` ncurses : *6.6*
+ - `x86_64` nesemu : *1.0.0*
  - `x86_64` netsurf-all : *3.11*
  - `x86_64` pixman : *0.40.0*
  - `x86_64` pkgconf : *1.1.0*
+ - `x86_64` readline : *8.3*
  - `x86_64` zlib : *1.3.2*
