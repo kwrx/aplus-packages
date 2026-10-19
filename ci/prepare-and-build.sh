@@ -30,6 +30,12 @@ python -m pip install --upgrade twine
 python -m pip install -r requirements.txt
 
 
+if [ -d sdk ]; then
+    rm -rf sdk
+fi
+if [ -d /tmp/aplus-packages-build ]; then
+    rm -rf /tmp/aplus-packages-build
+fi
 
 echo "### Install toolchain"
 mkdir -p sdk
@@ -51,4 +57,5 @@ python3 ci/pack.py --verbose
 echo "## Clean up"
 deactivate
 rm -rf .venv
-
+rm -rf sdk
+rm -rf /tmp/aplus-packages-build
