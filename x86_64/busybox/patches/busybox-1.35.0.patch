@@ -337,7 +337,7 @@ diff -uraBN busybox-1.35.0/.config aplus-busybox-1.35.0/.config
 +CONFIG_TIMEOUT=y
 +CONFIG_TOUCH=y
 +CONFIG_FEATURE_TOUCH_SUSV3=y
-+# CONFIG_TR is not set
++CONFIG_TR=y
 +# CONFIG_FEATURE_TR_CLASSES is not set
 +# CONFIG_FEATURE_TR_EQUIV is not set
 +CONFIG_TRUE=y
@@ -419,7 +419,7 @@ diff -uraBN busybox-1.35.0/.config aplus-busybox-1.35.0/.config
 +# CONFIG_FEATURE_DIFF_DIR is not set
 +# CONFIG_ED is not set
 +# CONFIG_PATCH is not set
-+# CONFIG_SED is not set
++CONFIG_SED=y
 +# CONFIG_VI is not set
 +CONFIG_FEATURE_VI_MAX_LEN=0
 +CONFIG_FEATURE_VI_8BIT=y
