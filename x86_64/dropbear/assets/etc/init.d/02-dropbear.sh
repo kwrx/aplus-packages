@@ -8,7 +8,7 @@ case "$1" in
         if command -v $EXEC_NAME >/dev/null 2>&1; then
             echo "init.d: Starting $EXEC_DESC..."
             mkdir -p /etc/dropbear
-            $EXEC_NAME -p 22 &
+            $EXEC_NAME -R -p 22 &
         else
             echo "init.d: $EXEC_NAME not found, skipping $EXEC_DESC startup."
         fi
