@@ -7,7 +7,13 @@ import wget
 import yaml
 import shutil
 import ssl
+import urllib.request
+
 ssl._create_default_https_context = ssl._create_unverified_context
+
+opener = urllib.request.build_opener()
+opener.addheaders = [('User-Agent', 'aplus-packages')]
+urllib.request.install_opener(opener)
 
 environ = os.environ.copy()
 
