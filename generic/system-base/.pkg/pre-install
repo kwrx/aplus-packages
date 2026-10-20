@@ -29,6 +29,8 @@ mkdir -p $prefix/usr/share/applications
 mkdir -p $prefix/usr/bin
 mkdir -p $prefix/var
 mkdir -p $prefix/var/cache
+mkdir -p $prefix/var/lib
+mkdir -p $prefix/var/lib/pkg
 
 ln -sf usr/sbin $prefix
 ln -sf usr/bin $prefix
