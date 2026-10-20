@@ -1,3 +1,9 @@
+## 0.8.1 (2026-10-20)
+
+### Fix
+
+- add dependency include subdirectories to cairo CFLAGS
+
 ## 0.8.0 (2026-10-20)
 
 ### Feat
