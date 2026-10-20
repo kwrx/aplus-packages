@@ -1,0 +1,37 @@
+
+package: git
+version: 2.56.0
+sources: 
+  - https://www.kernel.org/pub/software/scm/git/git-$VERSION.tar.xz
+
+dependencies:
+  - curl
+  - expat
+  - libressl
+  - zlib
+
+build:
+
+  env:
+    - DESTDIR: $SYSROOT
+    - APLUS_HOST: $HOST
+    - APLUS_DEPS: $PACKAGE_CURL/__out/usr $PACKAGE_EXPAT/__out/usr $PACKAGE_LIBRESSL/__out/usr $PACKAGE_ZLIB/__out/usr
+
+  setup:
+    - cp -f $PKGDIR/config/config.mak $SRCDIR/config.mak
+
+  make:
+    - -j$(nproc)
+    - uname_S=aplus
+    - uname_O=aplus
+    - uname_M=x86_64
+    - uname_R=0
+    - uname_V=0
+
+  install:
+    - -j$(nproc)
+    - uname_S=aplus
+    - uname_O=aplus
+    - uname_M=x86_64
+    - uname_R=0
+    - uname_V=0
