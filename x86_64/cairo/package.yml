@@ -13,7 +13,7 @@ dependencies:
 build:
 
   env:
-    - CFLAGS: -O2 -march=x86-64 -mtune=generic -fPIE -I$PACKAGE_FREETYPE/__out/usr/include -I$PACKAGE_PIXMAN/__out/usr/include -I$PACKAGE_LIBPNG/__out/usr/include -I$PACKAGE_ZLIB/__out/usr/include
+    - CFLAGS: -O2 -march=x86-64 -mtune=generic -fPIE -I$PACKAGE_FREETYPE/__out/usr/include -I$PACKAGE_FREETYPE/__out/usr/include/freetype2 -I$PACKAGE_PIXMAN/__out/usr/include -I$PACKAGE_PIXMAN/__out/usr/include/pixman-1 -I$PACKAGE_LIBPNG/__out/usr/include -I$PACKAGE_LIBPNG/__out/usr/include/libpng16 -I$PACKAGE_ZLIB/__out/usr/include
     - LDFLAGS: -L$PACKAGE_FREETYPE/__out/usr/lib -L$PACKAGE_PIXMAN/__out/usr/lib -L$PACKAGE_LIBPNG/__out/usr/lib -L$PACKAGE_ZLIB/__out/usr/lib
     - PKG_CONFIG: /usr/bin/pkg-config
     - PKG_CONFIG_PATH: $PACKAGE_FREETYPE/__out/usr/lib/pkgconfig:$PACKAGE_PIXMAN/__out/usr/lib/pkgconfig:$PACKAGE_LIBPNG/__out/usr/lib/pkgconfig:$PACKAGE_ZLIB/__out/usr/lib/pkgconfig
