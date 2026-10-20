@@ -1,10 +1,11 @@
---- libwebp/config.sub	2022-09-11 18:12:51.835738274 +0200
-+++ aplus-libwebp/config.sub	2022-09-11 18:09:46.743771904 +0200
-@@ -1965,6 +1965,7 @@
+--- libwebp-1.2.4/config.sub	2022-08-06 01:55:14.000000000 +0200
++++ aplus-libwebp-1.2.4/config.sub	2026-10-20 16:04:33.992225622 +0200
+@@ -1723,7 +1723,7 @@
  	# Now accept the basic system types.
+ 	# The portable systems comes first.
  	# Each alternative MUST end in a * to match a version number.
- 	  abug \
-+	| aplus* \
- 	| aix* \
- 	| amdhsa* \
- 	| amigados* \
+-	gnu* | android* | bsd* | mach* | minix* | genix* | ultrix* | irix* \
++	gnu* | android* | bsd* | mach* | minix* | genix* | ultrix* | irix* | aplus* \
+ 	     | *vms* | esix* | aix* | cnk* | sunos | sunos[34]* \
+ 	     | hpux* | unos* | osf* | luna* | dgux* | auroraux* | solaris* \
+ 	     | sym* |  plan9* | psp* | sim* | xray* | os68k* | v88r* \
