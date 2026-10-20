@@ -1,3 +1,15 @@
+## 0.8.0 (2026-10-20)
+
+### Feat
+
+- add user-agent header to urllib requests in pack.py
+- add pre-install script and shell configuration files
+- add init script and package configuration for dropbear SSH server
+
+### Fix
+
+- update source URL and remove unnecessary setup step in libwebp package
+
 ## 0.7.1 (2026-10-19)
 
 ### Fix
