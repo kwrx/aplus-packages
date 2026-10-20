@@ -52,7 +52,35 @@ export PATH=$(pwd)/sdk/bin:$PATH
 
 echo "### Run build-system"
 
-python3 ci/pack.py --verbose
+if ! python3 ci/pack.py --verbose; then
+
+    echo "### Build failed, dumping logs"
+
+    for f in /tmp/aplus-packages-build/*/__build/*.err; do
+        if [ -s $f ]; then
+            echo "::group::$f"
+            cat $f
+            echo "::endgroup::"
+        fi
+    done
+
+    last=$(ls -t /tmp/aplus-packages-build/*/__build/*.log 2> /dev/null | head -n 1)
+
+    if [ -n "$last" ]; then
+        echo "### Failed step: ${last%.log}"
+        echo "--- ${last}"
+        tail -n 200 $last
+        echo "--- ${last%.log}.err"
+        tail -n 200 ${last%.log}.err
+    fi
+
+    if [ -f $(dirname "$last")/meson-logs/meson-log.txt ]; then
+        echo "--- $(dirname $last)/meson-logs/meson-log.txt"
+        tail -n 100 $(dirname $last)/meson-logs/meson-log.txt
+    fi
+
+    exit 1
+fi
 
 echo "## Clean up"
 deactivate
