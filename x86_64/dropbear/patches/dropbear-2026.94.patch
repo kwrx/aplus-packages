@@ -1,0 +1,12 @@
+diff -Naur dropbear-2026.94/src/config.sub aplus-dropbear-2026.94/src/config.sub
+--- dropbear-2026.94/src/config.sub	2026-07-23 13:00:00.000000000 +0200
++++ aplus-dropbear-2026.94/src/config.sub	2026-10-19 21:33:05.035999602 +0200
+@@ -1735,7 +1735,7 @@
+ 	# Now accept the basic system types.
+ 	# The portable systems comes first.
+ 	# Each alternative MUST end in a * to match a version number.
+-	gnu* | android* | bsd* | mach* | minix* | genix* | ultrix* | irix* \
++	gnu* | android* | bsd* | mach* | minix* | genix* | ultrix* | irix* | aplus* \
+ 	     | *vms* | esix* | aix* | cnk* | sunos | sunos[34]* \
+ 	     | hpux* | unos* | osf* | luna* | dgux* | auroraux* | solaris* \
+ 	     | sym* |  plan9* | psp* | sim* | xray* | os68k* | v88r* \

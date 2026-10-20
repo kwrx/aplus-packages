@@ -1,0 +1,43 @@
+
+package: dropbear
+version: "2026.94"
+sources: 
+  - https://matt.ucc.asn.au/dropbear/releases/dropbear-$VERSION.tar.bz2
+
+dependencies:
+  - zlib
+
+build:
+
+  patches:
+    - patches/dropbear-$VERSION.patch
+
+  env:
+    - DESTDIR: $SYSROOT
+
+  configure:
+    - --prefix=/usr
+    - --host=$HOST
+    - --enable-static
+    - --enable-bundled-libtom
+    - --disable-pam
+    - --disable-syslog
+    - --disable-lastlog
+    - --disable-utmp
+    - --disable-utmpx
+    - --disable-wtmp
+    - --disable-wtmpx
+    - --disable-loginfunc
+    - --disable-pututline
+    - --disable-pututxline
+    - --with-zlib=$PACKAGE_ZLIB/__out/usr
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)
+
+  postinstall:
+    - mkdir -p $SYSROOT/etc/init.d
+    - install -m 755 $PKGDIR/assets/etc/init.d/02-dropbear.sh $SYSROOT/etc/init.d/02-dropbear.sh
