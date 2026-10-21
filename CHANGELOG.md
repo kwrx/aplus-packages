@@ -1,3 +1,16 @@
+## 0.9.0 (2026-10-22)
+
+### Feat
+
+- add initial configuration and package definition for git
+
+### Fix
+
+- update Busybox configuration to enable additional features and options
+- add aplus target configuration and linker options for GCC
+- enable CONFIG_TR and CONFIG_SED in Busybox configuration
+- add -R option to dropbear startup command
+
 ## 0.8.1 (2026-10-20)
 
 ### Fix
