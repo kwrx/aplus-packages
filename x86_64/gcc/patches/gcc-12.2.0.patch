@@ -158,3 +158,47 @@ diff -Naur gcc-12.2.0/libstdc++-v3/crossconfig.m4 aplus-gcc-12.2.0/libstdc++-v3/
    arm*-*-symbianelf*)
      # This is a freestanding configuration; there is nothing to do here.
      ;;
+diff -Naur gcc-12.2.0/gcc/ggc-common.cc aplus-gcc-12.2.0/gcc/ggc-common.cc
+--- gcc-12.2.0/gcc/ggc-common.cc	2022-08-19 10:09:52.884666363 +0200
++++ aplus-gcc-12.2.0/gcc/ggc-common.cc	2022-12-07 00:08:25.306646832 +0100
+@@ -1272,14 +1272,14 @@
+ void
+ report_heap_memory_use ()
+ {
+-#if defined(HAVE_MALLINFO) || defined(HAVE_MALLINFO2)
+-#ifdef HAVE_MALLINFO2
+-  #define MALLINFO_FN mallinfo2
+-#else
+-  #define MALLINFO_FN mallinfo
+-#endif
+-  if (!quiet_flag)
+-    fprintf (stderr, " {heap " PRsa (0) "}",
+-	     SIZE_AMOUNT (MALLINFO_FN ().arena));
+-#endif
++// #if defined(HAVE_MALLINFO) || defined(HAVE_MALLINFO2)
++// #ifdef HAVE_MALLINFO2
++//   #define MALLINFO_FN mallinfo2
++// #else
++//   #define MALLINFO_FN mallinfo
++// #endif
++//   if (!quiet_flag)
++//     fprintf (stderr, " {heap " PRsa (0) "}",
++// 	     SIZE_AMOUNT (MALLINFO_FN ().arena));
++// #endif
+ }
+diff -Naur gcc-12.2.0/gcc/system.h aplus-gcc-12.2.0/gcc/system.h
+--- gcc-12.2.0/gcc/system.h	2022-08-19 10:09:53.120669384 +0200
++++ aplus-gcc-12.2.0/gcc/system.h	2022-12-07 00:07:44.467836728 +0100
+@@ -745,9 +745,9 @@
+ #endif
+ 
+ #ifdef INCLUDE_MALLOC_H
+-#if defined(HAVE_MALLINFO) || defined(HAVE_MALLINFO2)
+-#include <malloc.h>
+-#endif
++// #if defined(HAVE_MALLINFO) || defined(HAVE_MALLINFO2)
++// #include <malloc.h>
++// #endif
+ #endif
+ 
+ #ifdef INCLUDE_PTHREAD_H
