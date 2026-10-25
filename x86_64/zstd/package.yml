@@ -1,0 +1,35 @@
+package: zstd
+version: 1.5.7
+sources:
+  - https://github.com/facebook/zstd/releases/download/v$VERSION/zstd-$VERSION.tar.gz
+
+build:
+
+  env:
+    - CC: $HOST-gcc
+    - AR: $HOST-ar
+    - RANLIB: $HOST-ranlib
+    - CFLAGS: -O2 -march=x86-64 -mtune=generic
+    - PREFIX: /usr
+    - DESTDIR: $SYSROOT
+    - HAVE_ZLIB: "0"
+    - HAVE_LZMA: "0"
+    - HAVE_LZ4: "0"
+
+  make:
+    - -j$(nproc)
+    - -C lib
+    - libzstd.a-mt
+    - libzstd.pc-mt
+
+  postmake:
+    - make -j$(nproc) -C programs zstd-release
+
+  install:
+    - -C lib
+    - install-static
+    - install-includes
+    - install-pc
+
+  postinstall:
+    - make -C programs install
