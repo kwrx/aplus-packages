@@ -1,0 +1,87 @@
+package: Python
+version: 3.15.1
+sources:
+  - https://www.python.org/ftp/python/$VERSION/Python-$VERSION.tar.xz
+
+dependencies:
+  - bzip2
+  - libffi
+  - libressl
+  - ncurses
+  - readline
+  - sqlite
+  - util-linux
+  - xz
+  - zlib
+  - zstd
+
+build:
+
+  env:
+    - DESTDIR: $SYSROOT
+
+  patches:
+    - patches/Python-$VERSION.patch
+
+  preconfigure:
+    - (mkdir -p __host && cd __host && ../configure --disable-test-modules --with-ensurepip=no && make -j$(nproc))
+
+  configure:
+    - --prefix=/usr
+    - --build=$($SRCDIR/config.guess)
+    - --host=$HOST
+    - --disable-shared
+    - --disable-test-modules
+    - --disable-epoll
+    - --enable-ipv6
+    - --without-static-libpython
+    - --without-mimalloc
+    - --without-system-libmpdec
+    - --with-computed-gotos
+    - --with-ensurepip=no
+    - --with-pkg-config=no
+    - --with-build-python=$SRCDIR/__host/python
+    - --with-openssl=$PACKAGE_LIBRESSL/__out/usr
+    - --with-openssl-rpath=no
+    - MODULE_BUILDTYPE=static
+    - DYNLOADFILE=dynload_stub.o
+    - CFLAGS="-O2 -march=x86-64 -mtune=generic -fno-PIE"
+    - CPPFLAGS="-isystem $(dirname $(command -v $HOST-gcc))/../$HOST/include -Daligned_alloc=memalign"
+    - LDFLAGS="-no-pie -static"
+    - ZLIB_CFLAGS="-I$PACKAGE_ZLIB/__out/usr/include"
+    - ZLIB_LIBS="-L$PACKAGE_ZLIB/__out/usr/lib -lz"
+    - BZIP2_CFLAGS="-I$PACKAGE_BZIP2/__out/usr/include"
+    - BZIP2_LIBS="-L$PACKAGE_BZIP2/__out/usr/lib -lbz2"
+    - LIBLZMA_CFLAGS="-I$PACKAGE_XZ/__out/usr/include"
+    - LIBLZMA_LIBS="-L$PACKAGE_XZ/__out/usr/lib -llzma"
+    - LIBZSTD_CFLAGS="-I$PACKAGE_ZSTD/__out/usr/include"
+    - LIBZSTD_LIBS="-L$PACKAGE_ZSTD/__out/usr/lib -lzstd"
+    - LIBFFI_CFLAGS="-I$PACKAGE_LIBFFI/__out/usr/include"
+    - LIBFFI_LIBS="-L$PACKAGE_LIBFFI/__out/usr/lib -lffi"
+    - LIBUUID_CFLAGS="-I$PACKAGE_UTIL_LINUX/__out/usr/include/uuid"
+    - LIBUUID_LIBS="-L$PACKAGE_UTIL_LINUX/__out/usr/lib -luuid"
+    - LIBSQLITE3_CFLAGS="-I$PACKAGE_SQLITE/__out/usr/include"
+    - LIBSQLITE3_LIBS="-L$PACKAGE_SQLITE/__out/usr/lib -lsqlite3"
+    - LIBREADLINE_CFLAGS="-I$PACKAGE_READLINE/__out/usr/include"
+    - LIBREADLINE_LIBS="-L$PACKAGE_READLINE/__out/usr/lib -L$PACKAGE_NCURSES/__out/usr/lib -lreadline -lncursesw"
+    - CURSES_CFLAGS="-I$PACKAGE_NCURSES/__out/usr/include -I$PACKAGE_NCURSES/__out/usr/include/ncursesw"
+    - CURSES_LIBS="-L$PACKAGE_NCURSES/__out/usr/lib -lncursesw"
+    - PANEL_CFLAGS="-I$PACKAGE_NCURSES/__out/usr/include -I$PACKAGE_NCURSES/__out/usr/include/ncursesw"
+    - PANEL_LIBS="-L$PACKAGE_NCURSES/__out/usr/lib -lpanelw"
+    - ac_cv_file__dev_ptmx=yes
+    - ac_cv_file__dev_ptc=no
+    - ac_cv_func_waitid=no
+    - ac_cv_func_sendfile=no
+    - ac_cv_func_copy_file_range=no
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)
+
+  postinstall:
+    - $HOST-strip $SYSROOT/usr/bin/python$(echo $VERSION | cut -d. -f1,2)
+    - mkdir -p $SYSROOT/usr/share/applications
+    - cp $PKGDIR/assets/python.desktop $SYSROOT/usr/share/applications/python.desktop
+    - cp -r $PKGDIR/assets/icons $SYSROOT/usr/share/

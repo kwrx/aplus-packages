@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Python
+Comment=Python interactive shell
+Exec=python3
+Icon=python
+Terminal=true
+Type=Application
+Categories=Development;

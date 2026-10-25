@@ -1,0 +1,111 @@
+diff -Naur Python-3.15.1/config.sub aplus-Python-3.15.1/config.sub
+--- Python-3.15.1/config.sub	2026-10-21 07:55:12.000000000 +0200
++++ aplus-Python-3.15.1/config.sub	2026-10-24 22:58:53.644890545 +0200
+@@ -1738,7 +1738,7 @@
+ 	# Now accept the basic system types.
+ 	# The portable systems comes first.
+ 	# Each alternative MUST end in a * to match a version number.
+-	gnu* | android* | bsd* | mach* | minix* | genix* | ultrix* | irix* \
++	gnu* | android* | bsd* | mach* | minix* | genix* | ultrix* | irix* | aplus* \
+ 	     | *vms* | esix* | aix* | cnk* | sunos | sunos[34]* \
+ 	     | hpux* | unos* | osf* | luna* | dgux* | auroraux* | solaris* \
+ 	     | sym* |  plan9* | psp* | sim* | xray* | os68k* | v88r* \
+diff -Naur Python-3.15.1/configure aplus-Python-3.15.1/configure
+--- Python-3.15.1/configure	2026-10-21 07:55:12.000000000 +0200
++++ aplus-Python-3.15.1/configure	2026-10-24 23:00:56.852099598 +0200
+@@ -4172,6 +4172,9 @@
+ 	*-*-vxworks*)
+ 	    ac_sys_system=VxWorks
+ 	    ;;
++	*-*-aplus*)
++	    ac_sys_system=aplus
++	    ;;
+ 	*-*-emscripten)
+ 	    ac_sys_system=Emscripten
+ 	    ;;
+@@ -4679,6 +4682,9 @@
+ 	*-*-vxworks*)
+ 		_host_ident=$host_cpu
+ 		;;
++	*-*-aplus*)
++		_host_ident=$host_cpu
++		;;
+ 	*-*-emscripten)
+ 		_host_ident=$(emcc -dumpversion | cut -f1 -d-)-$host_cpu
+ 		;;
+@@ -9879,7 +9885,10 @@
+      ;;
+ esac
+ 
+-if test "$ac_sys_system" = "Linux" -a "$cross_compiling" = no; then
++if test "$ac_sys_system" = "aplus"; then
++    ac_cv_thread_stack_size=${ac_cv_thread_stack_size-1048576}
++fi
++if test "$ac_sys_system" = "Linux" -a "$cross_compiling" = no -o "$ac_sys_system" = "aplus"; then
+     { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for thread stack size" >&5
+ printf %s "checking for thread stack size... " >&6; }
+ if test ${ac_cv_thread_stack_size+y}
+diff -Naur Python-3.15.1/configure.ac aplus-Python-3.15.1/configure.ac
+--- Python-3.15.1/configure.ac	2026-10-21 07:55:12.000000000 +0200
++++ aplus-Python-3.15.1/configure.ac	2026-10-24 23:00:56.848766160 +0200
+@@ -354,6 +354,9 @@
+ 	*-*-vxworks*)
+ 	    ac_sys_system=VxWorks
+ 	    ;;
++	*-*-aplus*)
++	    ac_sys_system=aplus
++	    ;;
+ 	*-*-emscripten)
+ 	    ac_sys_system=Emscripten
+ 	    ;;
+@@ -827,6 +830,9 @@
+ 	*-*-vxworks*)
+ 		_host_ident=$host_cpu
+ 		;;
++	*-*-aplus*)
++		_host_ident=$host_cpu
++		;;
+ 	*-*-emscripten)
+ 		_host_ident=$(emcc -dumpversion | cut -f1 -d-)-$host_cpu
+ 		;;
+@@ -2479,7 +2485,10 @@
+ dnl On Linux, check the thread stack size. musl (ex: Alpine Linux) uses
+ dnl a default thread stack size of 128 kB, whereas the glibc uses 8 MiB.
+ dnl Python needs at least 1 MiB.
+-if test "$ac_sys_system" = "Linux" -a "$cross_compiling" = no; then
++if test "$ac_sys_system" = "aplus"; then
++    ac_cv_thread_stack_size=${ac_cv_thread_stack_size-1048576}
++fi
++if test "$ac_sys_system" = "Linux" -a "$cross_compiling" = no -o "$ac_sys_system" = "aplus"; then
+     AC_CACHE_CHECK([for thread stack size], [ac_cv_thread_stack_size], [
+     cat > conftest.c <<EOF
+ #include <pthread.h>
+diff -Naur Python-3.15.1/Misc/platform_triplet.c aplus-Python-3.15.1/Misc/platform_triplet.c
+--- Python-3.15.1/Misc/platform_triplet.c	2026-10-21 07:55:12.000000000 +0200
++++ aplus-Python-3.15.1/Misc/platform_triplet.c	2026-10-24 22:58:48.381391631 +0200
+@@ -265,6 +265,12 @@
+ #  endif
+ #elif defined(__VXWORKS__)
+ PLATFORM_TRIPLET=vxworks
++#elif defined(__aplus__)
++#  if defined(__x86_64__)
++PLATFORM_TRIPLET=x86_64-aplus
++#  else
++#    error unknown aplus platform
++#  endif
+ #elif defined(__wasm32__)
+ #  if defined(__EMSCRIPTEN__)
+ PLATFORM_TRIPLET=wasm32-emscripten
+diff -Naur Python-3.15.1/Python/ceval.c aplus-Python-3.15.1/Python/ceval.c
+--- Python-3.15.1/Python/ceval.c	2026-10-21 07:55:12.000000000 +0200
++++ aplus-Python-3.15.1/Python/ceval.c	2026-10-24 23:00:56.848766160 +0200
+@@ -166,7 +166,8 @@
+     // non-Android Linux is musl and mustn't rely on pthread_getattr_np.
+ #  if (defined(HAVE_PTHREAD_GETATTR_NP) || defined(_Py_HAVE_PTHREAD_ATTR_GET_NP)) \
+         && !defined(_AIX) && !defined(__NetBSD__) \
+-        && (defined(__GLIBC__) || defined(__ANDROID__) || !defined(__linux__))
++        && (defined(__GLIBC__) || defined(__ANDROID__) || !defined(__linux__)) \
++        && !defined(__aplus__)
+     size_t stack_size, guard_size;
+     void *stack_addr;
+     pthread_attr_t attr;
