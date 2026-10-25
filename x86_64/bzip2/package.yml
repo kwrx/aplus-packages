@@ -1,0 +1,27 @@
+package: bzip2
+version: 1.0.8
+sources:
+  - https://sourceware.org/pub/bzip2/bzip2-$VERSION.tar.gz
+
+build:
+
+  patches:
+    - patches/bzip2-$VERSION.patch
+
+  make:
+    - -j$(nproc)
+    - libbz2.a
+    - bzip2
+    - bzip2recover
+    - CC=$HOST-gcc
+    - AR=$HOST-ar
+    - RANLIB=$HOST-ranlib
+    - CFLAGS="-O2 -march=x86-64 -mtune=generic -Wall -Winline -D_FILE_OFFSET_BITS=64"
+
+  install:
+    - -j$(nproc)
+    - CC=$HOST-gcc
+    - AR=$HOST-ar
+    - RANLIB=$HOST-ranlib
+    - CFLAGS="-O2 -march=x86-64 -mtune=generic -Wall -Winline -D_FILE_OFFSET_BITS=64"
+    - PREFIX=$SYSROOT/usr
