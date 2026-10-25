@@ -1,0 +1,11 @@
+diff -Naur util-linux-2.42.4/config/config.sub aplus-util-linux-2.42.4/config/config.sub
+--- util-linux-2.42.4/config/config.sub	2026-01-16 01:00:00.000000000 +0100
++++ aplus-util-linux-2.42.4/config/config.sub	2026-10-24 22:36:28.992529244 +0200
+@@ -1977,6 +1977,7 @@
+ 	| android* \
+ 	| aof* \
+ 	| aos* \
++	| aplus* \
+ 	| aros* \
+ 	| atheos* \
+ 	| auroraux* \
