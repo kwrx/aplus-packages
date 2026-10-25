@@ -147,15 +147,15 @@ diff -uraBN busybox-1.35.0/.config aplus-busybox-1.35.0/.config
 +CONFIG_GUNZIP=y
 +CONFIG_ZCAT=y
 +CONFIG_FEATURE_GUNZIP_LONG_OPTIONS=y
-+CONFIG_BUNZIP2=y
-+CONFIG_BZCAT=y
-+CONFIG_UNLZMA=y
-+CONFIG_LZCAT=y
-+CONFIG_LZMA=y
++# CONFIG_BUNZIP2 is not set
++# CONFIG_BZCAT is not set
++# CONFIG_UNLZMA is not set
++# CONFIG_LZCAT is not set
++# CONFIG_LZMA is not set
 +# CONFIG_UNXZ is not set
 +# CONFIG_XZCAT is not set
 +# CONFIG_XZ is not set
-+CONFIG_BZIP2=y
++# CONFIG_BZIP2 is not set
 +CONFIG_BZIP2_SMALL=0
 +CONFIG_FEATURE_BZIP2_DECOMPRESS=y
 +# CONFIG_CPIO is not set
