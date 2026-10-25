@@ -6,7 +6,7 @@ EXEC_DESC="SSH server"
 case "$1" in
     start)
         if command -v $EXEC_NAME >/dev/null 2>&1; then
-            echo "init.d: Starting $EXEC_DESC..."
+            echo "init.d: starting $EXEC_DESC..."
             mkdir -p /etc/dropbear
             $EXEC_NAME -R -p 22 &
         else
@@ -14,7 +14,7 @@ case "$1" in
         fi
         ;;
     stop)
-        echo "init.d: Stopping $EXEC_DESC..."
+        echo "init.d: stopping $EXEC_DESC..."
         pkill $EXEC_NAME
         ;;
     restart)
@@ -22,7 +22,7 @@ case "$1" in
         "$0" start
         ;;
     *)
-        echo "Usage: $0 {start|stop|restart}"
+        echo "usage: $0 {start|stop|restart}"
         exit 1
         ;;
 esac
