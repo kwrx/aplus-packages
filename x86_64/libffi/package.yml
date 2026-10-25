@@ -1,0 +1,29 @@
+package: libffi
+version: 3.8.0
+sources:
+  - https://github.com/libffi/libffi/releases/download/v$VERSION/libffi-$VERSION.tar.gz
+
+build:
+
+  patches:
+    - patches/libffi-$VERSION.patch
+
+  env:
+    - DESTDIR: $SYSROOT
+    - CFLAGS: -O2 -march=x86-64 -mtune=generic
+
+  configure:
+    - --prefix=/usr
+    - --host=$HOST
+    - --enable-static
+    - --disable-shared
+    - --disable-docs
+    - --disable-multi-os-directory
+    - --with-sysroot=$SYSROOT
+    - ac_cv_func_memfd_create=no
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)
