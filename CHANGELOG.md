@@ -1,3 +1,22 @@
+## 0.10.0 (2026-10-26)
+
+### Feat
+
+- update system images with new webp files and remove default image
+- add Python package with configuration, desktop entry, icons, and patches for aplus support
+- add zstd package with initial configuration and build instructions
+- add util-linux package with initial configuration and patch for aplus support
+- add libffi package with initial configuration and patches
+- add bzip2 package and patch for improved error handling and installation paths
+
+### Fix
+
+- correct wording in the MOTD for the Free Software Foundation
+- correct device entries in fstab for tmpfs and proc
+- correct casing in echo messages for dropbear init script
+- update Busybox configuration to disable unused compression options
+- add freetype dependency and update build environment variables for font support
+
 ## 0.9.1 (2026-10-22)
 
 ### Fix
