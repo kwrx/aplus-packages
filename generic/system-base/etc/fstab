@@ -1,6 +1,6 @@
 # -- /etc/fstab
 # |   Device   |   Directory   |   Filesystem   |    Flags    |
-      none         /tmp            tmpfs            nodev,nosuid,rw
-      none         /proc           proc             nodev,nosuid,rw
+      tmpfs        /tmp            tmpfs            nodev,nosuid,rw
+      proc         /proc           proc             nodev,nosuid,rw
 
  
