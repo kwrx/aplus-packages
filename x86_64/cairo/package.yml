@@ -13,23 +13,15 @@ dependencies:
 build:
 
   env:
+    - DESTDIR: $SYSROOT
     - CFLAGS: -O2 -march=x86-64 -mtune=generic -fPIE -I$PACKAGE_FREETYPE/__out/usr/include -I$PACKAGE_FREETYPE/__out/usr/include/freetype2 -I$PACKAGE_PIXMAN/__out/usr/include -I$PACKAGE_PIXMAN/__out/usr/include/pixman-1 -I$PACKAGE_LIBPNG/__out/usr/include -I$PACKAGE_LIBPNG/__out/usr/include/libpng16 -I$PACKAGE_ZLIB/__out/usr/include
     - LDFLAGS: -L$PACKAGE_FREETYPE/__out/usr/lib -L$PACKAGE_PIXMAN/__out/usr/lib -L$PACKAGE_LIBPNG/__out/usr/lib -L$PACKAGE_ZLIB/__out/usr/lib
     - PKG_CONFIG: /usr/bin/pkg-config
-    - PKG_CONFIG_PATH: $PACKAGE_FREETYPE/__out/usr/lib/pkgconfig:$PACKAGE_PIXMAN/__out/usr/lib/pkgconfig:$PACKAGE_LIBPNG/__out/usr/lib/pkgconfig:$PACKAGE_ZLIB/__out/usr/lib/pkgconfig
+    - PKG_CONFIG_LIBDIR: $PACKAGE_FREETYPE/__out/usr/lib/pkgconfig:$PACKAGE_PIXMAN/__out/usr/lib/pkgconfig:$PACKAGE_LIBPNG/__out/usr/lib/pkgconfig:$PACKAGE_ZLIB/__out/usr/lib/pkgconfig
 
   configure:
-    - -Dprefix=$SYSROOT/usr
-    - -Dbindir=$SYSROOT/usr/bin
-    - -Ddatadir=$SYSROOT/usr/share
-    - -Dincludedir=$SYSROOT/usr/include
-    - -Dinfodir=$SYSROOT/usr/share/info
-    - -Dlibdir=$SYSROOT/usr/lib
-    - -Dlibexecdir=$SYSROOT/usr/libexec
-    - -Dlocaledir=$SYSROOT/usr/share/locale
-    - -Dlocalstatedir=$SYSROOT/var
-    - -Dmandir=$SYSROOT/usr/share/man
-    - -Dsysconfdir=$SYSROOT/etc
+    - -Dprefix=/usr
+    - -Dlibdir=lib
     - -Dbuildtype=release
     - -Ddefault_library=static
     - -Dstrip=true

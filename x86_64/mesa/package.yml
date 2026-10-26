@@ -15,18 +15,12 @@ build:
   patches:
     - patches/mesa-$VERSION.patch
 
+  env:
+    - DESTDIR: $SYSROOT
+
   configure:
-    - -Dprefix=$SYSROOT/usr
-    - -Dbindir=$SYSROOT/usr/bin
-    - -Ddatadir=$SYSROOT/usr/share
-    - -Dincludedir=$SYSROOT/usr/include
-    - -Dinfodir=$SYSROOT/usr/share/info
-    - -Dlibdir=$SYSROOT/usr/lib
-    - -Dlibexecdir=$SYSROOT/usr/libexec
-    - -Dlocaledir=$SYSROOT/usr/share/locale
-    - -Dlocalstatedir=$SYSROOT/var
-    - -Dmandir=$SYSROOT/usr/share/man
-    - -Dsysconfdir=$SYSROOT/etc
+    - -Dprefix=/usr
+    - -Dlibdir=lib
     - -Dbuildtype=release
     - -Ddefault_library=static
     - -Dstrip=true

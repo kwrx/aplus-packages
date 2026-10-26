@@ -1,8 +1,8 @@
 
 package: libtsm
-version: "3"
-sources: 
-  - https://freedesktop.org/software/kmscon/releases/libtsm-$VERSION.tar.xz
+version: 4.8.0
+sources:
+  - https://github.com/kmscon/libtsm/archive/refs/tags/v$VERSION.tar.gz
 
 build:
 
@@ -11,17 +11,16 @@ build:
 
   env:
     - DESTDIR: $SYSROOT
-    - CFLAGS: -O2 -march=x86-64 -mtune=generic
-    - CPPFLAGS: -O2 -march=x86-64 -mtune=generic
+    - PKG_CONFIG: /usr/bin/pkg-config
+    - PKG_CONFIG_LIBDIR: $SYSROOT/usr/lib/pkgconfig
 
   configure:
-    - --prefix=/usr
-    - --host=$HOST
-    - --enable-static
-    - --enable-shared=no
-    - --enable-debug=no
-    - --without-xkbcommon
-    - --with-sysroot=$SYSROOT
+    - -Dprefix=/usr
+    - -Dlibdir=lib
+    - -Dbuildtype=release
+    - -Ddefault_library=static
+    - -Dtests=false
+    - --cross-file=$PKGDIR/meson/meson-cross-$HOST.txt
 
   make:
     - -j$(nproc)
