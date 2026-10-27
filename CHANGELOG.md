@@ -1,3 +1,13 @@
+## 0.11.0 (2026-10-27)
+
+### Feat
+
+- add custom prompt function to .bash_profile and .bashrc
+
+### Fix
+
+- system fonts licenses and build configurations
+
 ## 0.10.0 (2026-10-26)
 
 ### Feat
