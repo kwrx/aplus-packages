@@ -28,6 +28,8 @@ mkdir -p $prefix/usr/lib/modules
 mkdir -p $prefix/usr/share/applications
 mkdir -p $prefix/usr/bin
 mkdir -p $prefix/var
+mkdir -p $prefix/var/run
+mkdir -p $prefix/var/log
 mkdir -p $prefix/var/cache
 mkdir -p $prefix/var/lib
 mkdir -p $prefix/var/lib/pkg
