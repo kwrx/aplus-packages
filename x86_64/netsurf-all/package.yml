@@ -74,3 +74,4 @@ build:
   postinstall:
     - mkdir -p $SYSROOT/usr/share/applications
     - cp $PKGDIR/assets/netsurf-all.desktop $SYSROOT/usr/share/applications/netsurf-all.desktop
+    - cp -r $PKGDIR/assets/icons $SYSROOT/usr/share/
