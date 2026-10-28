@@ -447,6 +447,16 @@ def stage_3(packages):
             else:
                 run_command(f'tar xf {archive} -C {args.tmpdir}')
 
+        if 'srcdir' in package:
+
+            srcdir = os.path.join(args.tmpdir, resolve(packages, package, package['srcdir']))
+            dstdir = os.path.join(args.tmpdir, f'{package["package"]}-{package["version"]}')
+
+            if os.path.exists(dstdir):
+                shutil.rmtree(dstdir)
+
+            os.rename(srcdir, dstdir)
+
     return packages
 
 
