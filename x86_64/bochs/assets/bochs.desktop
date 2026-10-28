@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Bochs
+Comment=x86 PC emulator
+Exec=bochs
+Icon=bochs
+Terminal=true
+Type=Application
+Categories=Utility;Emulator;

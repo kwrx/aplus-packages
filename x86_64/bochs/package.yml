@@ -1,0 +1,62 @@
+package: bochs
+version: "3.1"
+sources: 
+  - https://downloads.sourceforge.net/project/bochs/bochs/$VERSION/bochs-$VERSION.tar.gz
+srcdir: bochs
+
+dependencies:
+  - aplus
+  - ncurses
+
+build:
+
+  patches:
+    - patches/bochs-$VERSION.patch
+
+  env:
+    - DESTDIR: $SYSROOT
+    - CPPFLAGS: -I$PACKAGE_APLUS/include -I$PACKAGE_APLUS/__out/usr/include -I$PACKAGE_NCURSES/__out/usr/include -I$PACKAGE_NCURSES/__out/usr/include/ncursesw
+    - LDFLAGS: -L$PACKAGE_APLUS/__out/usr/lib -L$PACKAGE_NCURSES/__out/usr/lib
+
+  configure:
+    - --prefix=/usr
+    - --host=$HOST
+    - --enable-static-link
+    - --disable-plugins
+    - --disable-docbook
+    - --disable-readline
+    - --disable-debugger
+    - --enable-x86-64
+    - --enable-smp
+    - --enable-cpu-level=6
+    - --enable-all-optimizations
+    - --enable-pci
+    - --enable-cdrom
+    - --enable-ne2000
+    - --enable-e1000
+    - --without-x
+    - --without-x11
+    - --without-sdl
+    - --without-sdl2
+    - --without-wx
+    - --with-aplus
+    - --with-nogui
+    - --with-term
+    - --with-rfb
+    - ac_cv_header_netpacket_packet_h=no
+    - ac_cv_func_tmpfile64=no
+    - ac_cv_func_fseeko64=no
+    - ac_cv_lib_ncurses_mvaddch=yes
+
+  make:
+    - -j$(nproc)
+    - GUI_LINK_OPTS_TERM=-lncursesw
+
+  install:
+    - -j$(nproc)
+    - GUI_LINK_OPTS_TERM=-lncursesw
+
+  postinstall:
+    - mkdir -p $SYSROOT/usr/share/applications
+    - cp $PKGDIR/assets/bochs.desktop $SYSROOT/usr/share/applications/bochs.desktop
+    - cp -r $PKGDIR/assets/icons $SYSROOT/usr/share/

@@ -1,0 +1,1291 @@
+diff -Naur bochs-3.1/config.h.in aplus-bochs-3.1/config.h.in
+--- bochs-3.1/config.h.in	2026-08-23 07:25:11.000000000 +0200
++++ aplus-bochs-3.1/config.h.in	2026-10-28 19:06:34.533860530 +0100
+@@ -296,6 +296,7 @@
+ #define BX_WITH_AMIGAOS 0
+ #define BX_WITH_SDL 0
+ #define BX_WITH_SDL2 0
++#define BX_WITH_APLUS 0
+ #define BX_WITH_WX 0
+ 
+ // BX_USE_TEXTCONFIG should be set to 1 unless Bochs is compiled
+diff -Naur bochs-3.1/config.sub aplus-bochs-3.1/config.sub
+--- bochs-3.1/config.sub	2026-08-23 07:25:11.000000000 +0200
++++ aplus-bochs-3.1/config.sub	2026-10-28 18:37:12.738743872 +0100
+@@ -1341,7 +1341,7 @@
+ 	# The portable systems comes first.
+ 	# Each alternative MUST end in a * to match a version number.
+ 	# sysv* is not here because it comes later, after sysvr4.
+-	gnu* | bsd* | mach* | minix* | genix* | ultrix* | irix* \
++	gnu* | bsd* | mach* | minix* | genix* | ultrix* | irix* | aplus* \
+ 	     | *vms* | esix* | aix* | cnk* | sunos | sunos[34]*\
+ 	     | hpux* | unos* | osf* | luna* | dgux* | auroraux* | solaris* \
+ 	     | sym* | kopensolaris* | plan9* \
+diff -Naur bochs-3.1/configure aplus-bochs-3.1/configure
+--- bochs-3.1/configure	2026-08-23 07:25:11.000000000 +0200
++++ aplus-bochs-3.1/configure	2026-10-28 19:06:22.176807010 +0100
+@@ -848,6 +848,7 @@
+ GUI_LINK_OPTS_TERM
+ GUI_LINK_OPTS
+ DEVICE_LINK_OPTS
++GUI_LINK_OPTS_APLUS
+ GUI_LINK_OPTS_SDL2
+ GUI_LINK_OPTS_SDL
+ GUI_LINK_OPTS_VNCSRV
+@@ -1113,6 +1114,7 @@
+ with_amigaos
+ with_sdl
+ with_sdl2
++with_aplus
+ with_wx
+ with_all_libs
+ enable_xpm
+@@ -1873,6 +1875,7 @@
+   --with-amigaos                    use AmigaOS (or MorphOS) GUI
+   --with-sdl                        use SDL libraries
+   --with-sdl2                       use SDL2 libraries
++  --with-aplus                      use aplus-wm through libui
+   --with-wx                         use wxWidgets libraries
+   --with-all-libs                   compile all guis that Bochs supports
+ 
+@@ -4062,6 +4065,9 @@
+   *-amigaos* | *-morphos*)
+     DEFAULT_GUI=amigaos               # amigaos or morphos defaults to amigaos gui
+     ;;
++  *-aplus*)
++    DEFAULT_GUI=aplus                 # aplus defaults to aplus-wm
++    ;;
+   *-solaris*)
+     ADD_FLAGS="-D_XOPEN_SOURCE_EXTENDED=1 -D__EXTENSIONS__"      # required for correct function prototypes
+     LIBS="$LIBS -lsocket -lnsl"
+@@ -4093,6 +4099,7 @@
+ 
+ if (test "$with_sdl" != yes) && \
+    (test "$with_sdl2" != yes) && \
++   (test "$with_aplus" != yes) && \
+    (test "$with_x11" != yes) && \
+    (test "$with_win32" != yes) && \
+    (test "$with_nogui" != yes) && \
+@@ -26474,6 +26481,14 @@
+ 
+ 
+ 
++# Check whether --with-aplus was given.
++if test ${with_aplus+y}
++then :
++  withval=$with_aplus;
++fi
++
++
++
+ # Check whether --with-wx was given.
+ if test ${with_wx+y}
+ then :
+@@ -27071,6 +27086,15 @@
+   fi
+ fi
+ 
++if test "$with_aplus" = yes; then
++  display_libs="$display_libs aplus"
++  printf "%s\n" "#define BX_WITH_APLUS 1" >>confdefs.h
++
++  SPECIFIC_GUI_OBJS="$SPECIFIC_GUI_OBJS \$(GUI_OBJS_APLUS)"
++  GUI_LINK_OPTS_APLUS="-lui"
++  GUI_LINK_OPTS="$GUI_LINK_OPTS \$(GUI_LINK_OPTS_APLUS)"
++fi
++
+ if test "$with_nogui" = yes; then
+   display_libs="$display_libs nogui"
+   GUI_DLL_TARGETS="$GUI_DLL_TARGETS bx_nogui_gui.dll"
+diff -Naur bochs-3.1/configure.ac aplus-bochs-3.1/configure.ac
+--- bochs-3.1/configure.ac	2026-08-23 07:25:11.000000000 +0200
++++ aplus-bochs-3.1/configure.ac	2026-10-28 19:06:22.170140135 +0100
+@@ -90,6 +90,9 @@
+   *-amigaos* | *-morphos*)
+     DEFAULT_GUI=amigaos               # amigaos or morphos defaults to amigaos gui
+     ;;
++  *-aplus*)
++    DEFAULT_GUI=aplus                 # aplus defaults to aplus-wm
++    ;;
+   *-solaris*)
+     ADD_FLAGS="-D_XOPEN_SOURCE_EXTENDED=1 -D__EXTENSIONS__"      # required for correct function prototypes
+     LIBS="$LIBS -lsocket -lnsl"
+@@ -120,6 +123,7 @@
+ dnl // make sure the default gui is enabled if no other chosen
+ if (test "$with_sdl" != yes) && \
+    (test "$with_sdl2" != yes) && \
++   (test "$with_aplus" != yes) && \
+    (test "$with_x11" != yes) && \
+    (test "$with_win32" != yes) && \
+    (test "$with_nogui" != yes) && \
+@@ -2454,6 +2458,10 @@
+   [  --with-sdl2                       use SDL2 libraries],
+   )
+ 
++AC_ARG_WITH(aplus,
++  [  --with-aplus                      use aplus-wm through libui],
++  )
++
+ AC_ARG_WITH(wx,
+   [  --with-wx                         use wxWidgets libraries],
+   )
+@@ -2876,6 +2884,14 @@
+   fi
+ fi
+ 
++if test "$with_aplus" = yes; then
++  display_libs="$display_libs aplus"
++  AC_DEFINE(BX_WITH_APLUS, 1)
++  SPECIFIC_GUI_OBJS="$SPECIFIC_GUI_OBJS \$(GUI_OBJS_APLUS)"
++  GUI_LINK_OPTS_APLUS="-lui"
++  GUI_LINK_OPTS="$GUI_LINK_OPTS \$(GUI_LINK_OPTS_APLUS)"
++fi
++
+ if test "$with_nogui" = yes; then
+   display_libs="$display_libs nogui"
+   GUI_DLL_TARGETS="$GUI_DLL_TARGETS bx_nogui_gui.dll"
+@@ -3520,6 +3536,7 @@
+ AC_SUBST(GUI_LINK_OPTS_VNCSRV)
+ AC_SUBST(GUI_LINK_OPTS_SDL)
+ AC_SUBST(GUI_LINK_OPTS_SDL2)
++AC_SUBST(GUI_LINK_OPTS_APLUS)
+ AC_SUBST(DEVICE_LINK_OPTS)
+ AC_SUBST(GUI_LINK_OPTS)
+ AC_SUBST(GUI_LINK_OPTS_TERM)
+diff -Naur bochs-3.1/gui/aplus.cc aplus-bochs-3.1/gui/aplus.cc
+--- bochs-3.1/gui/aplus.cc	1970-01-01 01:00:00.000000000 +0100
++++ aplus-bochs-3.1/gui/aplus.cc	2026-10-28 19:09:15.985581881 +0100
+@@ -0,0 +1,1069 @@
++/////////////////////////////////////////////////////////////////////////
++// $Id$
++/////////////////////////////////////////////////////////////////////////
++//
++//  Copyright (C) 2026  Antonino Natale
++//
++//  This library is free software; you can redistribute it and/or
++//  modify it under the terms of the GNU Lesser General Public
++//  License as published by the Free Software Foundation; either
++//  version 2 of the License, or (at your option) any later version.
++//
++//  This library is distributed in the hope that it will be useful,
++//  but WITHOUT ANY WARRANTY; without even the implied warranty of
++//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++//  Lesser General Public License for more details.
++//
++//  You should have received a copy of the GNU Lesser General Public
++//  License along with this library; if not, write to the Free Software
++//  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301 USA
++
++#define BX_PLUGGABLE
++
++#include "bochs.h"
++#include "param_names.h"
++#include "keymap.h"
++#include "iodev.h"
++#if BX_WITH_APLUS
++
++#include <errno.h>
++#include <string.h>
++#include <time.h>
++
++#include <aplus/input.h>
++#include <aplus/ui.h>
++
++#include "sdl.h"
++
++#define APLUS_MAX_XRES       1920
++#define APLUS_MAX_YRES       1200
++#define APLUS_MAX_BITMAPS    32
++#define APLUS_COMMAND_VKEY   KEY_F7
++
++class bx_aplus_gui_c : public bx_gui_c {
++public:
++  bx_aplus_gui_c();
++  DECLARE_GUI_VIRTUAL_METHODS()
++  DECLARE_GUI_NEW_VIRTUAL_METHODS()
++  virtual void draw_char(Bit8u ch, Bit8u fc, Bit8u bc, Bit16u xc, Bit16u yc,
++                         Bit8u fw, Bit8u fh, Bit8u fx, Bit8u fy,
++                         bool gfxcharw9, Bit8u cs, Bit8u ce, bool curs, bool font2);
++  virtual void statusbar_setitem_specific(int element, bool active, bool w);
++  virtual void get_capabilities(Bit16u *xres, Bit16u *yres, Bit16u *bpp);
++  virtual void set_mouse_mode_absxy(bool mode);
++#if BX_SHOW_IPS
++  virtual void show_ips(Bit32u ips_count);
++#endif
++private:
++  void command_key(Bit16u vkey);
++  void handle_key(Bit16u vkey, bool down);
++  void handle_pointer(int x, int y, Bit8u buttons);
++  void handle_scroll(int dz);
++};
++
++static bx_aplus_gui_c *theGui = NULL;
++IMPLEMENT_GUI_PLUGIN_CODE(aplus)
++
++#define LOG_THIS theGui->
++
++/**
++ * @brief A headerbar bitmap expanded to pixels, placed at xorigin or hidden at -1.
++ */
++struct aplus_bitmap {
++  Bit32u *pixels;
++  unsigned width;
++  unsigned height;
++  int xorigin;
++};
++
++static ui_connection_t *conn = NULL;
++static ui_window_t *win = NULL;
++
++static Bit32u *fb = NULL;
++static unsigned fb_width = 0, fb_height = 0;
++static unsigned res_x = 0, res_y = 0;
++static int headerbar_height = 0;
++static const int statusbar_height = 18;
++
++static int dirty_x0, dirty_y0, dirty_x1, dirty_y1;
++static bool dirty = 0;
++
++static Bit32u aplus_palette[256];
++static Bit32u headerbar_fg, headerbar_bg;
++static Bit32u status_leds[3];
++static Bit32u status_gray_text;
++static unsigned char menufont[256][8];
++
++static aplus_bitmap *bitmaps[APLUS_MAX_BITMAPS];
++static unsigned n_bitmaps = 0;
++static unsigned bitmap_left_xorigin = 0;
++static unsigned bitmap_right_xorigin = 0;
++
++static unsigned statusitem_pos[12] = {
++  0, 170, 220, 270, 320, 370, 420, 470, 520, 570, 620, 670
++};
++static bool statusitem_active[12];
++
++static bool mouse_grab = 0;
++static bool mouse_absxy = 0;
++static int old_mousex = 0, old_mousey = 0;
++static Bit8u old_mousebuttons = 0;
++
++static bool keys_down[KEY_CNT];
++
++#if BX_SHOW_IPS
++static bool ips_update = 0;
++static bool show_info_msg = 0;
++static char ips_text[20];
++static struct timespec ips_last;
++#endif
++
++
++/**
++ * @brief Packs an RGB triple into the window's XRGB32 pixel format.
++ * @param r Red.
++ * @param g Green.
++ * @param b Blue.
++ * @return The pixel.
++ */
++static inline Bit32u aplus_rgb(Bit8u r, Bit8u g, Bit8u b)
++{
++  return ((Bit32u)r << 16) | ((Bit32u)g << 8) | (Bit32u)b;
++}
++
++/**
++ * @brief Grows the dirty box to cover a rectangle of the frame buffer.
++ * @param x Left edge.
++ * @param y Top edge.
++ * @param w Width.
++ * @param h Height.
++ */
++static void aplus_damage(int x, int y, int w, int h)
++{
++  if ((w <= 0) || (h <= 0)) return;
++  if (!dirty) {
++    dirty_x0 = x;
++    dirty_y0 = y;
++    dirty_x1 = x + w;
++    dirty_y1 = y + h;
++    dirty = 1;
++    return;
++  }
++  if (x < dirty_x0) dirty_x0 = x;
++  if (y < dirty_y0) dirty_y0 = y;
++  if (x + w > dirty_x1) dirty_x1 = x + w;
++  if (y + h > dirty_y1) dirty_y1 = y + h;
++}
++
++/**
++ * @brief Copies the dirty box into the window's back buffer and commits it.
++ */
++static void aplus_present(void)
++{
++  if (!dirty || !win || !fb) return;
++  dirty = 0;
++
++  int x0 = dirty_x0 < 0 ? 0 : dirty_x0;
++  int y0 = dirty_y0 < 0 ? 0 : dirty_y0;
++  int x1 = dirty_x1;
++  int y1 = dirty_y1;
++  if (x1 > (int)fb_width) x1 = fb_width;
++  if (y1 > (int)fb_height) y1 = fb_height;
++  if (x1 > ui_window_width(win)) x1 = ui_window_width(win);
++  if (y1 > ui_window_height(win)) y1 = ui_window_height(win);
++  if ((x0 >= x1) || (y0 >= y1)) return;
++
++  Bit8u *dst = (Bit8u *)ui_window_pixels(win);
++  size_t stride = ui_window_stride(win);
++  for (int y = y0; y < y1; y++) {
++    memcpy(dst + (size_t)y * stride + (size_t)x0 * 4, fb + (size_t)y * fb_width + x0, (size_t)(x1 - x0) * 4);
++  }
++  ui_window_damage(win, x0, y0, x1 - x0, y1 - y0);
++  if (ui_window_commit(win) < 0) {
++    BX_ERROR(("ui_window_commit() failed: %s", strerror(errno)));
++  }
++}
++
++/**
++ * @brief Fills a rectangle of the frame buffer with one colour.
++ * @param x Left edge.
++ * @param y Top edge.
++ * @param w Width.
++ * @param h Height.
++ * @param color The pixel to fill with.
++ */
++static void aplus_fill(int x, int y, int w, int h, Bit32u color)
++{
++  for (int j = y; j < y + h; j++) {
++    Bit32u *row = fb + (size_t)j * fb_width + x;
++    for (int i = 0; i < w; i++) {
++      row[i] = color;
++    }
++  }
++  aplus_damage(x, y, w, h);
++}
++
++/**
++ * @brief Copies a headerbar bitmap into the frame buffer.
++ * @param bmp The bitmap.
++ * @param x Left edge in the frame buffer.
++ */
++static void aplus_blit(const aplus_bitmap *bmp, int x)
++{
++  unsigned w = bmp->width;
++  if (x < 0) return;
++  if ((unsigned)x + w > fb_width) w = fb_width - x;
++  for (unsigned j = 0; j < bmp->height; j++) {
++    memcpy(fb + (size_t)j * fb_width + x, bmp->pixels + (size_t)j * bmp->width, w * 4);
++  }
++  aplus_damage(x, 0, w, bmp->height);
++}
++
++/**
++ * @brief Draws one status bar field with its text, lit or greyed.
++ * @param element The field, 0 being the message area.
++ * @param text The text to show.
++ * @param active Whether the field is lit.
++ * @param color The LED colour for a lit field: green, red or yellow.
++ */
++static void aplus_set_status_text(int element, const char *text, bool active, Bit8u color = 0)
++{
++  statusitem_active[element] = active;
++  if (!fb) return;
++
++  int xleft = statusitem_pos[element] + 2;
++  int xsize = statusitem_pos[element + 1] - xleft - 1;
++  int ytop = res_y + headerbar_height + 1;
++  if (xleft + xsize > (int)fb_width) xsize = fb_width - xleft;
++  if (xsize <= 0) return;
++
++  Bit32u fgcolor = active ? headerbar_fg : status_gray_text;
++  Bit32u bgcolor = ((element > 0) && active) ? status_leds[color] : headerbar_bg;
++  aplus_fill(xleft, ytop, xsize, statusbar_height - 2, bgcolor);
++
++  int textlen = strlen(text);
++  if ((element > 0) && (textlen > 6)) textlen = 6;
++  if (textlen * 8 > xsize) textlen = xsize / 8;
++  for (int c = 0; c < textlen; c++) {
++    const unsigned char *glyph = menufont[(unsigned char)text[c]];
++    for (int row = 0; row < 8; row++) {
++      Bit32u *buf = fb + (size_t)(ytop + 4 + row) * fb_width + xleft + c * 8;
++      unsigned char bits = glyph[row];
++      for (int col = 0; col < 8; col++) {
++        if (bits & 0x80) buf[col] = fgcolor;
++        bits <<= 1;
++      }
++    }
++  }
++}
++
++/**
++ * @brief Translates an aplus input key code into a Bochs key.
++ * @param vkey The KEY_* code aplus-wm sent.
++ * @return The BX_KEY_* value, or BX_KEY_UNHANDLED.
++ */
++static Bit32u aplus_vkey_to_bx_key(Bit16u vkey)
++{
++  switch (vkey) {
++    case KEY_ESC:          return BX_KEY_ESC;
++    case KEY_1:            return BX_KEY_1;
++    case KEY_2:            return BX_KEY_2;
++    case KEY_3:            return BX_KEY_3;
++    case KEY_4:            return BX_KEY_4;
++    case KEY_5:            return BX_KEY_5;
++    case KEY_6:            return BX_KEY_6;
++    case KEY_7:            return BX_KEY_7;
++    case KEY_8:            return BX_KEY_8;
++    case KEY_9:            return BX_KEY_9;
++    case KEY_0:            return BX_KEY_0;
++    case KEY_MINUS:        return BX_KEY_MINUS;
++    case KEY_EQUAL:        return BX_KEY_EQUALS;
++    case KEY_BACKSPACE:    return BX_KEY_BACKSPACE;
++    case KEY_TAB:          return BX_KEY_TAB;
++    case KEY_Q:            return BX_KEY_Q;
++    case KEY_W:            return BX_KEY_W;
++    case KEY_E:            return BX_KEY_E;
++    case KEY_R:            return BX_KEY_R;
++    case KEY_T:            return BX_KEY_T;
++    case KEY_Y:            return BX_KEY_Y;
++    case KEY_U:            return BX_KEY_U;
++    case KEY_I:            return BX_KEY_I;
++    case KEY_O:            return BX_KEY_O;
++    case KEY_P:            return BX_KEY_P;
++    case KEY_LEFTBRACE:    return BX_KEY_LEFT_BRACKET;
++    case KEY_RIGHTBRACE:   return BX_KEY_RIGHT_BRACKET;
++    case KEY_ENTER:        return BX_KEY_ENTER;
++    case KEY_LEFTCTRL:     return BX_KEY_CTRL_L;
++    case KEY_A:            return BX_KEY_A;
++    case KEY_S:            return BX_KEY_S;
++    case KEY_D:            return BX_KEY_D;
++    case KEY_F:            return BX_KEY_F;
++    case KEY_G:            return BX_KEY_G;
++    case KEY_H:            return BX_KEY_H;
++    case KEY_J:            return BX_KEY_J;
++    case KEY_K:            return BX_KEY_K;
++    case KEY_L:            return BX_KEY_L;
++    case KEY_SEMICOLON:    return BX_KEY_SEMICOLON;
++    case KEY_APOSTROPHE:   return BX_KEY_SINGLE_QUOTE;
++    case KEY_GRAVE:        return BX_KEY_GRAVE;
++    case KEY_LEFTSHIFT:    return BX_KEY_SHIFT_L;
++    case KEY_BACKSLASH:    return BX_KEY_BACKSLASH;
++    case KEY_Z:            return BX_KEY_Z;
++    case KEY_X:            return BX_KEY_X;
++    case KEY_C:            return BX_KEY_C;
++    case KEY_V:            return BX_KEY_V;
++    case KEY_B:            return BX_KEY_B;
++    case KEY_N:            return BX_KEY_N;
++    case KEY_M:            return BX_KEY_M;
++    case KEY_COMMA:        return BX_KEY_COMMA;
++    case KEY_DOT:          return BX_KEY_PERIOD;
++    case KEY_SLASH:        return BX_KEY_SLASH;
++    case KEY_RIGHTSHIFT:   return BX_KEY_SHIFT_R;
++    case KEY_KPASTERISK:   return BX_KEY_KP_MULTIPLY;
++    case KEY_LEFTALT:      return BX_KEY_ALT_L;
++    case KEY_SPACE:        return BX_KEY_SPACE;
++    case KEY_CAPSLOCK:     return BX_KEY_CAPS_LOCK;
++    case KEY_F1:           return BX_KEY_F1;
++    case KEY_F2:           return BX_KEY_F2;
++    case KEY_F3:           return BX_KEY_F3;
++    case KEY_F4:           return BX_KEY_F4;
++    case KEY_F5:           return BX_KEY_F5;
++    case KEY_F6:           return BX_KEY_F6;
++    case KEY_F7:           return BX_KEY_F7;
++    case KEY_F8:           return BX_KEY_F8;
++    case KEY_F9:           return BX_KEY_F9;
++    case KEY_F10:          return BX_KEY_F10;
++    case KEY_NUMLOCK:      return BX_KEY_NUM_LOCK;
++    case KEY_SCROLLLOCK:   return BX_KEY_SCRL_LOCK;
++    case KEY_KP7:          return BX_KEY_KP_HOME;
++    case KEY_KP8:          return BX_KEY_KP_UP;
++    case KEY_KP9:          return BX_KEY_KP_PAGE_UP;
++    case KEY_KPMINUS:      return BX_KEY_KP_SUBTRACT;
++    case KEY_KP4:          return BX_KEY_KP_LEFT;
++    case KEY_KP5:          return BX_KEY_KP_5;
++    case KEY_KP6:          return BX_KEY_KP_RIGHT;
++    case KEY_KPPLUS:       return BX_KEY_KP_ADD;
++    case KEY_KP1:          return BX_KEY_KP_END;
++    case KEY_KP2:          return BX_KEY_KP_DOWN;
++    case KEY_KP3:          return BX_KEY_KP_PAGE_DOWN;
++    case KEY_KP0:          return BX_KEY_KP_INSERT;
++    case KEY_KPDOT:        return BX_KEY_KP_DELETE;
++    case KEY_102ND:        return BX_KEY_LEFT_BACKSLASH;
++    case KEY_F11:          return BX_KEY_F11;
++    case KEY_F12:          return BX_KEY_F12;
++    case KEY_KPENTER:      return BX_KEY_KP_ENTER;
++    case KEY_RIGHTCTRL:    return BX_KEY_CTRL_R;
++    case KEY_KPSLASH:      return BX_KEY_KP_DIVIDE;
++    case KEY_SYSRQ:        return BX_KEY_PRINT;
++    case KEY_RIGHTALT:     return BX_KEY_ALT_R;
++    case KEY_HOME:         return BX_KEY_HOME;
++    case KEY_UP:           return BX_KEY_UP;
++    case KEY_PAGEUP:       return BX_KEY_PAGE_UP;
++    case KEY_LEFT:         return BX_KEY_LEFT;
++    case KEY_RIGHT:        return BX_KEY_RIGHT;
++    case KEY_END:          return BX_KEY_END;
++    case KEY_DOWN:         return BX_KEY_DOWN;
++    case KEY_PAGEDOWN:     return BX_KEY_PAGE_DOWN;
++    case KEY_INSERT:       return BX_KEY_INSERT;
++    case KEY_DELETE:       return BX_KEY_DELETE;
++    case KEY_PAUSE:        return BX_KEY_PAUSE;
++    case KEY_LEFTMETA:     return BX_KEY_WIN_L;
++    case KEY_RIGHTMETA:    return BX_KEY_WIN_R;
++    case KEY_COMPOSE:      return BX_KEY_MENU;
++    default:
++      BX_DEBUG(("aplus key %u not mapped", (unsigned)vkey));
++      return BX_KEY_UNHANDLED;
++  }
++}
++
++/**
++ * @brief Runs a command mode key: the floppy, copy, paste, log, reset, snapshot, user, config, power and save buttons.
++ * @param vkey The key pressed while command mode was active.
++ */
++void bx_aplus_gui_c::command_key(Bit16u vkey)
++{
++  if (get_modifier_keys() == 0) {
++    switch (vkey) {
++      case KEY_A: floppyA_handler(); break;
++      case KEY_B: floppyB_handler(); break;
++      case KEY_C: copy_handler(); break;
++      case KEY_M: marklog_handler(); break;
++      case KEY_P: paste_handler(); break;
++      case KEY_R: reset_handler(); break;
++      case KEY_S: snapshot_handler(); break;
++      case KEY_U: userbutton_handler(); break;
++    }
++  } else if (get_modifier_keys() == BX_MOD_KEY_SHIFT) {
++    switch (vkey) {
++      case KEY_C: config_handler(); break;
++      case KEY_P: power_handler(); break;
++      case KEY_S: save_restore_handler(); break;
++    }
++  }
++}
++
++/**
++ * @brief Handles a key going down or up: modifiers, mouse toggle, command mode, then the guest keyboard.
++ * @param vkey The KEY_* code.
++ * @param down Whether the key went down.
++ */
++void bx_aplus_gui_c::handle_key(Bit16u vkey, bool down)
++{
++  Bit8u kmodchange = 0;
++  bool repeat = 0;
++
++  if (vkey < KEY_CNT) {
++    repeat = down && keys_down[vkey];
++    keys_down[vkey] = down;
++  }
++
++  if ((vkey == KEY_LEFTSHIFT) || (vkey == KEY_RIGHTSHIFT)) {
++    kmodchange = set_modifier_keys(BX_MOD_KEY_SHIFT, down);
++  } else if ((vkey == KEY_LEFTCTRL) || (vkey == KEY_RIGHTCTRL)) {
++    kmodchange = set_modifier_keys(BX_MOD_KEY_CTRL, down);
++  } else if (vkey == KEY_LEFTALT) {
++    kmodchange = set_modifier_keys(BX_MOD_KEY_ALT, down);
++  } else if ((vkey == KEY_CAPSLOCK) && down) {
++    kmodchange = set_modifier_keys(BX_MOD_KEY_CAPS, 1);
++  }
++
++  bool mouse_toggle = 0;
++  if ((kmodchange & BX_MOD_KEY_CTRL) > 0) {
++    mouse_toggle = mouse_toggle_check(BX_MT_KEY_CTRL, down);
++  } else if ((kmodchange & BX_MOD_KEY_ALT) > 0) {
++    mouse_toggle = mouse_toggle_check(BX_MT_KEY_ALT, down);
++  } else if (vkey == KEY_F10) {
++    mouse_toggle = mouse_toggle_check(BX_MT_KEY_F10, down);
++  } else if (vkey == KEY_F12) {
++    mouse_toggle = mouse_toggle_check(BX_MT_KEY_F12, down);
++  } else if (vkey == KEY_G) {
++    mouse_toggle = mouse_toggle_check(BX_MT_KEY_G, down);
++  }
++  if (down && mouse_toggle) {
++    toggle_mouse_enable();
++    return;
++  }
++
++  if (down) {
++    if (command_mode_active()) {
++      command_key(vkey);
++      if (kmodchange == 0) {
++        set_command_mode(0);
++#if BX_SHOW_IPS
++        show_info_msg = 0;
++#endif
++      }
++      if (vkey != APLUS_COMMAND_VKEY) return;
++    } else if (has_command_mode() && (get_modifier_keys() == 0) && (vkey == APLUS_COMMAND_VKEY)) {
++      set_command_mode(1);
++      aplus_set_status_text(0, "Command mode", 1);
++#if BX_SHOW_IPS
++      show_info_msg = 1;
++#endif
++      return;
++    }
++    if (repeat && gui_opts.nokeyrepeat) return;
++  }
++
++  Bit32u key_event = aplus_vkey_to_bx_key(vkey);
++  if (key_event == BX_KEY_UNHANDLED) return;
++  DEV_kbd_gen_scancode(down ? key_event : (key_event | BX_KEY_RELEASED));
++}
++
++/**
++ * @brief Handles a pointer event: the middle-button toggle, headerbar clicks, then the guest mouse.
++ * @param x Pointer position in the content area.
++ * @param y Pointer position in the content area.
++ * @param buttons UI_BUTTON_* held, which match Bochs's left/right/middle bits.
++ */
++void bx_aplus_gui_c::handle_pointer(int x, int y, Bit8u buttons)
++{
++  Bit8u pressed = buttons & ~old_mousebuttons;
++  Bit8u released = old_mousebuttons & ~buttons;
++  int dx = x - old_mousex;
++  int dy = y - old_mousey;
++
++  old_mousex = x;
++  old_mousey = y;
++  old_mousebuttons = buttons;
++
++  if (pressed & UI_BUTTON_MIDDLE) {
++    if (mouse_toggle_check(BX_MT_MBUTTON, 1)) {
++      toggle_mouse_enable();
++    }
++    return;
++  }
++  if (released & UI_BUTTON_MIDDLE) {
++    mouse_toggle_check(BX_MT_MBUTTON, 0);
++  }
++  if ((pressed & UI_BUTTON_LEFT) && (y < headerbar_height)) {
++    headerbar_click(x);
++    return;
++  }
++  if (!mouse_grab) return;
++
++  if (mouse_absxy) {
++    if ((y >= headerbar_height) && (y < (int)res_y + headerbar_height)) {
++      DEV_mouse_motion(x * 0x7fff / res_x, (y - headerbar_height) * 0x7fff / res_y, 0, buttons, 1);
++    }
++  } else {
++    DEV_mouse_motion(dx, -dy, 0, buttons, 0);
++  }
++}
++
++/**
++ * @brief Handles a wheel step for the guest mouse.
++ * @param dz The step, positive away from the user.
++ */
++void bx_aplus_gui_c::handle_scroll(int dz)
++{
++  if (!mouse_grab) return;
++  if (mouse_absxy) {
++    DEV_mouse_motion(old_mousex * 0x7fff / res_x, (old_mousey - headerbar_height) * 0x7fff / res_y, dz, old_mousebuttons, 1);
++  } else {
++    DEV_mouse_motion(0, 0, dz, old_mousebuttons, 0);
++  }
++}
++
++/**
++ * @brief Forgets every held key once the window loses focus, so none stays down in the guest.
++ */
++static void aplus_release_keys(void)
++{
++  memset(keys_down, 0, sizeof(keys_down));
++  DEV_kbd_release_keys();
++}
++
++
++/**
++ * @brief Connects to aplus-wm and sets up the fixed colours and fonts.
++ */
++bx_aplus_gui_c::bx_aplus_gui_c()
++{
++  put("APLUS");
++  conn = ui_connect(NULL, 5000);
++  if (!conn) {
++    BX_FATAL(("Unable to connect to aplus-wm: %s", strerror(errno)));
++    return;
++  }
++  headerbar_fg = aplus_rgb(BX_HEADERBAR_FG_RED, BX_HEADERBAR_FG_GREEN, BX_HEADERBAR_FG_BLUE);
++  headerbar_bg = aplus_rgb(BX_HEADERBAR_BG_RED, BX_HEADERBAR_BG_GREEN, BX_HEADERBAR_BG_BLUE);
++  status_leds[0] = aplus_rgb(0x00, 0xff, 0x00);
++  status_leds[1] = aplus_rgb(0xff, 0x40, 0x00);
++  status_leds[2] = aplus_rgb(0xff, 0xff, 0x00);
++  status_gray_text = aplus_rgb(0x80, 0x80, 0x80);
++}
++
++/**
++ * @brief Opens the window at 640x480 and parses the aplus display options.
++ * @param argc Number of display options.
++ * @param argv The display options.
++ * @param headerbar_y Height of the headerbar.
++ */
++void bx_aplus_gui_c::specific_init(int argc, char **argv, unsigned headerbar_y)
++{
++  put("APLUS");
++
++  headerbar_height = headerbar_y;
++
++  for (int i = 0; i < 256; i++) {
++    for (int j = 0; j < 16; j++) {
++      vga_charmap[0][i * 32 + j] = sdl_font8x16[i][j];
++      vga_charmap[1][i * 32 + j] = sdl_font8x16[i][j];
++    }
++    for (int j = 0; j < 8; j++) {
++      menufont[i][j] = sdl_font8x8[i][j];
++    }
++  }
++
++  win = ui_window_create(conn, 640, 480 + headerbar_height + statusbar_height, "Bochs");
++  if (!win) {
++    BX_FATAL(("Unable to create the aplus window: %s", strerror(errno)));
++    return;
++  }
++
++  dimension_update(640, 480);
++
++  if (SIM->get_param_bool(BXPN_KBD_USEMAPPING)->get()) {
++    BX_INFO(("keyboard mapping is not supported by the aplus gui, ignoring it"));
++  }
++
++  Bit8u flags = BX_GUI_OPT_NOKEYREPEAT | BX_GUI_OPT_HIDE_IPS | BX_GUI_OPT_CMDMODE;
++  for (int i = 1; i < argc; i++) {
++    if (!parse_common_gui_options(argv[i], flags)) {
++      BX_PANIC(("Unknown aplus option '%s'", argv[i]));
++    }
++  }
++
++#if BX_SHOW_IPS
++  clock_gettime(CLOCK_MONOTONIC, &ips_last);
++#endif
++
++  new_gfx_api = 1;
++  new_text_api = 1;
++}
++
++/**
++ * @brief Draws one text mode character cell, cursor included, from the VGA font.
++ */
++void bx_aplus_gui_c::draw_char(Bit8u ch, Bit8u fc, Bit8u bc, Bit16u xc, Bit16u yc,
++                               Bit8u fw, Bit8u fh, Bit8u fx, Bit8u fy,
++                               bool gfxcharw9, Bit8u cs, Bit8u ce, bool curs, bool font2)
++{
++  Bit32u *buf = fb + (size_t)(headerbar_height + yc) * fb_width + xc;
++  Bit32u fgcolor = aplus_palette[fc];
++  Bit32u bgcolor = aplus_palette[bc];
++  bool dwidth = (guest_fwidth > 9);
++  Bit8u *font_ptr = &vga_charmap[font2 ? 1 : 0][(ch << 5) + fy];
++  Bit8u rows = fh;
++
++  do {
++    Bit16u font_row = *font_ptr++;
++    if (gfxcharw9) {
++      font_row = (font_row << 1) | (font_row & 0x01);
++    } else {
++      font_row <<= 1;
++    }
++    if (fx > 0) {
++      font_row <<= fx;
++    }
++    Bit16u mask = (curs && (fy >= cs) && (fy <= ce)) ? 0x100 : 0x00;
++    Bit8u fontpixels = fw;
++    do {
++      *buf++ = ((font_row & 0x100) == mask) ? bgcolor : fgcolor;
++      if (!dwidth || (fontpixels & 1)) font_row <<= 1;
++    } while (--fontpixels);
++    buf += (fb_width - fw);
++    fy++;
++  } while (--rows);
++
++  aplus_damage(xc, headerbar_height + yc, fw, fh);
++}
++
++/**
++ * @brief Unused: the new text API draws through draw_char().
++ */
++void bx_aplus_gui_c::text_update(Bit8u *old_text, Bit8u *new_text,
++                                 unsigned long cursor_x, unsigned long cursor_y,
++                                 bx_vga_tminfo_t *tm_info)
++{
++}
++
++/**
++ * @brief Draws an 8 bpp tile through the palette.
++ * @param tile The tile's palette indices.
++ * @param x Left edge in guest coordinates.
++ * @param y Top edge in guest coordinates.
++ */
++void bx_aplus_gui_c::graphics_tile_update(Bit8u *tile, unsigned x, unsigned y)
++{
++  if ((x >= res_x) || (y >= res_y)) return;
++
++  unsigned h = y_tilesize;
++  unsigned w = x_tilesize;
++  if (y + h > res_y) h = res_y - y;
++  if (x + w > res_x) w = res_x - x;
++
++  Bit32u *buf = fb + (size_t)(headerbar_height + y) * fb_width + x;
++  for (unsigned j = 0; j < h; j++) {
++    for (unsigned i = 0; i < w; i++) {
++      buf[i] = aplus_palette[tile[i]];
++    }
++    tile += x_tilesize;
++    buf += fb_width;
++  }
++  aplus_damage(x, headerbar_height + y, w, h);
++}
++
++/**
++ * @brief Drains the window's events, refreshes the IPS field once a second and presents what changed.
++ */
++void bx_aplus_gui_c::handle_events(void)
++{
++  ui_event_t ev;
++  int e;
++
++  while ((e = ui_next_event(conn, &ev, 0)) > 0) {
++    switch (ev.type) {
++      case UI_EVENT_CONFIGURE:
++        if (ui_window_apply_configure(win) < 0) {
++          BX_PANIC(("ui_window_apply_configure() failed: %s", strerror(errno)));
++        }
++        aplus_damage(0, 0, fb_width, fb_height);
++        break;
++      case UI_EVENT_FOCUS:
++        if (!ev.focus.focused) aplus_release_keys();
++        break;
++      case UI_EVENT_KEY:
++        handle_key(ev.key.vkey, ev.key.down);
++        break;
++      case UI_EVENT_POINTER:
++        handle_pointer(ev.pointer.x, ev.pointer.y, ev.pointer.buttons);
++        break;
++      case UI_EVENT_SCROLL:
++        handle_scroll(ev.scroll.dy);
++        break;
++      case UI_EVENT_CLOSE:
++        BX_FATAL(("User requested shutdown."));
++        break;
++      default:
++        break;
++    }
++  }
++  if (e < 0) {
++    BX_FATAL(("Lost the connection to aplus-wm: %s", strerror(errno)));
++  }
++
++#if BX_SHOW_IPS
++  struct timespec now;
++  clock_gettime(CLOCK_MONOTONIC, &now);
++  if (now.tv_sec > ips_last.tv_sec) {
++    ips_last = now;
++    bx_show_ips_handler();
++  }
++  if (ips_update && !show_info_msg) {
++    ips_update = 0;
++    aplus_set_status_text(0, ips_text, 1);
++  }
++#endif
++
++  aplus_present();
++}
++
++/**
++ * @brief Presents what was drawn since the last flush.
++ */
++void bx_aplus_gui_c::flush(void)
++{
++  aplus_present();
++}
++
++/**
++ * @brief Blanks the guest area.
++ */
++void bx_aplus_gui_c::clear_screen(void)
++{
++  if (!fb) return;
++  aplus_fill(0, headerbar_height, res_x, res_y, 0);
++  aplus_present();
++}
++
++/**
++ * @brief Stores one palette entry as a pixel.
++ * @return Always 1, so that the guest area is redrawn.
++ */
++bool bx_aplus_gui_c::palette_change(Bit8u index, Bit8u red, Bit8u green, Bit8u blue)
++{
++  aplus_palette[index] = aplus_rgb(red, green, blue);
++  return 1;
++}
++
++/**
++ * @brief Follows a guest mode change: resizes the frame buffer and asks aplus-wm for the matching window size.
++ * @param x Guest width.
++ * @param y Guest height.
++ * @param fheight Text mode font height, 0 in graphics modes.
++ * @param fwidth Text mode font width.
++ * @param bpp Guest colour depth.
++ */
++void bx_aplus_gui_c::dimension_update(unsigned x, unsigned y,
++                                      unsigned fheight, unsigned fwidth, unsigned bpp)
++{
++  if (bpp == 8 || bpp == 15 || bpp == 16 || bpp == 24 || bpp == 32) {
++    guest_bpp = bpp;
++  } else {
++    BX_PANIC(("%d bpp graphics mode not supported", bpp));
++  }
++  guest_textmode = (fheight > 0);
++  guest_fwidth = fwidth;
++  guest_fheight = fheight;
++  guest_xres = x;
++  guest_yres = y;
++
++  if ((x == res_x) && (y == res_y)) return;
++
++  if ((x > APLUS_MAX_XRES) || (y > APLUS_MAX_YRES)) {
++    BX_PANIC(("dimension_update(): resolution of out of display bounds"));
++    return;
++  }
++
++  delete [] fb;
++  res_x = x;
++  res_y = y;
++  fb_width = x;
++  fb_height = y + headerbar_height + statusbar_height;
++  fb = new Bit32u[(size_t)fb_width * fb_height];
++  memset(fb, 0, (size_t)fb_width * fb_height * 4);
++
++  if (ui_window_request_size(win, fb_width, fb_height) < 0) {
++    BX_ERROR(("ui_window_request_size() failed: %s", strerror(errno)));
++  }
++
++  show_headerbar();
++  host_xres = x;
++  host_yres = y;
++  host_bpp = 32;
++}
++
++/**
++ * @brief Expands a 1 bpp bitmap into headerbar colours.
++ * @param bmap The bitmap, LSB first.
++ * @param xdim Width, a multiple of 8.
++ * @param ydim Height.
++ * @return The bitmap's id.
++ */
++unsigned bx_aplus_gui_c::create_bitmap(const unsigned char *bmap, unsigned xdim, unsigned ydim)
++{
++  if (n_bitmaps >= APLUS_MAX_BITMAPS) {
++    BX_PANIC(("too many aplus bitmaps. To fix, increase APLUS_MAX_BITMAPS"));
++    return 0;
++  }
++
++  aplus_bitmap *bmp = new aplus_bitmap;
++  bmp->width = xdim;
++  bmp->height = ydim;
++  bmp->xorigin = -1;
++  bmp->pixels = new Bit32u[xdim * ydim];
++
++  Bit32u *buf = bmp->pixels;
++  for (unsigned j = 0; j < ydim; j++) {
++    for (unsigned i = 0; i < xdim / 8; i++) {
++      unsigned char pixels = *bmap++;
++      for (unsigned k = 0; k < 8; k++) {
++        *buf++ = (pixels & 0x01) ? headerbar_fg : headerbar_bg;
++        pixels >>= 1;
++      }
++    }
++  }
++
++  bitmaps[n_bitmaps] = bmp;
++  return n_bitmaps++;
++}
++
++/**
++ * @brief Places a bitmap on the headerbar, packed from the left or the right.
++ * @param bmap_id The bitmap.
++ * @param alignment BX_GRAVITY_LEFT or BX_GRAVITY_RIGHT.
++ * @param f The handler a click runs.
++ * @return The headerbar entry.
++ */
++unsigned bx_aplus_gui_c::headerbar_bitmap(unsigned bmap_id, unsigned alignment, void (*f)(void))
++{
++  if (bmap_id >= n_bitmaps) return 0;
++
++  if ((bx_headerbar_entries + 1) > BX_MAX_HEADERBAR_ENTRIES)
++    BX_PANIC(("too many headerbar entries, increase BX_MAX_HEADERBAR_ENTRIES"));
++
++  unsigned hb_index = bx_headerbar_entries++;
++  aplus_bitmap *bmp = bitmaps[bmap_id];
++
++  bx_headerbar_entry[hb_index].bmap_id = bmap_id;
++  bx_headerbar_entry[hb_index].xdim = bmp->width;
++  bx_headerbar_entry[hb_index].ydim = bmp->height;
++  bx_headerbar_entry[hb_index].alignment = alignment;
++  bx_headerbar_entry[hb_index].f = f;
++
++  if (alignment == BX_GRAVITY_LEFT) {
++    bmp->xorigin = bitmap_left_xorigin;
++    bitmap_left_xorigin += bmp->width;
++  } else {
++    bitmap_right_xorigin += bmp->width;
++    bmp->xorigin = bitmap_right_xorigin;
++  }
++  bx_headerbar_entry[hb_index].xorigin = bmp->xorigin;
++
++  return hb_index;
++}
++
++/**
++ * @brief Swaps the bitmap of a headerbar entry, as a floppy or mouse button changes state.
++ * @param hbar_id The headerbar entry.
++ * @param bmap_id The new bitmap.
++ */
++void bx_aplus_gui_c::replace_bitmap(unsigned hbar_id, unsigned bmap_id)
++{
++  unsigned old_id = bx_headerbar_entry[hbar_id].bmap_id;
++  int xorigin = bitmaps[old_id]->xorigin;
++
++  bitmaps[old_id]->xorigin = -1;
++  bx_headerbar_entry[hbar_id].bmap_id = bmap_id;
++  bitmaps[bmap_id]->xorigin = xorigin;
++
++  if (!fb || (xorigin == -1)) return;
++  if (bx_headerbar_entry[hbar_id].alignment == BX_GRAVITY_RIGHT) {
++    xorigin = res_x - xorigin;
++  }
++  aplus_blit(bitmaps[bmap_id], xorigin);
++}
++
++/**
++ * @brief Redraws the headerbar and the status bar from scratch.
++ */
++void bx_aplus_gui_c::show_headerbar(void)
++{
++  if (!fb) return;
++
++  aplus_fill(0, 0, res_x, headerbar_height, headerbar_bg);
++  for (unsigned i = bx_headerbar_entries; i-- > 0;) {
++    aplus_bitmap *bmp = bitmaps[bx_headerbar_entry[i].bmap_id];
++    if (bmp->xorigin == -1) continue;
++    int x = bmp->xorigin;
++    if (bx_headerbar_entry[i].alignment == BX_GRAVITY_RIGHT) {
++      x = res_x - x;
++    }
++    aplus_blit(bmp, x);
++  }
++
++  int ytop = res_y + headerbar_height;
++  aplus_fill(0, ytop, res_x, statusbar_height, headerbar_bg);
++  for (unsigned i = 1; i < 12; i++) {
++    if (statusitem_pos[i] >= res_x) break;
++    aplus_fill(statusitem_pos[i], ytop, 1, statusbar_height, headerbar_fg);
++  }
++  for (unsigned i = 0; i < statusitem_count; i++) {
++    aplus_set_status_text(i + 1, statusitem[i].text, statusitem_active[i + 1]);
++  }
++}
++
++/**
++ * @brief No clipboard on aplus-wm yet.
++ * @return 0, so the paste button does nothing.
++ */
++int bx_aplus_gui_c::get_clipboard_text(Bit8u **bytes, Bit32s *nbytes)
++{
++  return 0;
++}
++
++/**
++ * @brief No clipboard on aplus-wm yet.
++ * @return 0, so the copy button does nothing.
++ */
++int bx_aplus_gui_c::set_clipboard_text(char *text_snapshot, Bit32u len)
++{
++  return 0;
++}
++
++/**
++ * @brief Starts or stops feeding pointer motion to the guest; aplus-wm has no pointer grab.
++ * @param val Whether the guest mouse is enabled.
++ */
++void bx_aplus_gui_c::mouse_enabled_changed_specific(bool val)
++{
++  mouse_grab = val;
++}
++
++/**
++ * @brief Frees the bitmaps, the frame buffer and the window.
++ */
++void bx_aplus_gui_c::exit(void)
++{
++  while (n_bitmaps) {
++    n_bitmaps--;
++    delete [] bitmaps[n_bitmaps]->pixels;
++    delete bitmaps[n_bitmaps];
++  }
++  delete [] fb;
++  fb = NULL;
++  if (win) {
++    ui_window_destroy(win);
++    win = NULL;
++  }
++  if (conn) {
++    ui_disconnect(conn);
++    conn = NULL;
++  }
++}
++
++/**
++ * @brief Describes the frame buffer as 32 bpp XRGB for the new graphics API.
++ * @param info Receives the layout.
++ * @return info.
++ */
++bx_svga_tileinfo_t *bx_aplus_gui_c::graphics_tile_info(bx_svga_tileinfo_t *info)
++{
++  info->bpp = 32;
++  info->pitch = fb_width * 4;
++  info->red_shift = 24;
++  info->green_shift = 16;
++  info->blue_shift = 8;
++  info->red_mask = 0x00ff0000;
++  info->green_mask = 0x0000ff00;
++  info->blue_mask = 0x000000ff;
++  info->is_indexed = 0;
++  info->is_little_endian = 1;
++  return info;
++}
++
++/**
++ * @brief Hands the guest a tile of the frame buffer to draw into directly.
++ * @param x0 Left edge in guest coordinates.
++ * @param y0 Top edge in guest coordinates.
++ * @param w Receives the tile width, clipped to the guest area.
++ * @param h Receives the tile height, clipped to the guest area.
++ * @return The tile's first pixel.
++ */
++Bit8u *bx_aplus_gui_c::graphics_tile_get(unsigned x0, unsigned y0, unsigned *w, unsigned *h)
++{
++  *w = (x0 + x_tilesize > res_x) ? res_x - x0 : x_tilesize;
++  *h = (y0 + y_tilesize > res_y) ? res_y - y0 : y_tilesize;
++  return (Bit8u *)(fb + (size_t)(headerbar_height + y0) * fb_width + x0);
++}
++
++/**
++ * @brief Marks a tile the guest drew in place as dirty.
++ */
++void bx_aplus_gui_c::graphics_tile_update_in_place(unsigned x0, unsigned y0, unsigned w, unsigned h)
++{
++  aplus_damage(x0, headerbar_height + y0, w, h);
++}
++
++/**
++ * @brief Redraws a status bar field after its state changed.
++ * @param element The field.
++ * @param active Whether it is lit.
++ * @param w Whether it shows a write, red if it turns itself off, yellow otherwise.
++ */
++void bx_aplus_gui_c::statusbar_setitem_specific(int element, bool active, bool w)
++{
++  Bit8u color = 0;
++  if (w) {
++    color = (statusitem[element].auto_off) ? 1 : 2;
++  }
++  aplus_set_status_text(element + 1, statusitem[element].text, active, color);
++}
++
++/**
++ * @brief Reports the largest mode the guest may set, since aplus-wm does not tell the display size.
++ */
++void bx_aplus_gui_c::get_capabilities(Bit16u *xres, Bit16u *yres, Bit16u *bpp)
++{
++  *xres = APLUS_MAX_XRES;
++  *yres = APLUS_MAX_YRES;
++  *bpp = 32;
++}
++
++/**
++ * @brief Switches the guest mouse between relative and absolute reports.
++ * @param mode Whether a tablet-like device wants absolute coordinates.
++ */
++void bx_aplus_gui_c::set_mouse_mode_absxy(bool mode)
++{
++  mouse_absxy = mode;
++}
++
++#if BX_SHOW_IPS
++/**
++ * @brief Formats the instructions per second for the status bar's message field.
++ * @param ips_count Instructions run in the last second.
++ */
++void bx_aplus_gui_c::show_ips(Bit32u ips_count)
++{
++  if (!gui_opts.hide_ips && !ips_update) {
++    ips_count /= 1000;
++    sprintf(ips_text, "IPS: %u.%3.3uM", ips_count / 1000, ips_count % 1000);
++    ips_update = 1;
++  }
++}
++#endif
++
++#endif /* if BX_WITH_APLUS */
+diff -Naur bochs-3.1/gui/Makefile.in aplus-bochs-3.1/gui/Makefile.in
+--- bochs-3.1/gui/Makefile.in	2026-08-23 07:25:11.000000000 +0200
++++ aplus-bochs-3.1/gui/Makefile.in	2026-10-28 19:06:34.533860530 +0100
+@@ -56,6 +56,7 @@
+ GUI_OBJS_X11  = x.o
+ GUI_OBJS_SDL = sdl.o
+ GUI_OBJS_SDL2 = sdl2.o
++GUI_OBJS_APLUS = aplus.o
+ GUI_OBJS_WIN32 = win32.o
+ GUI_OBJS_MACOS = macintosh.o
+ GUI_OBJS_CARBON = carbon.o
+@@ -78,6 +79,7 @@
+ GUI_LINK_OPTS_X = $(X_LIBS) $(X_PRE_LIBS)
+ GUI_LINK_OPTS_SDL = @GUI_LINK_OPTS_SDL@
+ GUI_LINK_OPTS_SDL2 = @GUI_LINK_OPTS_SDL2@
++GUI_LINK_OPTS_APLUS = @GUI_LINK_OPTS_APLUS@
+ GUI_LINK_OPTS_RFB = @RFB_LIBS@
+ GUI_LINK_OPTS_RFB_VCPP = user32.lib @RFB_LIBS@
+ GUI_LINK_OPTS_VNCSRV = @GUI_LINK_OPTS_VNCSRV@
+@@ -136,6 +138,9 @@
+ libbx_sdl2_gui.la: sdl2.lo
+ 	$(LIBTOOL) --mode=link --tag CXX $(CXX) $(LDFLAGS) -module $< -o $@ -rpath $(PLUGIN_PATH) $(GUI_LINK_OPTS_SDL2)
+ 
++libbx_aplus_gui.la: aplus.lo
++	$(LIBTOOL) --mode=link --tag CXX $(CXX) $(LDFLAGS) -module $< -o $@ -rpath $(PLUGIN_PATH) $(GUI_LINK_OPTS_APLUS)
++
+ libbx_rfb_gui.la: rfb.lo
+ 	$(LIBTOOL) --mode=link --tag CXX $(CXX) $(LDFLAGS) -module $< -o $@ -rpath $(PLUGIN_PATH) $(GUI_LINK_OPTS_RFB)
+ 
+diff -Naur bochs-3.1/Makefile.in aplus-bochs-3.1/Makefile.in
+--- bochs-3.1/Makefile.in	2026-08-23 07:25:11.000000000 +0200
++++ aplus-bochs-3.1/Makefile.in	2026-10-28 19:06:34.533860530 +0100
+@@ -96,6 +96,7 @@
+ GUI_LINK_OPTS_X = $(X_LIBS) $(X_PRE_LIBS)
+ GUI_LINK_OPTS_SDL = @GUI_LINK_OPTS_SDL@
+ GUI_LINK_OPTS_SDL2 = @GUI_LINK_OPTS_SDL2@
++GUI_LINK_OPTS_APLUS = @GUI_LINK_OPTS_APLUS@
+ GUI_LINK_OPTS_RFB = @RFB_LIBS@
+ GUI_LINK_OPTS_VNCSRV = @GUI_LINK_OPTS_VNCSRV@
+ GUI_LINK_OPTS_AMIGAOS =
+diff -Naur bochs-3.1/plugin.cc aplus-bochs-3.1/plugin.cc
+--- bochs-3.1/plugin.cc	2026-08-23 07:25:11.000000000 +0200
++++ aplus-bochs-3.1/plugin.cc	2026-10-28 19:06:34.537193968 +0100
+@@ -1027,6 +1027,9 @@
+ #if BX_WITH_SDL2
+   BUILTIN_GUI_PLUGIN_ENTRY(sdl2),
+ #endif
++#if BX_WITH_APLUS
++  BUILTIN_GUI_PLUGIN_ENTRY(aplus),
++#endif
+ #if BX_WITH_TERM
+   BUILTIN_GUI_PLUGIN_ENTRY(term),
+ #endif
+diff -Naur bochs-3.1/plugin.h aplus-bochs-3.1/plugin.h
+--- bochs-3.1/plugin.h	2026-08-23 07:25:11.000000000 +0200
++++ aplus-bochs-3.1/plugin.h	2026-10-28 19:06:34.537193968 +0100
+@@ -464,6 +464,7 @@
+ PLUGIN_ENTRY_FOR_GUI_MODULE(rfb);
+ PLUGIN_ENTRY_FOR_GUI_MODULE(sdl);
+ PLUGIN_ENTRY_FOR_GUI_MODULE(sdl2);
++PLUGIN_ENTRY_FOR_GUI_MODULE(aplus);
+ PLUGIN_ENTRY_FOR_GUI_MODULE(term);
+ PLUGIN_ENTRY_FOR_GUI_MODULE(vncsrv);
+ PLUGIN_ENTRY_FOR_GUI_MODULE(win32);
