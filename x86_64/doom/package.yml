@@ -30,3 +30,4 @@ build:
   postinstall:
     - mkdir -p $SYSROOT/usr/share/applications
     - cp $PKGDIR/assets/doom.desktop $SYSROOT/usr/share/applications/doom.desktop
+    - cp -r $PKGDIR/assets/icons $SYSROOT/usr/share/
