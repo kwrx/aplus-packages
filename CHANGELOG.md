@@ -1,3 +1,9 @@
+## 0.12.0 (2026-10-28)
+
+### Feat
+
+- add new image 07.webp to system images
+
 ## 0.11.0 (2026-10-27)
 
 ### Feat
