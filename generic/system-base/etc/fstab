@@ -3,3 +3,4 @@
       tmpfs        /tmp            tmpfs            nodev,nosuid,rw
       tmpfs        /var/run        tmpfs            nodev,nosuid,rw
       proc         /proc           proc             nodev,nosuid,rw
+      sys          /sys            sys              nodev,nosuid,rw
