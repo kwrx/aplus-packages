@@ -1,3 +1,15 @@
+## 0.13.0 (2026-11-04)
+
+### Feat
+
+- add sys mount entry to fstab and update BusyBox configuration for FBSET and device support
+- add missing directories and update fstab for var/run
+- update BusyBox configuration for HTTPD and related features
+- add NetSurf icons and update desktop entry for application integration
+- add new doom icons and update postinstall script
+- add bochs package
+- handle source directory renaming during package staging
+
 ## 0.12.0 (2026-10-28)
 
 ### Feat
