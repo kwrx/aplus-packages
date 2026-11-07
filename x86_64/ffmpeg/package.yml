@@ -1,0 +1,44 @@
+package: ffmpeg
+version: 9.0.2
+sources:
+  - https://github.com/FFmpeg/FFmpeg/archive/refs/tags/n$VERSION.tar.gz
+srcdir: FFmpeg-n$VERSION
+
+dependencies:
+  - bzip2
+  - xz
+  - zlib
+
+build:
+
+  patches:
+    - patches/ffmpeg-$VERSION.patch
+
+  env:
+    - DESTDIR: $SYSROOT
+
+  configure:
+    - --prefix=/usr
+    - --enable-cross-compile
+    - --cross-prefix=$HOST-
+    - --arch=x86_64
+    - --target-os=aplus
+    - --pkg-config=false
+    - --enable-static
+    - --disable-shared
+    - --disable-debug
+    - --disable-doc
+    - --disable-ffplay
+    - --disable-autodetect
+    - --enable-pthreads
+    - --enable-zlib
+    - --enable-bzlib
+    - --enable-lzma
+    - --extra-cflags="-O2 -march=x86-64 -mtune=generic -fno-PIE -I$PACKAGE_ZLIB/__out/usr/include -I$PACKAGE_BZIP2/__out/usr/include -I$PACKAGE_XZ/__out/usr/include"
+    - --extra-ldflags="-no-pie -static -Wl,-z,stack-size=2097152 -L$PACKAGE_ZLIB/__out/usr/lib -L$PACKAGE_BZIP2/__out/usr/lib -L$PACKAGE_XZ/__out/usr/lib"
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)

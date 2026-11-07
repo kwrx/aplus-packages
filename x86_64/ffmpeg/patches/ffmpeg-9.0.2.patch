@@ -1,0 +1,12 @@
+--- ffmpeg-9.0.2/configure	2026-08-04 00:14:47.000000000 +0200
++++ aplus-ffmpeg-9.0.2/configure	2026-11-07 11:13:31.996457583 +0100
+@@ -6325,6 +6325,9 @@
+         enable section_data_rel_ro
+         enabled_any arm aarch64 && enable_weak linux_perf
+         ;;
++    aplus)
++        enable section_data_rel_ro
++        ;;
+     irix*)
+         target_os=irix
+         ranlib="echo ignoring ranlib"
