@@ -2,34 +2,17 @@
 
 prefix=$1
 
+if ! command -v fc-scan > /dev/null; then
+    echo "fc-scan not found, $prefix/etc/fonts/fonts.conf left as it is"
+    exit 0
+fi
 
-echo -n "" > $prefix/etc/fonts/fonts.conf
+mkdir -p "$prefix/etc/fonts"
 
-for line in $(find $prefix/usr/share/fonts/* -type f); do
+find "$prefix/usr/share/fonts" -type f \( -iname '*.ttf' -o -iname '*.otf' \) -print0 | sort -z | while IFS= read -r -d '' font; do
+    fc-scan --format "${font#$prefix}:%{family[0]}:%{style[0]}:%{spacing:-0}\n" "$font"
+done > "$prefix/etc/fonts/fonts.conf.new"
 
-    family=$(fc-scan $line | grep "family:" | cut -d: -f2 | cut -d\( -f1 | sed 's/\"//g' | sed 's/^ //g')
-    slant=$(fc-scan $line | grep "slant:" | cut -d: -f2 | sed 's/ //g')
-    weight=$(fc-scan $line | grep "weight:" | cut -d: -f2 | sed 's/ //g')
+mv "$prefix/etc/fonts/fonts.conf.new" "$prefix/etc/fonts/fonts.conf"
 
-    if [ "$slant" == "100" ]; then
-        slant="Italic"
-    else
-        slant="Regular"
-    fi
-
-    if [ "$weight" == "200" ]; then
-        weight="Bold"
-    elif [ "$weight" == "180" ]; then
-        weight="Medium"
-    elif [ "$weight" == "80" ]; then
-        weight="Regular"
-    else
-        weight="Light"
-    fi
-
-    echo "${line#$prefix}:$family:$slant:$weight" >> $prefix/etc/fonts/fonts.conf
-    echo "Found '$(fc-scan $line | grep "fullname: " | cut -d '"' -f 2)'"
-
-done
-
-
+echo "Found $(wc -l < "$prefix/etc/fonts/fonts.conf") fonts"
