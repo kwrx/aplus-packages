@@ -1,0 +1,20 @@
+
+package: tzdata
+version: 2026f
+srcdir: tz-$VERSION
+sources:
+  - https://github.com/eggert/tz/archive/refs/tags/$VERSION.tar.gz
+
+build:
+
+  make:
+    - -j$(nproc)
+    - VERSION=$VERSION
+    - cc=gcc
+    - zic
+    - tzdata.zi
+
+  postmake:
+    - mkdir -p $SYSROOT/usr/share/zoneinfo
+    - ./zic -b slim -d $SYSROOT/usr/share/zoneinfo tzdata.zi
+    - cp -f iso3166.tab zone.tab zone1970.tab zonenow.tab tzdata.zi leap-seconds.list $SYSROOT/usr/share/zoneinfo/
