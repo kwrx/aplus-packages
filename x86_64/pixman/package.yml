@@ -1,37 +1,43 @@
 
 package: pixman
-version: 0.40.0
+version: 0.46.4
 sources: 
-  - https://www.cairographics.org/releases/pixman-$VERSION.tar.gz
-
-dependencies:
-  - libpng
+  - https://www.cairographics.org/releases/pixman-$VERSION.tar.xz
 
 build:
-
-  patches:
-    - patches/pixman-$VERSION.patch
 
   env:
     - DESTDIR: $SYSROOT
     - CFLAGS: -O2 -march=x86-64 -mtune=generic
-    - CXXFLAGS: -O2 -march=x86-64 -mtune=generic
-    - CPPFLAGS: -I$PACKAGE_LIBPNG/__out/usr/include
-    - LDFLAGS: -L$PACKAGE_LIBPNG/__out/usr/lib
-    - LIBS: -lpng
+    - PKG_CONFIG: /usr/bin/pkg-config
+    - PKG_CONFIG_LIBDIR: $SYSROOT/usr/lib/pkgconfig
 
   configure:
-    - --prefix=/usr
-    - --host=$HOST
-    - --enable-static
-    - --enable-mmx
-    - --enable-sse2
-    - --enable-ssse3
-    - --enable-shared=no
-    - --enable-gtk=no
-    - --enable-gnuplot=no
-    - --enable-timers=no
-    - --with-sysroot=$SYSROOT
+    - -Dprefix=/usr
+    - -Dlibdir=lib
+    - -Dbuildtype=release
+    - -Ddefault_library=static
+    - -Dstrip=true
+    - -Dmmx=enabled
+    - -Dsse2=enabled
+    - -Dssse3=enabled
+    - -Dgnu-inline-asm=enabled
+    - -Dtls=enabled
+    - -Dloongson-mmi=disabled
+    - -Dvmx=disabled
+    - -Darm-simd=disabled
+    - -Dneon=disabled
+    - -Da64-neon=disabled
+    - -Dmips-dspr2=disabled
+    - -Drvv=disabled
+    - -Dopenmp=disabled
+    - -Dtimers=false
+    - -Dgnuplot=false
+    - -Dgtk=disabled
+    - -Dlibpng=disabled
+    - -Dtests=disabled
+    - -Ddemos=disabled
+    - --cross-file=$PKGDIR/meson/meson-cross-$HOST.txt
 
   make:
     - -j$(nproc)

@@ -30,7 +30,7 @@
  - `x86_64` ncurses : *6.6*
  - `x86_64` nesemu : *1.0.0*
  - `x86_64` netsurf-all : *3.11*
- - `x86_64` pixman : *0.40.0*
+ - `x86_64` pixman : *0.46.4*
  - `x86_64` pkgconf : *1.1.0*
  - `x86_64` readline : *8.3*
  - `x86_64` tzdata : *2026f*
