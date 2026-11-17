@@ -1,0 +1,25 @@
+package: libghostty-vt
+version: 1.0.1
+sources:
+  - https://release.files.ghostty.org/libghostty-vt/$VERSION/libghostty-vt-$VERSION.tar.gz
+  - https://release.files.ghostty.org/libghostty-vt/$VERSION/libghostty-vt-$VERSION-deps.tar.gz
+
+build:
+
+  env:
+    - DESTDIR: $SYSROOT
+    - ZIG_GLOBAL_CACHE_DIR: $BUILDDIR/zig-cache
+
+  zig:
+    - --prefix /usr
+    - --prefix-lib-dir lib
+    - --system $TMP/libghostty-vt-$VERSION-deps
+    - -Dtarget=x86_64-linux-musl
+    - -Dcpu=baseline
+    - -Doptimize=ReleaseFast
+    - -Dstrip=true
+
+  postinstall:
+    - rm -f $SYSROOT/usr/lib/libghostty-vt.so*
+    - rm -f $SYSROOT/usr/lib/pkgconfig/libghostty-vt.pc
+    - rm -rf $SYSROOT/usr/lib/cmake

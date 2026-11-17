@@ -5,6 +5,7 @@ echo "### Packing generic packages"
 TARGET=${1:-x86_64}
 HOST=${2:-$(gcc -dumpmachine)}
 TOOLCHAIN_VERSION=${3:-0.2.0}
+ZIG_VERSION=${4:-0.17.1}
 
 packages="generic"
 
@@ -48,6 +49,22 @@ pushd sdk
 popd
 
 export PATH=$(pwd)/sdk/bin:$PATH
+
+
+echo "### Install zig"
+mkdir -p sdk/zig
+
+pushd sdk
+    ZIG_ARCHIVE=zig-$(uname -m)-linux-$ZIG_VERSION.tar.xz
+
+    if [ ! -f $ZIG_ARCHIVE ]; then
+        wget https://ziglang.org/download/$ZIG_VERSION/$ZIG_ARCHIVE || exit 1
+    fi
+    tar xJf $ZIG_ARCHIVE -C zig --strip-components=1 || exit 1
+popd
+
+export ZIG=$(pwd)/sdk/zig/zig
+$ZIG version || exit 1
 
 
 echo "### Run build-system"
