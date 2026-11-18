@@ -1,0 +1,48 @@
+package: openssh
+version: 10.6p2
+sources: 
+  - https://cdn.openbsd.org/pub/OpenBSD/OpenSSH/portable/openssh-$VERSION.tar.gz
+
+dependencies:
+  - zlib
+  - libressl
+
+build:
+
+  patches:
+    - patches/openssh-$VERSION.patch
+
+  env:
+    - DESTDIR: $SYSROOT
+    - CPPFLAGS: -DPATH_MAX=4096 -DSSIZE_MAX=LONG_MAX
+    - CFLAGS: -O2 -march=x86-64 -mtune=generic
+    - LDFLAGS: -static
+
+  configure:
+    - --prefix=/usr
+    - --host=$HOST
+    - --sysconfdir=/etc/ssh
+    - --libexecdir=/usr/libexec
+    - --with-ssl-dir=$PACKAGE_LIBRESSL/__out/usr
+    - --with-zlib=$PACKAGE_ZLIB/__out/usr
+    - --with-privsep-path=/var/empty
+    - --with-pid-dir=/var/run
+    - --without-pam
+    - --without-hardening
+    - --disable-pkcs11
+    - --disable-security-key
+    - --disable-lastlog
+    - --disable-utmp
+    - --disable-utmpx
+    - --disable-wtmp
+    - --disable-wtmpx
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - install-nokeys
+
+  postinstall:
+    - mkdir -p $SYSROOT/var/empty $SYSROOT/etc/init.d
+    - install -m 755 $PKGDIR/assets/etc/init.d/02-sshd.sh $SYSROOT/etc/init.d/02-sshd.sh

@@ -1,0 +1,13 @@
+#!/bin/sh
+
+prefix=$1
+
+mkdir -p $prefix/etc 
+mkdir -p $prefix/var/empty 
+mkdir -p $prefix/var/run
+
+grep -q '^sshd:' $prefix/etc/passwd 2>/dev/null ||
+    echo 'sshd:x:74:74:Privilege-separated SSH:/var/empty:/bin/false' >> $prefix/etc/passwd
+
+grep -q '^sshd:' $prefix/etc/group 2>/dev/null ||
+    echo 'sshd:x:74:' >> $prefix/etc/group

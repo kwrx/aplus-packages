@@ -31,6 +31,7 @@
  - `x86_64` ncurses : *6.6*
  - `x86_64` nesemu : *1.0.0*
  - `x86_64` netsurf-all : *3.11*
+ - `x86_64` openssh : *10.6p2*
  - `x86_64` pixman : *0.46.4*
  - `x86_64` pkgconf : *1.1.0*
  - `x86_64` readline : *8.3*

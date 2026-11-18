@@ -1,0 +1,33 @@
+diff -Naur openssh-10.6p2/config.sub aplus-openssh-10.6p2/config.sub
+--- openssh-10.6p2/config.sub	2026-11-05 00:57:26.000000000 +0100
++++ aplus-openssh-10.6p2/config.sub	2026-11-18 22:12:32.794353169 +0100
+@@ -1727,7 +1727,7 @@
+ 	# Now accept the basic system types.
+ 	# The portable systems comes first.
+ 	# Each alternative MUST end in a * to match a version number.
+-	gnu* | android* | bsd* | mach* | minix* | genix* | ultrix* | irix* \
++	gnu* | android* | bsd* | mach* | minix* | genix* | ultrix* | irix* | aplus* \
+ 	     | *vms* | esix* | aix* | cnk* | sunos | sunos[34]* \
+ 	     | hpux* | unos* | osf* | luna* | dgux* | auroraux* | solaris* \
+ 	     | sym* |  plan9* | psp* | sim* | xray* | os68k* | v88r* \
+diff -Naur openssh-10.6p2/sshd-session.c aplus-openssh-10.6p2/sshd-session.c
+--- openssh-10.6p2/sshd-session.c	2026-11-05 00:57:26.000000000 +0100
++++ aplus-openssh-10.6p2/sshd-session.c	2026-11-18 22:22:20.266266289 +0100
+@@ -1204,7 +1204,7 @@
+ 		itv.it_value.tv_sec += ujitter / 1000000;
+ 		itv.it_value.tv_usec = ujitter % 1000000; 
+ 
+-		if (setitimer(ITIMER_REAL, &itv, NULL) == -1)
++		if (setitimer(ITIMER_REAL, &itv, NULL) == -1 && errno != ENOSYS)
+ 			fatal("login grace time setitimer failed");
+ 	}
+ 
+@@ -1239,7 +1239,7 @@
+ 	 */
+ 	timerclear(&itv.it_interval);
+ 	timerclear(&itv.it_value);
+-	if (setitimer(ITIMER_REAL, &itv, NULL) == -1)
++	if (setitimer(ITIMER_REAL, &itv, NULL) == -1 && errno != ENOSYS)
+ 		fatal("login grace time clear failed");
+ 	ssh_signal(SIGALRM, SIG_DFL);
+ 	authctxt->authenticated = 1;
