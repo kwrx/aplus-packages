@@ -1,0 +1,54 @@
+package: fontconfig
+version: 2.17.1
+sources:
+  - https://gitlab.freedesktop.org/api/v4/projects/890/packages/generic/fontconfig/$VERSION/fontconfig-$VERSION.tar.xz
+
+dependencies:
+  - expat
+  - freetype
+  - libpng
+  - zlib
+
+build:
+
+  setup:
+    - rm -f configure
+
+  patches:
+    - patches/fontconfig-$VERSION.patch
+
+  env:
+    - DESTDIR: $SYSROOT
+    - PKG_CONFIG: /usr/bin/pkg-config
+    - PKG_CONFIG_LIBDIR: $PACKAGE_EXPAT/__out/usr/lib/pkgconfig:$PACKAGE_FREETYPE/__out/usr/lib/pkgconfig:$PACKAGE_LIBPNG/__out/usr/lib/pkgconfig:$PACKAGE_ZLIB/__out/usr/lib/pkgconfig
+    - PKG_CONFIG_RELOCATE_PATHS: "1"
+
+  configure:
+    - -Dprefix=/usr
+    - -Dlibdir=lib
+    - -Dsysconfdir=/etc
+    - -Dlocalstatedir=/var
+    - -Dbuildtype=release
+    - -Ddefault_library=static
+    - -Dprefer_static=true
+    - -Dstrip=true
+    - -Dwerror=false
+    - --wrap-mode=nodownload
+    - -Dc_args="-O2 -march=x86-64 -mtune=generic"
+    - -Dc_link_args="-static -no-pie"
+    - -Dxml-backend=expat
+    - -Ddoc=disabled
+    - -Dnls=disabled
+    - -Dtests=disabled
+    - -Dtools=enabled
+    - -Dcache-build=disabled
+    - -Ddefault-fonts-dirs=/usr/share/fonts
+    - -Dadditional-fonts-dirs=
+    - -Dcache-dir=/var/cache/fontconfig
+    - --cross-file=$PKGDIR/meson/meson-cross-$HOST.txt
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)

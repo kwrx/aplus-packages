@@ -1,0 +1,12 @@
+diff -Naur fontconfig-2.17.1/src/fcstat.c aplus-fontconfig-2.17.1/src/fcstat.c
+--- fontconfig-2.17.1/src/fcstat.c	2026-11-19 20:12:31.162271062 +0100
++++ aplus-fontconfig-2.17.1/src/fcstat.c	2026-11-19 20:12:31.162271062 +0100
+@@ -372,7 +372,7 @@
+ #  endif
+ #  if defined(HAVE_STRUCT_STATFS_F_FSTYPENAME)
+ 	p = buf.f_fstypename;
+-#  elif defined(__linux__) || defined(__EMSCRIPTEN__)
++#  elif defined(__linux__) || defined(__aplus__) || defined(__EMSCRIPTEN__)
+ 	switch (buf.f_type) {
+ 	case 0x6969: /* nfs */
+ 	    statb->is_remote_fs = FcTrue;
