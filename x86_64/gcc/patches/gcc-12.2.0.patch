@@ -202,3 +202,15 @@ diff -Naur gcc-12.2.0/gcc/system.h aplus-gcc-12.2.0/gcc/system.h
  #endif
  
  #ifdef INCLUDE_PTHREAD_H
+diff -Naur gcc-12.2.0/libatomic/configure.tgt aplus-gcc-12.2.0/libatomic/configure.tgt
+--- gcc-12.2.0/libatomic/configure.tgt	2022-08-19 10:09:54.608688432 +0200
++++ aplus-gcc-12.2.0/libatomic/configure.tgt	2026-11-19 20:45:53.557743463 +0100
+@@ -151,7 +151,7 @@
+   *-*-linux* | *-*-gnu* | *-*-k*bsd*-gnu \
+   | *-*-netbsd* | *-*-freebsd* | *-*-openbsd* | *-*-dragonfly* \
+   | *-*-solaris2* | *-*-sysv4* | *-*-irix6* | *-*-osf* | *-*-hpux11* \
+-  | *-*-darwin* | *-*-aix* | *-*-cygwin*)
++  | *-*-darwin* | *-*-aix* | *-*-cygwin* | *-*-aplus*)
+ 	# POSIX system.  The OS is supported.
+ 	config_path="${config_path} posix"
+ 	;;

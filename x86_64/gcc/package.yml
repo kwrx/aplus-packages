@@ -50,12 +50,14 @@ build:
     - -j$(nproc)
     - all-gcc
     - all-target-libgcc
+    - all-target-libatomic
     - all-target-libstdc++-v3
 
   install:
     - -j$(nproc)
     - install-gcc
     - install-target-libgcc
+    - install-target-libatomic
     - install-target-libstdc++-v3
 
   postinstall:
