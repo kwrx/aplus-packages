@@ -1,0 +1,53 @@
+package: glib
+version: 2.88.4
+sources:
+  - https://download.gnome.org/sources/glib/2.88/glib-$VERSION.tar.xz
+
+dependencies:
+  - libffi
+  - pcre2
+  - zlib
+
+build:
+
+  patches:
+    - patches/glib-$VERSION.patch
+
+  env:
+    - DESTDIR: $SYSROOT
+    - PKG_CONFIG: /usr/bin/pkg-config
+    - PKG_CONFIG_LIBDIR: $PACKAGE_LIBFFI/__out/usr/lib/pkgconfig:$PACKAGE_PCRE2/__out/usr/lib/pkgconfig:$PACKAGE_ZLIB/__out/usr/lib/pkgconfig
+    - PKG_CONFIG_RELOCATE_PATHS: "1"
+
+  configure:
+    - -Dprefix=/usr
+    - -Dlibdir=lib
+    - -Dbuildtype=release
+    - -Ddefault_library=static
+    - -Dprefer_static=true
+    - -Dstrip=true
+    - -Dwerror=false
+    - -Dc_args="-O2 -march=x86-64 -mtune=generic -include $(dirname $(command -v $HOST-gcc))/../$HOST/include/limits.h"
+    - -Dc_link_args="-static -no-pie"
+    - --wrap-mode=nodownload
+    - -Dselinux=disabled
+    - -Dxattr=false
+    - -Dlibmount=disabled
+    - -Dman-pages=disabled
+    - -Ddtrace=disabled
+    - -Dsystemtap=disabled
+    - -Dsysprof=disabled
+    - -Ddocumentation=false
+    - -Dtests=false
+    - -Dinstalled_tests=false
+    - -Dnls=disabled
+    - -Dintrospection=disabled
+    - -Dlibelf=disabled
+    - -Dglib_debug=disabled
+    - --cross-file=$PKGDIR/meson/meson-cross-$HOST.txt
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)

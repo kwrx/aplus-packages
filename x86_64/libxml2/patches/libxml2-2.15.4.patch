@@ -1,0 +1,11 @@
+diff -Naur libxml2-2.15.4/meson.build aplus-libxml2-2.15.4/meson.build
+--- libxml2-2.15.4/meson.build	2026-11-19 19:08:30.134438460 +0100
++++ aplus-libxml2-2.15.4/meson.build	2026-11-19 19:08:30.307777721 +0100
+@@ -504,6 +504,7 @@
+     build_rpath: get_option('libdir'),
+     include_directories: config_dir,
+     name_prefix: '',
++    build_by_default: false,
+ )
+ 
+ ## tests

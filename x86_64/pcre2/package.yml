@@ -1,0 +1,37 @@
+package: pcre2
+version: "10.49"
+sources:
+  - https://github.com/PCRE2Project/pcre2/releases/download/pcre2-$VERSION/pcre2-$VERSION.tar.bz2
+
+build:
+
+  setup:
+    - rm -f configure
+
+  env:
+    - DESTDIR: $SYSROOT
+
+  configure:
+    - -DCMAKE_TOOLCHAIN_FILE=$PKGDIR/cmake/x86_64-aplus-toolchain.cmake
+    - -DCMAKE_INSTALL_PREFIX=/usr
+    - -DCMAKE_INSTALL_LIBDIR=lib
+    - -DCMAKE_BUILD_TYPE=Release
+    - -DBUILD_SHARED_LIBS=OFF
+    - -DBUILD_STATIC_LIBS=ON
+    - -DPCRE2_BUILD_PCRE2_8=ON
+    - -DPCRE2_BUILD_PCRE2_16=OFF
+    - -DPCRE2_BUILD_PCRE2_32=OFF
+    - -DPCRE2_SUPPORT_UNICODE=ON
+    - -DPCRE2_SUPPORT_JIT=OFF
+    - -DPCRE2_BUILD_PCRE2GREP=OFF
+    - -DPCRE2_BUILD_TESTS=OFF
+    - -DPCRE2_SUPPORT_LIBBZ2=OFF
+    - -DPCRE2_SUPPORT_LIBZ=OFF
+    - -DPCRE2_SUPPORT_LIBREADLINE=OFF
+    - -DPCRE2_SYMVERS=OFF
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)

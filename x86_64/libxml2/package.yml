@@ -1,0 +1,44 @@
+package: libxml2
+version: 2.15.4
+sources:
+  - https://download.gnome.org/sources/libxml2/2.15/libxml2-$VERSION.tar.xz
+
+build:
+
+  setup:
+    - rm -f configure
+
+  patches:
+    - patches/libxml2-$VERSION.patch
+
+  env:
+    - DESTDIR: $SYSROOT
+    - CFLAGS: -O2 -march=x86-64 -mtune=generic
+    - LDFLAGS: -static -no-pie
+    - PKG_CONFIG: /usr/bin/pkg-config
+    - PKG_CONFIG_LIBDIR: $SYSROOT/usr/lib/pkgconfig
+
+  configure:
+    - -Dprefix=/usr
+    - -Dlibdir=lib
+    - -Dbuildtype=release
+    - -Ddefault_library=static
+    - -Dstrip=true
+    - -Dwerror=false
+    - -Ddocs=disabled
+    - -Dpython=disabled
+    - -Dmodules=disabled
+    - -Dhttp=disabled
+    - -Dreadline=disabled
+    - -Dhistory=disabled
+    - -Dicu=disabled
+    - -Dzlib=disabled
+    - -Diconv=enabled
+    - -Dthreads=enabled
+    - --cross-file=$PKGDIR/meson/meson-cross-$HOST.txt
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)
