@@ -99,6 +99,17 @@ if ! python3 ci/pack.py --verbose; then
     exit 1
 fi
 
+echo "### Index generic packages"
+
+for p in $packages; do
+    for d in $(find $p -maxdepth 1 -mindepth 1 -type d -name 'system-*'); do
+        name=$(basename $d)
+        version=$(tr -d '[:space:]' < $d/.pkg/version)
+        sha256=$(sha256sum $name.tar.xz | cut -d' ' -f1)
+        echo "$name:$version:$sha256:" >> index
+    done
+done
+
 echo "## Clean up"
 deactivate
 rm -rf .venv

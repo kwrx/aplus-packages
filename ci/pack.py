@@ -611,7 +611,7 @@ def stage_8(packages):
         ).stdout.split()[0]
         dependencies = ",".join(package.get("dependencies", []))
         index.append(
-            f"{package['package']}:{package['version']}:{sha256}:{dependencies}"
+            f"{package['package']}:{package['version']}:{sha256}:{dependencies}\n"
         )
 
     with open(f"{args.root}/index", "w") as f:
