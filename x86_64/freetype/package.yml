@@ -15,11 +15,10 @@ build:
 
   env:
     - DESTDIR: $SYSROOT
-    - ZLIB_CFLAGS: -I$PACKAGE_ZLIB/__out/usr/include
-    - ZLIB_LIBS: -lz
-    - LIBPNG_CFLAGS: -I$PACKAGE_LIBPNG/__out/usr/include
-    - LIBPNG_LIBS: -lpng -lz
-    - CFLAGS: -O2 -march=x86-64 -mtune=generic -I$PACKAGE_ZLIB/__out/usr/include -I$PACKAGE_LIBPNG/__out/usr/include
+    - CFLAGS: -O2 -march=x86-64 -mtune=generic
+    - PKG_CONFIG: /usr/bin/pkg-config
+    - PKG_CONFIG_LIBDIR: $PACKAGE_LIBPNG/__out/usr/lib/pkgconfig:$PACKAGE_ZLIB/__out/usr/lib/pkgconfig
+    - PKG_CONFIG_RELOCATE_PATHS: "1"
 
   configure:
     - --prefix=/usr
@@ -42,3 +41,6 @@ build:
 
   install:
     - -j$(nproc)
+
+  postinstall:
+    - "sed -i 's|^Libs: -L/usr/lib |Libs: -L${libdir} |' $SYSROOT/usr/lib/pkgconfig/freetype2.pc"
