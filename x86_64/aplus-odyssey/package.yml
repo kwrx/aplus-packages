@@ -1,0 +1,42 @@
+package: aplus-odyssey
+version: 2.34.6
+sources:
+  - https://github.com/kwrx/aplus-odyssey/archive/refs/tags/v$VERSION.tar.gz
+
+dependencies:
+  - aplus
+  - cairo
+  - pixman
+  - fontconfig
+  - expat
+  - freetype
+  - harfbuzz
+  - icu
+  - libpsl
+  - libxml2
+  - libxslt
+  - sqlite
+  - curl
+  - libressl
+  - ffmpeg
+  - bzip2
+  - xz
+  - zstd
+  - libwebp
+  - libjpeg-turbo
+  - libpng
+  - zlib
+
+build:
+
+  preconfigure:
+    - $PKGDIR/scripts/prepare.sh $SRCDIR $HOST $PKGDIR/../cairo $PACKAGE_CAIRO $PACKAGE_APLUS $PACKAGE_PIXMAN $PACKAGE_FONTCONFIG $PACKAGE_EXPAT $PACKAGE_FREETYPE $PACKAGE_HARFBUZZ $PACKAGE_ICU $PACKAGE_LIBPSL $PACKAGE_LIBXML2 $PACKAGE_LIBXSLT $PACKAGE_SQLITE $PACKAGE_CURL $PACKAGE_LIBRESSL $PACKAGE_FFMPEG $PACKAGE_BZIP2 $PACKAGE_XZ $PACKAGE_ZSTD $PACKAGE_LIBWEBP $PACKAGE_LIBJPEG_TURBO $PACKAGE_LIBPNG $PACKAGE_ZLIB
+
+  postmake:
+    - ninja -C __build -j4 odyssey
+
+  postinstall:
+    - mkdir -p $SYSROOT/usr/bin $SYSROOT/usr/share/applications
+    - $HOST-strip -o $SYSROOT/usr/bin/odyssey __build/bin/odyssey
+    - cp $PKGDIR/assets/odyssey.desktop $SYSROOT/usr/share/applications/odyssey.desktop
+    - cp -r $PKGDIR/assets/icons $SYSROOT/usr/share/

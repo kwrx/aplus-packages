@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=Odyssey
+Comment=Web browser
+Exec=odyssey
+Icon=odyssey
+Terminal=false
+Type=Application
+Categories=Network;WebBrowser;
