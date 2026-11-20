@@ -1,0 +1,12 @@
+diff -Naur libxslt-1.1.45/config.sub aplus-libxslt-1.1.45/config.sub
+--- libxslt-1.1.45/config.sub	2025-11-30 08:00:00.000000000 +0100
++++ aplus-libxslt-1.1.45/config.sub	2026-11-20 00:51:13.475941172 +0100
+@@ -1750,7 +1750,7 @@
+ 	     | os2* | vos* | palmos* | uclinux* | nucleus* | morphos* \
+ 	     | scout* | superux* | sysv* | rtmk* | tpf* | windiss* \
+ 	     | powermax* | dnix* | nx6 | nx7 | sei* | dragonfly* \
+-	     | skyos* | haiku* | rdos* | toppers* | drops* | es* \
++	     | skyos* | haiku* | aplus* | rdos* | toppers* | drops* | es* \
+ 	     | onefs* | tirtos* | phoenix* | fuchsia* | redox* | bme* \
+ 	     | midnightbsd* | amdhsa* | unleashed* | emscripten* | wasi* \
+ 	     | nsk* | powerunix* | genode* | zvmoe* | qnx* | emx* | zephyr* \

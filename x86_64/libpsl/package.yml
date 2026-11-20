@@ -1,0 +1,35 @@
+package: libpsl
+version: 0.21.5
+sources:
+  - https://github.com/rockdaboot/libpsl/releases/download/$VERSION/libpsl-$VERSION.tar.gz
+
+build:
+
+  setup:
+    - rm -f configure
+
+  env:
+    - DESTDIR: $SYSROOT
+    - PKG_CONFIG: /usr/bin/pkg-config
+    - PKG_CONFIG_LIBDIR: $SYSROOT/usr/lib/pkgconfig
+
+  configure:
+    - -Dprefix=/usr
+    - -Dlibdir=lib
+    - -Dbuildtype=release
+    - -Ddefault_library=static
+    - -Dstrip=true
+    - -Dwerror=false
+    - -Dc_args="-O2 -march=x86-64 -mtune=generic"
+    - -Dc_link_args="-static -no-pie"
+    - -Druntime=no
+    - -Dbuiltin=true
+    - -Dtests=false
+    - -Ddocs=false
+    - --cross-file=$PKGDIR/meson/meson-cross-$HOST.txt
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)

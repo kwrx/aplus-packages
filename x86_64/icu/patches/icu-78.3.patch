@@ -1,0 +1,55 @@
+diff -Naur icu-78.3/acinclude.m4 aplus-icu-78.3/acinclude.m4
+--- icu-78.3/acinclude.m4	2026-11-20 00:41:19.713770222 +0100
++++ aplus-icu-78.3/acinclude.m4	2026-11-20 00:41:19.837107556 +0100
+@@ -33,7 +33,7 @@
+ 	else
+ 		icu_cv_host_frag=mh-linux-va
+ 	fi ;;
+-*-*-linux*|*-*-gnu|*-*-k*bsd*-gnu|*-*-kopensolaris*-gnu) icu_cv_host_frag=mh-linux ;;
++*-*-linux*|*-*-gnu|*-*-k*bsd*-gnu|*-*-kopensolaris*-gnu|*-*-aplus*) icu_cv_host_frag=mh-linux ;;
+ i[[34567]]86-*-cygwin) 
+ 	if test "$GCC" = yes; then
+ 		icu_cv_host_frag=mh-cygwin
+diff -Naur icu-78.3/config.sub aplus-icu-78.3/config.sub
+--- icu-78.3/config.sub	2026-11-20 00:41:19.713770222 +0100
++++ aplus-icu-78.3/config.sub	2026-11-20 00:41:19.837107556 +0100
+@@ -2022,6 +2022,7 @@
+ 	| ios* \
+ 	| iris* \
+ 	| irix* \
++	| aplus* \
+ 	| ironclad* \
+ 	| isc* \
+ 	| its* \
+diff -Naur icu-78.3/configure aplus-icu-78.3/configure
+--- icu-78.3/configure	2026-11-20 00:41:19.717103662 +0100
++++ aplus-icu-78.3/configure	2026-11-20 00:41:19.840440998 +0100
+@@ -5764,7 +5764,7 @@
+ 	else
+ 		icu_cv_host_frag=mh-linux-va
+ 	fi ;;
+-*-*-linux*|*-*-gnu|*-*-k*bsd*-gnu|*-*-kopensolaris*-gnu) icu_cv_host_frag=mh-linux ;;
++*-*-linux*|*-*-gnu|*-*-k*bsd*-gnu|*-*-kopensolaris*-gnu|*-*-aplus*) icu_cv_host_frag=mh-linux ;;
+ i[34567]86-*-cygwin)
+ 	if test "$GCC" = yes; then
+ 		icu_cv_host_frag=mh-cygwin
+@@ -8232,7 +8232,7 @@
+ # set ICUDATA_CHAR to 'e' for any EBCDIC (which should be big endian) platform.
+ case "${host}" in
+ 	*-*-solaris*) 	platform=U_SOLARIS ;;
+-	*-*-linux*|*-*-gnu|*-*-k*bsd*-gnu|*-*-kopensolaris*-gnu)        platform=U_LINUX ;;
++	*-*-linux*|*-*-gnu|*-*-k*bsd*-gnu|*-*-kopensolaris*-gnu|*-*-aplus*)        platform=U_LINUX ;;
+ 	*-*-*bsd*|*-*-dragonfly*) 	platform=U_BSD ;;
+ 	*-*-aix*) 	platform=U_AIX ;;
+ 	*-*-hpux*) 	platform=U_HPUX ;;
+diff -Naur icu-78.3/Makefile.in aplus-icu-78.3/Makefile.in
+--- icu-78.3/Makefile.in	2026-11-20 00:41:19.713770222 +0100
++++ aplus-icu-78.3/Makefile.in	2026-11-20 00:41:19.840440998 +0100
+@@ -190,7 +190,6 @@
+ 	$(INSTALL_SCRIPT) $(top_srcdir)/install-sh $(DESTDIR)$(pkgdatadir)/install-sh
+ 	@$(MKINSTALLDIRS) $(DESTDIR)$(libdir)/pkgconfig
+ 	$(INSTALL_DATA) $(ALL_PKGCONFIG_FILES) $(DESTDIR)$(libdir)/pkgconfig/
+-	$(INSTALL_DATA) $(top_srcdir)/../LICENSE $(DESTDIR)$(pkgdatadir)/LICENSE
+ ifeq ($(INSTALL_ICU_CONFIG),true)
+ 	$(INSTALL_SCRIPT) $(top_builddir)/config/icu-config $(DESTDIR)$(bindir)/icu-config
+ endif

@@ -1,0 +1,56 @@
+package: harfbuzz
+version: 8.5.0
+sources:
+  - https://github.com/harfbuzz/harfbuzz/releases/download/$VERSION/harfbuzz-$VERSION.tar.xz
+
+dependencies:
+  - freetype
+  - icu
+  - libpng
+  - zlib
+
+build:
+
+  setup:
+    - rm -f configure
+
+  env:
+    - DESTDIR: $SYSROOT
+    - PKG_CONFIG: /usr/bin/pkg-config
+    - PKG_CONFIG_LIBDIR: $PACKAGE_FREETYPE/__out/usr/lib/pkgconfig:$PACKAGE_ICU/__out/usr/lib/pkgconfig:$PACKAGE_LIBPNG/__out/usr/lib/pkgconfig:$PACKAGE_ZLIB/__out/usr/lib/pkgconfig
+    - PKG_CONFIG_RELOCATE_PATHS: "1"
+
+  configure:
+    - -Dprefix=/usr
+    - -Dlibdir=lib
+    - -Dbuildtype=release
+    - -Ddefault_library=static
+    - -Dprefer_static=true
+    - -Dcpp_std=c++17
+    - -Dstrip=true
+    - -Dwerror=false
+    - --wrap-mode=nodownload
+    - -Dc_args="-O2 -march=x86-64 -mtune=generic"
+    - -Dcpp_args="-O2 -march=x86-64 -mtune=generic -D_GNU_SOURCE"
+    - -Dc_link_args="-static -no-pie"
+    - -Dcpp_link_args="-static -no-pie"
+    - -Dfreetype=enabled
+    - -Dicu=enabled
+    - -Dicu_builtin=false
+    - -Dglib=disabled
+    - -Dgobject=disabled
+    - -Dcairo=disabled
+    - -Dchafa=disabled
+    - -Dgraphite2=disabled
+    - -Dintrospection=disabled
+    - -Dtests=disabled
+    - -Ddocs=disabled
+    - -Dbenchmark=disabled
+    - -Dutilities=disabled
+    - --cross-file=$PKGDIR/meson/meson-cross-$HOST.txt
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)

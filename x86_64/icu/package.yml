@@ -1,0 +1,40 @@
+package: icu
+version: "78.3"
+srcdir: icu/source
+sources:
+  - https://github.com/unicode-org/icu/releases/download/release-$VERSION/icu4c-$VERSION-sources.tgz
+
+build:
+
+  patches:
+    - patches/icu-$VERSION.patch
+
+  env:
+    - DESTDIR: $SYSROOT
+
+  preconfigure:
+    - (mkdir -p __host && cd __host && env -u DESTDIR ../configure --disable-tests --disable-samples --disable-extras && make -j$(nproc))
+
+  configure:
+    - --prefix=/usr
+    - --build=$($SRCDIR/config.guess)
+    - --host=$HOST
+    - --with-cross-build=$SRCDIR/__host
+    - --with-data-packaging=static
+    - --enable-static
+    - --disable-shared
+    - --disable-tests
+    - --disable-samples
+    - --disable-extras
+    - --disable-tools
+    - --disable-dyload
+    - CFLAGS="-O2 -march=x86-64 -mtune=generic"
+    - CXXFLAGS="-O2 -march=x86-64 -mtune=generic"
+    - CPPFLAGS="-D_GNU_SOURCE -include $(dirname $(command -v $HOST-gcc))/../$HOST/include/limits.h"
+    - LDFLAGS="-static -no-pie"
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)

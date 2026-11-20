@@ -1,0 +1,38 @@
+package: libxslt
+version: 1.1.45
+sources:
+  - https://download.gnome.org/sources/libxslt/1.1/libxslt-$VERSION.tar.xz
+
+dependencies:
+  - libxml2
+
+build:
+
+  patches:
+    - patches/libxslt-$VERSION.patch
+
+  env:
+    - DESTDIR: $SYSROOT
+    - CPPFLAGS: -I$PACKAGE_LIBXML2/__out/usr/include/libxml2 -I$PACKAGE_LIBXML2/__out/usr/include
+    - CFLAGS: -O2 -march=x86-64 -mtune=generic
+    - LDFLAGS: -static -no-pie -L$PACKAGE_LIBXML2/__out/usr/lib
+    - PKG_CONFIG: /usr/bin/pkg-config
+    - PKG_CONFIG_LIBDIR: $PACKAGE_LIBXML2/__out/usr/lib/pkgconfig
+    - PKG_CONFIG_SYSROOT_DIR: $PACKAGE_LIBXML2/__out
+
+  configure:
+    - --prefix=/usr
+    - --host=$HOST
+    - --enable-static
+    - --disable-shared
+    - --without-python
+    - --without-crypto
+    - --without-debug
+    - --without-plugins
+    - --without-profiler
+
+  make:
+    - -j$(nproc)
+
+  install:
+    - -j$(nproc)
