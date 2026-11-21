@@ -20,3 +20,6 @@ build:
   install:
     - -j$(nproc)
     - CROSS_COMPILE=$HOST-
+
+  postinstall:
+    - rm -f $SYSROOT/bin/su $SYSROOT/usr/bin/passwd
