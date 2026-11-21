@@ -20,7 +20,7 @@ build:
     - patches/bash-$VERSION.patch
 
   configure:
-    - --prefix=$SYSROOT/usr
+    - --prefix=/usr
     - --host=$HOST
     - --enable-static
     - --enable-static-link
@@ -52,5 +52,6 @@ build:
     - TERMCAP_LIB=-lncursesw
 
   install:
+    - DESTDIR=$SYSROOT
     - -j$(nproc)
     - TERMCAP_LIB=-lncursesw

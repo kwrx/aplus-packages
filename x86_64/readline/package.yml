@@ -18,7 +18,7 @@ build:
     - patches/readline-$VERSION.patch
 
   configure:
-    - --prefix=$SYSROOT/usr
+    - --prefix=/usr
     - --host=$HOST
     - --disable-shared
     - --disable-install-examples
@@ -29,4 +29,5 @@ build:
     - -j$(nproc)
 
   install:
+    - DESTDIR=$SYSROOT
     - -j$(nproc)

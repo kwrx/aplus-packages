@@ -10,7 +10,7 @@ build:
     - patches/ncurses-$VERSION.patch
 
   configure:
-    - --prefix=$SYSROOT/usr
+    - --prefix=/usr
     - --host=$HOST
     - --without-ada
     - --without-tests
@@ -21,4 +21,5 @@ build:
     - -j$(nproc)
 
   install:
+    - DESTDIR=$SYSROOT
     - -j$(nproc)

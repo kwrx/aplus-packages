@@ -11,7 +11,7 @@ build:
     - CFLAGS: -O2 -march=x86-64 -mtune=generic
 
   configure:
-    - --prefix=$SYSROOT/usr
+    - --prefix=/usr
     - --static
     - --64
 
@@ -19,4 +19,5 @@ build:
     - -j$(nproc)
 
   install:
+    - DESTDIR=$SYSROOT
     - -j$(nproc)

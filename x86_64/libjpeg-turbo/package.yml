@@ -10,7 +10,7 @@ build:
 
   configure:
     - -DCMAKE_TOOLCHAIN_FILE=$PKGDIR/cmake/x86_64-aplus-toolchain.cmake
-    - -DCMAKE_INSTALL_PREFIX=$SYSROOT/usr
+    - -DCMAKE_INSTALL_PREFIX=/usr
     - -DCMAKE_BUILD_TYPE=Release
     - -DENABLE_SHARED=OFF
     - -DWITH_JPEG8=ON
@@ -21,4 +21,5 @@ build:
     - -j$(nproc)
 
   install:
+    - DESTDIR=$SYSROOT
     - -j$(nproc)

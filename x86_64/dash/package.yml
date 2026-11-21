@@ -13,7 +13,7 @@ build:
     - patches/dash-$VERSION.patch
 
   configure:
-    - --prefix=$SYSROOT/usr
+    - --prefix=/usr
     - --host=$HOST
     - --enable-static
     - --enable-fnmatch=no
@@ -24,4 +24,5 @@ build:
     - -j$(nproc)
 
   install:
+    - DESTDIR=$SYSROOT
     - -j$(nproc)
