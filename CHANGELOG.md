@@ -1,3 +1,9 @@
+## 1.1.0 (2026-11-21)
+
+### Feat
+
+- **system-base**: keep local state as factory defaults and complete the base root
+
 ## 1.0.0 (2026-11-21)
 
 ### Feat
