@@ -62,43 +62,10 @@
 
 # Build
 
-Every tag matching `*.*.*` triggers the [deploy](.github/workflows/build-and-deploy.yml) workflow, which runs `ci/prepare-and-build.sh` and publishes a GitHub release with every package archive, the `index` and the `buildinfo` file.
+Pushing a tag matching `*.*.*` starts the [deploy](.github/workflows/build-and-deploy.yml) workflow, which builds the packages and publishes them as a GitHub release. The workflow can also be started manually from the Actions tab.
 
-Builds are incremental: only packages whose inputs changed since the latest release are rebuilt, everything else is reused from that release.
-
-## Build keys
-
-`ci/pack.py` computes a key for each package as the sha256 of:
-
- - every file in the recipe directory (`package.yml`, patches, scripts, assets);
- - the resolved source URLs, plus the current remote `HEAD` commit for `.git` sources;
- - the keys of all its dependencies, so a change propagates to every dependent package;
- - a global salt made of the target, toolchain version, zig version, `requirements.txt` and the optional `APLUS_CACHE_SALT` repository variable.
-
-Keys are published in the `buildinfo` release asset, one `name:key:sha256` line per package.
-
-## Reusing prebuilt packages
-
-At build time `pack.py` downloads `buildinfo` from `releases/latest/download`, which still points to the previous release while the new one is being built. For each package:
-
- - if its key matches, the archive is downloaded from the previous release and its checksum verified, without building;
- - otherwise it is rebuilt. Reused dependencies that are needed by a rebuilt package have their sources fetched and their archive extracted into `__out`, so `$PACKAGE_*/__out` paths keep working.
-
-A recipe can set `restorable: false` when its dependents need more than its `__out` directory (for example `aplus`, whose source tree is used by other packages). Such a package is rebuilt whenever one of its dependents is rebuilt.
-
-If the previous release has no `buildinfo`, every package is built.
-
-## Forcing a full rebuild
-
- - run the workflow manually with the `full_rebuild` input enabled;
- - or change the `APLUS_CACHE_SALT` repository variable, which invalidates every key.
-
-Changes to `ci/pack.py` itself do not change the keys, so use one of the options above when they affect the produced archives.
-
-## Building locally
+To build locally:
 
 ```sh
 ci/prepare-and-build.sh x86_64 x86_64-linux-gnu
 ```
-
-Outside GitHub Actions every package is built from scratch. Set `APLUS_PREBUILT_URL` to the download URL of a release (for example `https://github.com/kwrx/aplus-packages/releases/latest/download`) to reuse its packages.
