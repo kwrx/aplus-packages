@@ -1,4 +1,6 @@
 *.tar.xz
 /sdk/
+/build/
 /index
 /buildinfo
+/CLAUDE.md

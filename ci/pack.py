@@ -22,7 +22,7 @@ environ = os.environ.copy()
 parser = argparse.ArgumentParser(description='Build the project')
 parser.add_argument('-i', '--install', help='Install the package', default='*', nargs='+')
 parser.add_argument('-c', '--clean', help='Clean all packages', action='store_true')
-parser.add_argument('--tmpdir', default='/tmp/aplus-packages-build', help='Temporary directory')
+parser.add_argument('--tmpdir', default=None, help='Build directory (default: <root>/build)')
 parser.add_argument('--host', default='x86_64-aplus', help='Host architecture')
 parser.add_argument('--root', default='.', help='Root directory')
 parser.add_argument('--verbose', action='store_true', help='Verbose output')
@@ -37,7 +37,9 @@ def run_command(cmd, cwd=None):
 
 def scan(path):
 
-    for root, _, files in os.walk(path):
+    for root, dirs, files in os.walk(path):
+        dirs[:] = [d for d in dirs if os.path.join(root, d) != args.tmpdir]
+
         for file in files:
             if not file.endswith("package.yml"):
                 continue
@@ -834,10 +836,11 @@ def stage_8(packages):
 
 def main():
 
+    args.root = os.path.abspath(args.root)
+    args.tmpdir = os.path.abspath(args.tmpdir or os.path.join(args.root, "build"))
+
     if not os.path.exists(args.tmpdir):
         os.mkdir(args.tmpdir)
-
-    args.root = os.path.abspath(args.root)
 
     if args.clean:
         return shutil.rmtree(args.tmpdir)

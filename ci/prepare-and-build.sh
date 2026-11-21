@@ -8,6 +8,7 @@ TOOLCHAIN_VERSION=${3:-0.2.0}
 ZIG_VERSION=${4:-0.17.1}
 
 packages="generic"
+BUILD_DIR=$(pwd)/build
 
 for p in $packages; do
     for d in $(find $p -maxdepth 1 -mindepth 1 -type d); do
@@ -34,8 +35,8 @@ python -m pip install -r requirements.txt
 if [ -d sdk ]; then
     rm -rf sdk
 fi
-if [ -d /tmp/aplus-packages-build ]; then
-    rm -rf /tmp/aplus-packages-build
+if [ -d $BUILD_DIR ]; then
+    rm -rf $BUILD_DIR
 fi
 
 echo "### Install toolchain"
@@ -75,11 +76,11 @@ fi
 
 BUILD_SALT="$TARGET:$TOOLCHAIN_VERSION:$ZIG_VERSION:$(sha256sum requirements.txt | cut -d' ' -f1):${APLUS_CACHE_SALT:-}"
 
-if ! python3 ci/pack.py --verbose --prebuilt "${APLUS_PREBUILT_URL:-}" --salt "$BUILD_SALT"; then
+if ! python3 ci/pack.py --verbose --tmpdir "$BUILD_DIR" --prebuilt "${APLUS_PREBUILT_URL:-}" --salt "$BUILD_SALT"; then
 
     echo "### Build failed, dumping logs"
 
-    for f in /tmp/aplus-packages-build/*/__build/*.err; do
+    for f in $BUILD_DIR/*/__build/*.err; do
         if [ -s $f ]; then
             echo "::group::$f"
             cat $f
@@ -87,7 +88,7 @@ if ! python3 ci/pack.py --verbose --prebuilt "${APLUS_PREBUILT_URL:-}" --salt "$
         fi
     done
 
-    last=$(ls -t /tmp/aplus-packages-build/*/__build/*.log 2> /dev/null | head -n 1)
+    last=$(ls -t $BUILD_DIR/*/__build/*.log 2> /dev/null | head -n 1)
 
     if [ -n "$last" ]; then
         echo "### Failed step: ${last%.log}"
@@ -120,4 +121,4 @@ echo "## Clean up"
 deactivate
 rm -rf .venv
 rm -rf sdk
-rm -rf /tmp/aplus-packages-build
+rm -rf $BUILD_DIR

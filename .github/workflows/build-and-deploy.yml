@@ -42,9 +42,9 @@ jobs:
           name: build-logs
           if-no-files-found: ignore
           path: |
-            /tmp/aplus-packages-build/*/__build/*.log
-            /tmp/aplus-packages-build/*/__build/*.err
-            /tmp/aplus-packages-build/*/__build/meson-logs/meson-log.txt
+            ${{github.workspace}}/build/*/__build/*.log
+            ${{github.workspace}}/build/*/__build/*.err
+            ${{github.workspace}}/build/*/__build/meson-logs/meson-log.txt
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         if: startsWith(github.ref, 'refs/tags/')
