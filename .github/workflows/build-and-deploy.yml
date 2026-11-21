@@ -5,13 +5,18 @@ on:
     tags:
       - '*.*.*'
   workflow_dispatch:
+    inputs:
+      full_rebuild:
+        description: Rebuild every package ignoring the previous release
+        type: boolean
+        default: false
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Prepare environment
         working-directory: ${{github.workspace}}
@@ -21,7 +26,14 @@ jobs:
       - name: Prepare build-system
         working-directory: ${{github.workspace}}
         shell: bash
-        run: ci/prepare-and-build.sh x86_64 x86_64-linux-gnu
+        env:
+          APLUS_CACHE_SALT: ${{ vars.APLUS_CACHE_SALT }}
+          FULL_REBUILD: ${{ inputs.full_rebuild }}
+        run: |
+          if [ "$FULL_REBUILD" = "true" ]; then
+            export APLUS_PREBUILT_URL=
+          fi
+          ci/prepare-and-build.sh x86_64 x86_64-linux-gnu
 
       - name: Upload build logs
         if: failure()
@@ -42,3 +54,4 @@ jobs:
           files: |
             ${{github.workspace}}/*.tar.xz
             ${{github.workspace}}/index
+            ${{github.workspace}}/buildinfo

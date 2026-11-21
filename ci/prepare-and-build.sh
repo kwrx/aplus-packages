@@ -69,7 +69,13 @@ $ZIG version || exit 1
 
 echo "### Run build-system"
 
-if ! python3 ci/pack.py --verbose; then
+if [ -z "${APLUS_PREBUILT_URL+x}" ] && [ -n "$GITHUB_REPOSITORY" ]; then
+    APLUS_PREBUILT_URL=https://github.com/$GITHUB_REPOSITORY/releases/latest/download
+fi
+
+BUILD_SALT="$TARGET:$TOOLCHAIN_VERSION:$ZIG_VERSION:$(sha256sum requirements.txt | cut -d' ' -f1):${APLUS_CACHE_SALT:-}"
+
+if ! python3 ci/pack.py --verbose --prebuilt "${APLUS_PREBUILT_URL:-}" --salt "$BUILD_SALT"; then
 
     echo "### Build failed, dumping logs"
 

@@ -1,6 +1,7 @@
 #!/bin/env python3
 
 import argparse
+import hashlib
 import os
 import shutil
 import ssl
@@ -25,6 +26,8 @@ parser.add_argument('--tmpdir', default='/tmp/aplus-packages-build', help='Tempo
 parser.add_argument('--host', default='x86_64-aplus', help='Host architecture')
 parser.add_argument('--root', default='.', help='Root directory')
 parser.add_argument('--verbose', action='store_true', help='Verbose output')
+parser.add_argument('--prebuilt', default='', help='Base URL of a previous release to reuse unchanged packages from')
+parser.add_argument('--salt', default='', help='Extra input mixed into every build key')
 args = parser.parse_args()
 
 
@@ -392,6 +395,210 @@ def stage_1(packages):
     return packages
 
 
+def hash_tree(path):
+
+    h = hashlib.sha256()
+
+    for root, dirs, files in os.walk(path):
+        dirs.sort()
+
+        for file in sorted(files):
+            full = os.path.join(root, file)
+
+            h.update(os.path.relpath(full, path).encode())
+            h.update(b"\0")
+
+            if os.path.islink(full):
+                h.update(os.readlink(full).encode())
+            else:
+                with open(full, "rb") as f:
+                    h.update(f.read())
+
+            h.update(b"\0")
+
+    return h.hexdigest()
+
+
+def source_revisions(packages, package):
+
+    revisions = []
+
+    for source in package["sources"]:
+        source = resolve(packages, package, source)
+
+        if source.endswith(".git"):
+            head = subprocess.run(
+                ["git", "ls-remote", source, "HEAD"],
+                check=True,
+                capture_output=True,
+                text=True,
+            ).stdout.split()
+
+            if not head:
+                raise RuntimeError(f"Unable to resolve HEAD of {source}")
+
+            source = f"{source}@{head[0]}"
+
+        revisions.append(source)
+
+    return revisions
+
+
+def compute_key(packages, package):
+
+    if "key" in package:
+        if package["key"] is None:
+            raise RuntimeError(f"Circular dependency detected: {package['package']}")
+
+        return package["key"]
+
+    package["key"] = None
+
+    h = hashlib.sha256()
+    h.update(f"{args.salt}\0{args.host}\0".encode())
+    h.update(hash_tree(package["root"]).encode())
+
+    for revision in source_revisions(packages, package):
+        h.update(f"\0{revision}".encode())
+
+    for dep in sorted(package.get("dependencies", [])):
+        key = compute_key(packages, resolve_package(packages, dep))
+        h.update(f"\0{dep}={key}".encode())
+
+    package["key"] = h.hexdigest()
+
+    return package["key"]
+
+
+def fetch_prebuilt_info():
+
+    if not args.prebuilt:
+        return {}
+
+    try:
+        with urllib.request.urlopen(f"{args.prebuilt}/buildinfo") as r:
+            lines = r.read().decode().splitlines()
+
+    except Exception as e:
+        print(f" - No previous build info available: {e}")
+        return {}
+
+    info = {}
+
+    for line in lines:
+        fields = line.strip().split(":")
+
+        if len(fields) != 3:
+            continue
+
+        info[fields[0]] = (fields[1], fields[2])
+
+    return info
+
+
+def dependencies_of(packages, package, seen=None):
+
+    if seen is None:
+        seen = set()
+
+    for dep in package.get("dependencies", []):
+        if dep in seen:
+            continue
+
+        seen.add(dep)
+        dependencies_of(packages, resolve_package(packages, dep), seen)
+
+    return seen
+
+
+def stage_plan(packages):
+
+    print("Planning build")
+
+    prebuilt = fetch_prebuilt_info()
+
+    for package in packages:
+        compute_key(packages, package)
+
+        previous = prebuilt.get(package["package"])
+
+        package["prebuilt"] = (
+            "build" in package
+            and previous is not None
+            and previous[0] == package["key"]
+        )
+
+        if package["prebuilt"]:
+            package["sha256"] = previous[1]
+
+    changed = True
+
+    while changed:
+        changed = False
+        needed = set()
+
+        for package in packages:
+            if not package["prebuilt"]:
+                needed.add(package["package"])
+                needed |= dependencies_of(packages, package)
+
+        for package in packages:
+            if not package["prebuilt"]:
+                continue
+
+            if package["package"] not in needed:
+                continue
+
+            if package.get("restorable", True):
+                continue
+
+            package["prebuilt"] = False
+            changed = True
+
+    for package in packages:
+        package["needed"] = package["package"] in needed
+
+        if args.verbose or not package["prebuilt"]:
+            state = "reuse" if package["prebuilt"] else "build"
+            print(f" - {state} {package['package']}:{package['version']} ({package['key'][:12]})")
+
+    reused = sum(1 for p in packages if p["prebuilt"])
+    print(f" - {len(packages) - reused} to build, {reused} reused")
+
+    return packages
+
+
+def stage_restore(packages):
+
+    print("Restoring prebuilt packages")
+
+    for package in packages:
+        if not package["prebuilt"]:
+            continue
+
+        print(f" - Restoring {package['package']}:{package['version']}")
+
+        archive = os.path.join(args.root, f"{package['package']}.tar.xz")
+        urllib.request.urlretrieve(f"{args.prebuilt}/{package['package']}.tar.xz", archive)
+
+        sha256 = subprocess.run(
+            ["sha256sum", archive], check=True, capture_output=True, text=True
+        ).stdout.split()[0]
+
+        if sha256 != package["sha256"]:
+            raise RuntimeError(
+                f"Checksum mismatch for prebuilt {package['package']}: {sha256} != {package['sha256']}"
+            )
+
+        if package["needed"]:
+            srcdir = prepare(packages, package, False)
+            run_command(f"tar xJf {archive} -C {srcdir}/__out")
+
+        package["status"] = "done"
+
+    return packages
+
+
 def stage_2(packages):
 
     print("Fetching sources")
@@ -519,7 +726,7 @@ def stage_6(packages):
     print("Generating metadata")
 
     for package in packages:
-        if not "build" in package:
+        if not "build" in package or package["prebuilt"]:
             continue
 
         print(f" - Indexing {package['package']}:{package['version']}")
@@ -571,7 +778,7 @@ def stage_7(packages):
     print("Packaging packages")
 
     for package in packages:
-        if not "build" in package:
+        if not "build" in package or package["prebuilt"]:
             continue
 
         print(f" - Packaging {package['package']}:{package['version']}")
@@ -598,6 +805,7 @@ def stage_8(packages):
     print("Generating index")
 
     index = []
+    buildinfo = []
     for package in packages:
         if not "build" in package:
             continue
@@ -613,9 +821,13 @@ def stage_8(packages):
         index.append(
             f"{package['package']}:{package['version']}:{sha256}:{dependencies}\n"
         )
+        buildinfo.append(f"{package['package']}:{package['key']}:{sha256}\n")
 
     with open(f"{args.root}/index", "w") as f:
         f.writelines(index)
+
+    with open(f"{args.root}/buildinfo", "w") as f:
+        f.writelines(buildinfo)
 
     return packages
 
@@ -632,9 +844,14 @@ def main():
 
     packages = []
     packages = stage_1(packages)
-    packages = stage_2(packages)
-    packages = stage_3(packages)
-    packages = stage_4(packages)
+    packages = stage_plan(packages)
+
+    needed = [p for p in packages if p["needed"]]
+    stage_2(needed)
+    stage_3(needed)
+    stage_4(needed)
+
+    packages = stage_restore(packages)
     packages = stage_5(packages)
     packages = stage_6(packages)
     packages = stage_7(packages)

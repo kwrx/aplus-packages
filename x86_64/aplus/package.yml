@@ -4,6 +4,8 @@ version: latest
 sources: 
   - https://github.com/kwrx/aplus.git
 
+restorable: false
+
 dependencies:
   - cairo
   - libwebp
