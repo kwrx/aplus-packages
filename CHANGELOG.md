@@ -1,3 +1,31 @@
+## 1.0.0 (2026-11-21)
+
+### Feat
+
+- **aplus-odyssey**: build from the fork's main branch
+- add the aplus-odyssey browser
+- add icu, harfbuzz, libpsl and libxslt recipes
+- **system-fonts**: add Noto Serif
+- add fontconfig and drop the system-fonts font index
+- add static glib, libxml2 and pcre2 recipes
+- update system-base to 0.7 and configure shadow passwords in busybox
+- replace dropbear with openssh
+- add libghostty-vt package and Zig toolchain
+- update pixman to 0.46.4 and migrate to Meson
+- add tzdata package for x86_64
+- enable NTP daemon in busybox patch
+- update font configuration and improve font scanning process
+- add ffmpeg package with aplus target support
+
+### Fix
+
+- build git without Rust and point bash at the readline package
+- install with DESTDIR instead of a build-directory prefix
+- **python**: enable epoll and sem_getvalue
+- **gcc**: build and install libatomic
+- **freetype**: find zlib and libpng through pkg-config
+- use zlib fossils URL for source download
+
 ## 0.13.0 (2026-11-04)
 
 ### Feat
