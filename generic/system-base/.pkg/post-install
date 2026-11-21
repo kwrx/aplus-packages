@@ -1,0 +1,20 @@
+#!/bin/sh
+
+root=${1:-/}
+
+for f in "$root"/usr/share/factory/etc/*; do
+    t="$root/etc/${f##*/}"
+    [ -e "$t" ] || cp "$f" "$t"
+done
+
+for f in .profile .bashrc .bash_profile; do
+    [ -e "$root/home/root/$f" ] || cp "$root/etc/skel/$f" "$root/home/root/$f"
+done
+
+[ -e "$root/etc/localtime" ] || [ -L "$root/etc/localtime" ] || ln -s ../usr/share/zoneinfo/UTC "$root/etc/localtime"
+
+chmod 600 "$root/etc/shadow"
+chmod 700 "$root/home/root"
+chmod 1777 "$root/tmp" "$root/var/tmp"
+
+exit 0

@@ -1,6 +1,6 @@
 # -- /etc/fstab
 # |   Device   |   Directory   |   Filesystem   |    Flags    |
       tmpfs        /tmp            tmpfs            nodev,nosuid,rw
-      tmpfs        /var/run        tmpfs            nodev,nosuid,rw
+      tmpfs        /run            tmpfs            nodev,nosuid,rw
       proc         /proc           proc             nodev,nosuid,rw
       sys          /sys            sys              nodev,nosuid,rw

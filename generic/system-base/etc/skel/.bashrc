@@ -1,5 +1,4 @@
-export TERMINFO=/usr/share/terminfo
-export PATH=/usr/local/bin:/usr/bin:/bin:/usr/local/sbin:/usr/sbin:/sbin
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
 
 case $- in
     *i*) ;;

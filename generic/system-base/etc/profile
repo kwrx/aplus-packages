@@ -1,0 +1,7 @@
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin
+umask 022
+
+for f in /etc/profile.d/*.sh; do
+    [ -r "$f" ] && . "$f"
+done
+unset f
