@@ -44,7 +44,7 @@ build:
     - --enable-threads=posix
     - --disable-nls
     - --disable-rpath
-    - --with-installed-readline
+    - --with-installed-readline=$PACKAGE_READLINE/__out/usr
     - --with-curses
 
   make:

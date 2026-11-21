@@ -12,6 +12,7 @@ NO_PYTHON    = YesPlease
 NO_TCLTK     = YesPlease
 NO_GETTEXT   = YesPlease
 NO_REGEX     = YesPlease
+NO_RUST      = YesPlease
 
 CURL_CONFIG  = false
 CURL_CFLAGS  =
