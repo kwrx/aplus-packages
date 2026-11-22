@@ -2,6 +2,4 @@
 
 prefix=$1
 
-ln -sf bash $prefix/bin/sh
-chmod +x $prefix/bin/sh
 chmod +x $prefix/bin/bash
