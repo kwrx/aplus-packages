@@ -1,0 +1,42 @@
+package: aplus-browser
+version: 1.10.0
+sources:
+  - https://github.com/kwrx/aplus-browser.git
+
+dependencies:
+  - aplus
+  - cairo
+  - pixman
+  - fontconfig
+  - expat
+  - freetype
+  - harfbuzz
+  - icu
+  - libpsl
+  - libxml2
+  - libxslt
+  - sqlite
+  - curl
+  - libressl
+  - ffmpeg
+  - bzip2
+  - xz
+  - zstd
+  - libwebp
+  - libjpeg-turbo
+  - libpng
+  - zlib
+
+build:
+
+  preconfigure:
+    - $PKGDIR/scripts/prepare.sh $SRCDIR $HOST $PACKAGE_APLUS $PACKAGE_CAIRO $PACKAGE_PIXMAN $PACKAGE_FONTCONFIG $PACKAGE_EXPAT $PACKAGE_FREETYPE $PACKAGE_HARFBUZZ $PACKAGE_ICU $PACKAGE_LIBPSL $PACKAGE_LIBXML2 $PACKAGE_LIBXSLT $PACKAGE_SQLITE $PACKAGE_CURL $PACKAGE_LIBRESSL $PACKAGE_FFMPEG $PACKAGE_BZIP2 $PACKAGE_XZ $PACKAGE_ZSTD $PACKAGE_LIBWEBP $PACKAGE_LIBJPEG_TURBO $PACKAGE_LIBPNG $PACKAGE_ZLIB
+
+  postmake:
+    - ninja -C __build -j4 aplus-browser
+
+  postinstall:
+    - mkdir -p $SYSROOT/usr/bin $SYSROOT/usr/share/applications
+    - $HOST-strip -o $SYSROOT/usr/bin/aplus-browser __build/bin/aplus-browser
+    - cp Tools/aplus/browser/data/aplus-browser.desktop $SYSROOT/usr/share/applications/aplus-browser.desktop
+    - cp -r Tools/aplus/browser/data/icons $SYSROOT/usr/share/
