@@ -6,7 +6,7 @@
  - `generic` system-images : *0.6*
  - `generic` system-keymaps : *0.6*
  - `x86_64` aplus : *latest*
- - `x86_64` aplus-odyssey : *2.34.6*
+ - `x86_64` aplus-browser : *1.10.0*
  - `x86_64` bash : *5.1*
  - `x86_64` binutils : *2.38*
  - `x86_64` bochs : *3.1*
