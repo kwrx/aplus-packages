@@ -5,6 +5,8 @@ sources:
   - https://www.cairographics.org/releases/cairo-$VERSION.tar.xz
 
 dependencies:
+  - expat
+  - fontconfig
   - freetype
   - pixman
   - libpng
@@ -14,10 +16,11 @@ build:
 
   env:
     - DESTDIR: $SYSROOT
-    - CFLAGS: -O2 -march=x86-64 -mtune=generic -fPIE -I$PACKAGE_FREETYPE/__out/usr/include -I$PACKAGE_FREETYPE/__out/usr/include/freetype2 -I$PACKAGE_PIXMAN/__out/usr/include -I$PACKAGE_PIXMAN/__out/usr/include/pixman-1 -I$PACKAGE_LIBPNG/__out/usr/include -I$PACKAGE_LIBPNG/__out/usr/include/libpng16 -I$PACKAGE_ZLIB/__out/usr/include
-    - LDFLAGS: -L$PACKAGE_FREETYPE/__out/usr/lib -L$PACKAGE_PIXMAN/__out/usr/lib -L$PACKAGE_LIBPNG/__out/usr/lib -L$PACKAGE_ZLIB/__out/usr/lib
+    - CFLAGS: -O2 -march=x86-64 -mtune=generic -fPIE -I$PACKAGE_EXPAT/__out/usr/include -I$PACKAGE_FONTCONFIG/__out/usr/include -I$PACKAGE_FREETYPE/__out/usr/include -I$PACKAGE_FREETYPE/__out/usr/include/freetype2 -I$PACKAGE_PIXMAN/__out/usr/include -I$PACKAGE_PIXMAN/__out/usr/include/pixman-1 -I$PACKAGE_LIBPNG/__out/usr/include -I$PACKAGE_LIBPNG/__out/usr/include/libpng16 -I$PACKAGE_ZLIB/__out/usr/include
+    - LDFLAGS: -L$PACKAGE_EXPAT/__out/usr/lib -L$PACKAGE_FONTCONFIG/__out/usr/lib -L$PACKAGE_FREETYPE/__out/usr/lib -L$PACKAGE_PIXMAN/__out/usr/lib -L$PACKAGE_LIBPNG/__out/usr/lib -L$PACKAGE_ZLIB/__out/usr/lib
     - PKG_CONFIG: /usr/bin/pkg-config
-    - PKG_CONFIG_LIBDIR: $PACKAGE_FREETYPE/__out/usr/lib/pkgconfig:$PACKAGE_PIXMAN/__out/usr/lib/pkgconfig:$PACKAGE_LIBPNG/__out/usr/lib/pkgconfig:$PACKAGE_ZLIB/__out/usr/lib/pkgconfig
+    - PKG_CONFIG_LIBDIR: $PACKAGE_EXPAT/__out/usr/lib/pkgconfig:$PACKAGE_FONTCONFIG/__out/usr/lib/pkgconfig:$PACKAGE_FREETYPE/__out/usr/lib/pkgconfig:$PACKAGE_PIXMAN/__out/usr/lib/pkgconfig:$PACKAGE_LIBPNG/__out/usr/lib/pkgconfig:$PACKAGE_ZLIB/__out/usr/lib/pkgconfig
+    - PKG_CONFIG_RELOCATE_PATHS: "1"
 
   configure:
     - -Dprefix=/usr
@@ -28,7 +31,7 @@ build:
     - -Dwarning_level=1
     - -Dwerror=false
     - -Ddwrite=disabled
-    - -Dfontconfig=disabled
+    - -Dfontconfig=enabled
     - -Dfreetype=enabled
     - -Dpng=enabled
     - -Dquartz=disabled
